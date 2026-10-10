@@ -19,11 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link UpdatePropertiesMojo}
@@ -38,10 +37,12 @@ public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
         UpdatePropertyMojo mojo = setUpMojo("update-property");
         mojo.property = "artifact-version";
         mojo.execute();
-        assertThat(
-                changeRecorder.getChanges(),
-                Matchers.hasItem(
-                        new DefaultDependencyVersionChange("default-group", "default-artifact", "1.0.0", "2.0.0-M1")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "default-artifact", "1.0.0", "2.0.0-M1")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -54,10 +55,12 @@ public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
         mojo.property = "artifact-version";
         mojo.allowMajorUpdates = false;
         mojo.execute();
-        assertThat(
-                changeRecorder.getChanges(),
-                Matchers.hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "default-artifact", "1.0.0", "1.1.0-alpha")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "default-artifact", "1.0.0", "1.1.0-alpha")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -71,10 +74,12 @@ public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
         mojo.allowMajorUpdates = false;
         mojo.allowMinorUpdates = false;
         mojo.execute();
-        assertThat(
-                changeRecorder.getChanges(),
-                Matchers.hasItem(
-                        new DefaultDependencyVersionChange("default-group", "default-artifact", "1.0.0", "1.0.1-rc1")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "default-artifact", "1.0.0", "1.0.1-rc1")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test

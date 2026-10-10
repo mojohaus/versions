@@ -22,14 +22,14 @@ import java.util.HashMap;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.codehaus.mojo.versions.utils.TestUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.Collections.emptyList;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link UpdatePropertiesMojo}
@@ -42,9 +42,12 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
                 Paths.get(pomDir.toString(), "pom.xml"),
                 REPLACE_EXISTING);
         setUpMojo("update-properties").execute();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "default-artifact", "1.0.0", "2.0.0-M1")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "default-artifact", "1.0.0", "2.0.0-M1")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -56,10 +59,12 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
         UpdatePropertiesMojo mojo = setUpMojo("update-properties");
         mojo.allowMajorUpdates = false;
         mojo.execute();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "default-artifact", "1.0.0", "1.1.0-alpha")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "default-artifact", "1.0.0", "1.1.0-alpha")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -72,9 +77,12 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
         mojo.allowMajorUpdates = false;
         mojo.allowMinorUpdates = false;
         mojo.execute();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "default-artifact", "1.0.0", "1.0.1-rc1")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "default-artifact", "1.0.0", "1.0.1-rc1")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -88,7 +96,7 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
         // anyString() ) )
         //                            .thenReturn( false );
         mojo.execute();
-        assertThat(changeRecorder.getChanges(), is(empty()));
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     @Test
@@ -103,7 +111,7 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
         });
 
         mojo.execute();
-        assertThat(changeRecorder.getChanges(), is(empty()));
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     @Test
