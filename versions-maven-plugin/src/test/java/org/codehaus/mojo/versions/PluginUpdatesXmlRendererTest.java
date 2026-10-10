@@ -34,9 +34,9 @@ import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.mojo.versions.xml.PluginUpdatesXmlReportRenderer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -52,12 +52,12 @@ import static org.hamcrest.Matchers.containsString;
 public class PluginUpdatesXmlRendererTest {
     private Path tempFile;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         tempFile = Files.createTempFile("xml-plugin-report", "");
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         if (tempFile != null && Files.exists(tempFile)) {
             Files.delete(tempFile);

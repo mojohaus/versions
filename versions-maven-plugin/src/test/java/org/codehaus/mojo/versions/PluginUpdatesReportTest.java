@@ -52,8 +52,8 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -68,7 +68,7 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -198,7 +198,7 @@ public class PluginUpdatesReportTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         SinkFactory factory = new Xhtml5SinkFactory();
         TestPluginUpdatesReport report = new TestPluginUpdatesReport().withReportingPlugin("artifactA", "1.0.0");
-        Assert.assertTrue(report.canGenerateReport());
+        Assertions.assertTrue(report.canGenerateReport());
         report.withPlugins(pluginOf("artifactA", "2.0.0")).generate(factory.createSink(output), factory, Locale.ROOT);
         String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
         assertThat(text, containsString("artifactA 1.0.0"));
@@ -213,7 +213,7 @@ public class PluginUpdatesReportTest {
         report.generate(factory.createSink(output), factory, Locale.ROOT);
         String text = output.toString().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ");
         assertThat(text, containsString("artifactA 2.0.0"));
-        Assert.assertNull(report.getProject().getReportPlugins().get(0).getVersion());
+        Assertions.assertNull(report.getProject().getReportPlugins().get(0).getVersion());
     }
 
     @Test

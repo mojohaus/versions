@@ -20,8 +20,8 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -55,7 +55,7 @@ public class UseLatestVersionsRaceConditionTest {
     @Mock
     protected ExpressionEvaluator expressionEvaluator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         openMocks(this);
         changeRecorder = new TestChangeRecorder();

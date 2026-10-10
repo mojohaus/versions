@@ -10,13 +10,13 @@ import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 public class SeparatePatternsForIncludesAnExcludesTest {
@@ -33,7 +33,7 @@ public class SeparatePatternsForIncludesAnExcludesTest {
     @Mock
     private ExpressionEvaluator expressionEvaluator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         openMocks(this);
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
