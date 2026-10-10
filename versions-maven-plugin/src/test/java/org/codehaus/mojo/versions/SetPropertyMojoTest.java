@@ -35,11 +35,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextMatches;
 import static org.codehaus.mojo.versions.utils.TestUtils.copyDir;
 import static org.codehaus.mojo.versions.utils.TestUtils.createTempDir;
 import static org.codehaus.mojo.versions.utils.TestUtils.tearDownTempDir;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextMatches;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;

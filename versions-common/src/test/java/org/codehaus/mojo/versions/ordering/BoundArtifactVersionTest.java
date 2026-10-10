@@ -26,9 +26,7 @@ import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link BoundArtifactVersion}
@@ -39,55 +37,55 @@ class BoundArtifactVersionTest {
     void testMajorUpperBoundGreaterThanNextMajor() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.2.3", MAJOR);
         ArtifactVersion artifactVersion = ArtifactVersionService.getArtifactVersion("2.0.0");
-        assertThat(bound.compareTo(artifactVersion), greaterThan(0));
+        assertTrue(bound.compareTo(artifactVersion) > 0, () -> "was " + bound.compareTo(artifactVersion));
     }
 
     @Test
     void testSubIncrementalUpperBoundGreaterThanNextSubIncremental() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.2.3-2", SUBINCREMENTAL);
         ArtifactVersion artifactVersion = ArtifactVersionService.getArtifactVersion("1.2.3-3");
-        assertThat(bound.compareTo(artifactVersion), greaterThan(0));
+        assertTrue(bound.compareTo(artifactVersion) > 0, () -> "was " + bound.compareTo(artifactVersion));
     }
 
     @Test
     void testVersionShorterThanSegment() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.1", INCREMENTAL);
         ArtifactVersion artifactVersion = ArtifactVersionService.getArtifactVersion("1.1.3");
-        assertThat(bound.compareTo(artifactVersion), greaterThan(0));
+        assertTrue(bound.compareTo(artifactVersion) > 0, () -> "was " + bound.compareTo(artifactVersion));
     }
 
     @Test
     void testVersionBoundArtifactVersionShorterThanConcreteVersionAndSegment() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.1", SUBINCREMENTAL);
         ArtifactVersion artifactVersion = ArtifactVersionService.getArtifactVersion("1.1.3");
-        assertThat(bound.compareTo(artifactVersion), lessThan(0));
+        assertTrue(bound.compareTo(artifactVersion) < 0, () -> "was " + bound.compareTo(artifactVersion));
     }
 
     @Test
     void testVersionSubIncrementalBoundGreaterThanSubIncremental() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.1", SUBINCREMENTAL);
         ArtifactVersion artifactVersion = ArtifactVersionService.getArtifactVersion("1.1.0-2");
-        assertThat(bound.compareTo(artifactVersion), greaterThan(0));
+        assertTrue(bound.compareTo(artifactVersion) > 0, () -> "was " + bound.compareTo(artifactVersion));
     }
 
     @Test
     void testVersionSubIncrementalBoundGreaterThanIncremental() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.1", INCREMENTAL);
         ArtifactVersion artifactVersion = ArtifactVersionService.getArtifactVersion("1.1.3");
-        assertThat(bound.compareTo(artifactVersion), greaterThan(0));
+        assertTrue(bound.compareTo(artifactVersion) > 0, () -> "was " + bound.compareTo(artifactVersion));
     }
 
     @Test
     void testVersionSubIncrementalBoundGreaterThanMinor() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.1", MINOR);
         ArtifactVersion artifactVersion = ArtifactVersionService.getArtifactVersion("1.3");
-        assertThat(bound.compareTo(artifactVersion), greaterThan(0));
+        assertTrue(bound.compareTo(artifactVersion) > 0, () -> "was " + bound.compareTo(artifactVersion));
     }
 
     @Test
     void testSnapshotWithSubIncremental() {
         BoundArtifactVersion bound = new BoundArtifactVersion("1.0.0-SNAPSHOT", MINOR);
         ArtifactVersion artifactVersion = ArtifactVersionService.getArtifactVersion("1.0.0");
-        assertThat(bound.compareTo(artifactVersion), greaterThan(0));
+        assertTrue(bound.compareTo(artifactVersion) > 0, () -> "was " + bound.compareTo(artifactVersion));
     }
 }

@@ -25,9 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DefaultSegmentCounterTest {
     protected SegmentCounter instance;
@@ -40,10 +38,20 @@ class DefaultSegmentCounterTest {
     @Test
     void testScopeLessThanNumSegmentsUpper() {
         ArtifactVersion artifactVersion = new BoundArtifactVersion(version("1.1"), SUBINCREMENTAL);
-        assertThat(artifactVersion.compareTo(version("1.0.1")), greaterThan(0));
-        assertThat(artifactVersion.compareTo(version("1.1-SNAPSHOT")), greaterThan(0));
-        assertThat(artifactVersion.compareTo(version("1.1")), greaterThan(0));
-        assertThat(artifactVersion.compareTo(version("1.1.0-2")), greaterThan(0));
-        assertThat(artifactVersion.compareTo(version("1.1.1-2")), lessThan(0));
+        assertTrue(
+                artifactVersion.compareTo(version("1.0.1")) > 0,
+                () -> "was " + artifactVersion.compareTo(version("1.0.1")));
+        assertTrue(
+                artifactVersion.compareTo(version("1.1-SNAPSHOT")) > 0,
+                () -> "was " + artifactVersion.compareTo(version("1.1-SNAPSHOT")));
+        assertTrue(
+                artifactVersion.compareTo(version("1.1")) > 0,
+                () -> "was " + artifactVersion.compareTo(version("1.1")));
+        assertTrue(
+                artifactVersion.compareTo(version("1.1.0-2")) > 0,
+                () -> "was " + artifactVersion.compareTo(version("1.1.0-2")));
+        assertTrue(
+                artifactVersion.compareTo(version("1.1.1-2")) < 0,
+                () -> "was " + artifactVersion.compareTo(version("1.1.1-2")));
     }
 }

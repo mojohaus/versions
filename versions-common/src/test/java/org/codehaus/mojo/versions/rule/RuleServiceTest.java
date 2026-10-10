@@ -29,9 +29,8 @@ import org.mockito.MockitoAnnotations;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertSameElements;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -79,12 +78,12 @@ public class RuleServiceTest {
                 .withIgnoredVersions(Arrays.asList(".*-M.", ".*-SNAPSHOT"))
                 .build();
         RuleSet ruleSet = service.getRuleSet();
-        assertThat(ruleSet.getIgnoreVersions(), hasSize(3));
-        assertThat(
+        assertEquals(3, ruleSet.getIgnoreVersions().size(), () -> String.valueOf(ruleSet.getIgnoreVersions()));
+        assertSameElements(
+                Arrays.asList(".*-M.", ".*-SNAPSHOT", "1.0.0"),
                 ruleSet.getIgnoreVersions().stream()
                         .map(IgnoreVersion::getVersion)
-                        .collect(Collectors.toList()),
-                containsInAnyOrder(".*-M.", ".*-SNAPSHOT", "1.0.0"));
+                        .collect(Collectors.toList()));
     }
 
     @Test
@@ -95,12 +94,12 @@ public class RuleServiceTest {
                 .withIgnoredVersions(Arrays.asList(".*-M.", ".*-SNAPSHOT"))
                 .build();
         RuleSet ruleSet = service.getRuleSet();
-        assertThat(ruleSet.getIgnoreVersions(), hasSize(2));
-        assertThat(
+        assertEquals(2, ruleSet.getIgnoreVersions().size(), () -> String.valueOf(ruleSet.getIgnoreVersions()));
+        assertSameElements(
+                Arrays.asList(".*-M.", ".*-SNAPSHOT"),
                 ruleSet.getIgnoreVersions().stream()
                         .map(IgnoreVersion::getVersion)
-                        .collect(Collectors.toList()),
-                containsInAnyOrder(".*-M.", ".*-SNAPSHOT"));
+                        .collect(Collectors.toList()));
     }
 
     private static Wagon mockFileWagon(URI rulesUri)

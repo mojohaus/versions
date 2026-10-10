@@ -48,14 +48,14 @@ import org.eclipse.aether.RepositorySystem;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContainsInOrder;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextMatches;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContainsInOrder;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextMatches;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextNotContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;

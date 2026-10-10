@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextMatches;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextMatches;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 /**

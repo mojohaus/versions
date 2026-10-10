@@ -10,8 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Optional.of;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -38,11 +37,11 @@ public class ArtifactFactoryTest {
     void createPluginArtifact() throws Exception {
         ArtifactFactory artifactFactory = new ArtifactFactory(artifactHandlerManager);
         Artifact artifact = artifactFactory.createMavenPluginArtifact("groupId", "artifactId", "version");
-        assertThat("groupId", equalTo(artifact.getGroupId()));
-        assertThat("artifactId", equalTo(artifact.getArtifactId()));
-        assertThat("version", equalTo(artifact.getVersion()));
-        assertThat("maven-plugin", equalTo(artifact.getType()));
-        assertThat("runtime", equalTo(artifact.getScope()));
-        assertThat("jar", equalTo(artifact.getArtifactHandler().getExtension()));
+        assertEquals(artifact.getGroupId(), "groupId");
+        assertEquals(artifact.getArtifactId(), "artifactId");
+        assertEquals(artifact.getVersion(), "version");
+        assertEquals(artifact.getType(), "maven-plugin");
+        assertEquals(artifact.getScope(), "runtime");
+        assertEquals(artifact.getArtifactHandler().getExtension(), "jar");
     }
 }

@@ -42,8 +42,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -114,7 +113,7 @@ class MaxDependencyUpdatesTest {
 
         maxDependencyUpdates.maxUpdates = 1;
         Exception e = assertThrows(EnforcerRuleException.class, () -> maxDependencyUpdates.execute());
-        assertThat(e.getMessage(), containsString("More than 1 upgradable artifacts detected"));
+        assertTextContains(e.getMessage(), "More than 1 upgradable artifacts detected");
     }
 
     @Test

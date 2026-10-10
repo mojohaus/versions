@@ -19,6 +19,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,9 +29,8 @@ import org.apache.maven.model.Extension;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,7 +49,7 @@ class ExtensionUtilsTest {
                         new File("src/test/resources/org/codehaus/mojo/versions/utils/core-extensions/no-extensions"));
         MavenSession session = mock(MavenSession.class);
         when(session.getCurrentProject()).thenReturn(project);
-        assertThat(ExtensionUtils.getCoreExtensions(project).findAny(), is(Optional.empty()));
+        assertEquals(Optional.empty(), ExtensionUtils.getCoreExtensions(project).findAny());
     }
 
     @Test
@@ -60,9 +60,8 @@ class ExtensionUtilsTest {
         MavenSession session = mock(MavenSession.class);
         when(session.getCurrentProject()).thenReturn(project);
         Set<Extension> extensions = ExtensionUtils.getCoreExtensions(project).collect(Collectors.toSet());
-        assertThat(
-                extensions,
-                hasItems(
+        assertTrue(
+                extensions.containsAll(Arrays.asList(
                         ExtensionBuilder.newBuilder()
                                 .withGroupId("default-group")
                                 .withArtifactId("artifactA")
@@ -72,6 +71,7 @@ class ExtensionUtilsTest {
                                 .withGroupId("default-group")
                                 .withArtifactId("artifactB")
                                 .withVersion("2.0.0")
-                                .build()));
+                                .build())),
+                () -> String.valueOf(extensions));
     }
 }

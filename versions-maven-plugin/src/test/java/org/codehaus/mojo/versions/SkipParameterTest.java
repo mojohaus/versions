@@ -33,10 +33,10 @@ import org.junit.jupiter.api.Test;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextNotContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;

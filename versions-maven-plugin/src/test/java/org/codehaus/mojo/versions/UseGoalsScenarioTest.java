@@ -22,8 +22,8 @@ import org.apache.maven.api.plugin.testing.Basedir;
 import org.apache.maven.api.plugin.testing.InjectMojo;
 import org.junit.jupiter.api.Test;
 
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextNotContains;
 
 /**
  * Scenarios of the {@code use-latest-*}, {@code use-next-*} and {@code use-releases} goals that used to be the

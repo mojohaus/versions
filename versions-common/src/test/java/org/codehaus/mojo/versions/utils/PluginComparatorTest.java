@@ -4,10 +4,8 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.ReportPlugin;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PluginComparatorTest {
 
@@ -32,8 +30,8 @@ class PluginComparatorTest {
         Plugin a = plugin("a.group", "artifact", "1.0");
         Plugin b = plugin("b.group", "artifact", "1.0");
 
-        assertThat(PluginComparator.INSTANCE.compare(a, b), lessThan(0));
-        assertThat(PluginComparator.INSTANCE.compare(b, a), greaterThan(0));
+        assertTrue(PluginComparator.INSTANCE.compare(a, b) < 0, () -> "was " + PluginComparator.INSTANCE.compare(a, b));
+        assertTrue(PluginComparator.INSTANCE.compare(b, a) > 0, () -> "was " + PluginComparator.INSTANCE.compare(b, a));
     }
 
     @Test
@@ -41,7 +39,7 @@ class PluginComparatorTest {
         Plugin a = plugin("g", "a", "1.0");
         Plugin b = plugin("g", "b", "1.0");
 
-        assertThat(PluginComparator.INSTANCE.compare(a, b), lessThan(0));
+        assertTrue(PluginComparator.INSTANCE.compare(a, b) < 0, () -> "was " + PluginComparator.INSTANCE.compare(a, b));
     }
 
     @Test
@@ -49,7 +47,9 @@ class PluginComparatorTest {
         Plugin v1 = plugin("g", "a", "1.0");
         Plugin v2 = plugin("g", "a", "2.0");
 
-        assertThat(PluginComparator.INSTANCE.compare(v1, v2), lessThan(0));
+        assertTrue(
+                PluginComparator.INSTANCE.compare(v1, v2) < 0,
+                () -> "was " + PluginComparator.INSTANCE.compare(v1, v2));
     }
 
     @Test
@@ -57,7 +57,9 @@ class PluginComparatorTest {
         ReportPlugin rp1 = reportPlugin("g", "a", "1.0");
         ReportPlugin rp2 = reportPlugin("g", "a", "2.0");
 
-        assertThat(PluginComparator.INSTANCE.compare(rp1, rp2), lessThan(0));
+        assertTrue(
+                PluginComparator.INSTANCE.compare(rp1, rp2) < 0,
+                () -> "was " + PluginComparator.INSTANCE.compare(rp1, rp2));
     }
 
     @Test
@@ -65,8 +67,10 @@ class PluginComparatorTest {
         Plugin p = plugin("g", "a", "1.0");
         ReportPlugin rp = reportPlugin("g", "a", "2.0");
 
-        assertThat(PluginComparator.INSTANCE.compare(p, rp), lessThan(0));
-        assertThat(PluginComparator.INSTANCE.compare(rp, p), greaterThan(0));
+        assertTrue(
+                PluginComparator.INSTANCE.compare(p, rp) < 0, () -> "was " + PluginComparator.INSTANCE.compare(p, rp));
+        assertTrue(
+                PluginComparator.INSTANCE.compare(rp, p) > 0, () -> "was " + PluginComparator.INSTANCE.compare(rp, p));
     }
 
     @Test
@@ -75,7 +79,9 @@ class PluginComparatorTest {
         Plugin v10 = plugin("g", "a", "10");
 
         // Semantic: 2 < 10
-        assertThat(PluginComparator.INSTANCE.compare(v2, v10), lessThan(0));
+        assertTrue(
+                PluginComparator.INSTANCE.compare(v2, v10) < 0,
+                () -> "was " + PluginComparator.INSTANCE.compare(v2, v10));
     }
 
     @Test
@@ -84,7 +90,9 @@ class PluginComparatorTest {
         Plugin v1010 = plugin("g", "a", "1.0.10");
 
         // Semantic: 1.0.2 < 1.0.10
-        assertThat(PluginComparator.INSTANCE.compare(v102, v1010), lessThan(0));
+        assertTrue(
+                PluginComparator.INSTANCE.compare(v102, v1010) < 0,
+                () -> "was " + PluginComparator.INSTANCE.compare(v102, v1010));
     }
 
     @Test
@@ -93,9 +101,9 @@ class PluginComparatorTest {
         Plugin v10 = plugin("g", "a", "1.0");
         Plugin v100 = plugin("g", "a", "1.0.0");
 
-        assertThat(PluginComparator.INSTANCE.compare(v1, v10), is(0));
-        assertThat(PluginComparator.INSTANCE.compare(v10, v100), is(0));
-        assertThat(PluginComparator.INSTANCE.compare(v1, v100), is(0));
+        assertEquals(0, PluginComparator.INSTANCE.compare(v1, v10));
+        assertEquals(0, PluginComparator.INSTANCE.compare(v10, v100));
+        assertEquals(0, PluginComparator.INSTANCE.compare(v1, v100));
     }
 
     @Test
@@ -103,7 +111,9 @@ class PluginComparatorTest {
         Plugin alpha = plugin("g", "a", "1.0.0-alpha");
         Plugin release = plugin("g", "a", "1.0.0");
 
-        assertThat(PluginComparator.INSTANCE.compare(alpha, release), lessThan(0));
+        assertTrue(
+                PluginComparator.INSTANCE.compare(alpha, release) < 0,
+                () -> "was " + PluginComparator.INSTANCE.compare(alpha, release));
     }
 
     @Test

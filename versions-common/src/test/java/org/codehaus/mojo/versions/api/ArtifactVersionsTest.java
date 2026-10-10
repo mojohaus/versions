@@ -45,20 +45,11 @@ import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.versions;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.arrayContaining;
-import static org.hamcrest.Matchers.arrayWithSize;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ArtifactVersionsTest {
 
@@ -77,27 +68,24 @@ class ArtifactVersionsTest {
                         "1.0.0.1", "1.0.0.2", "2.121.2.1", "2.100.0.1", "3.1.0.1", "1.1.1", "2.0.0-SNAPSHOT")));
         assertEquals("artifact", instance.getArtifactId());
         assertEquals("group", instance.getGroupId());
-        assertThat(
-                instance.getVersions(false),
-                arrayContaining(versions("1.0.0.1", "1.0.0.2", "1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
-        assertThat(
-                instance.getVersions(true),
-                arrayContaining(versions(
-                        "1.0.0.1", "1.0.0.2", "1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
-        assertThat(
-                instance.getVersions(new Restriction(version("1.1"), false, null, false), false),
-                arrayContaining(versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
-        assertThat(
-                instance.getVersions(new Restriction(version("1.1"), false, null, false), true),
-                arrayContaining(versions("1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
-        assertThat(
-                instance.getVersions(new Restriction(version("1.0.0.2"), false, null, false), false),
-                // Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));
-                arrayContaining(versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
-        assertThat(
-                instance.getVersions(new Restriction(version("1.0.0.2"), false, null, false), true),
-                // Matchers.arrayContaining(versions("1.1.1", "2.121.2.1", "2.100.0.1", "3.1.0.1")));
-                arrayContaining(versions("1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1")));
+        assertArrayEquals(
+                versions("1.0.0.1", "1.0.0.2", "1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1"),
+                instance.getVersions(false));
+        assertArrayEquals(
+                versions("1.0.0.1", "1.0.0.2", "1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1"),
+                instance.getVersions(true));
+        assertArrayEquals(
+                versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1"),
+                instance.getVersions(new Restriction(version("1.1"), false, null, false), false));
+        assertArrayEquals(
+                versions("1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1"),
+                instance.getVersions(new Restriction(version("1.1"), false, null, false), true));
+        assertArrayEquals(
+                versions("1.1.1", "2.100.0.1", "2.121.2.1", "3.1.0.1"),
+                instance.getVersions(new Restriction(version("1.0.0.2"), false, null, false), false));
+        assertArrayEquals(
+                versions("1.1.1", "2.0.0-SNAPSHOT", "2.100.0.1", "2.121.2.1", "3.1.0.1"),
+                instance.getVersions(new Restriction(version("1.0.0.2"), false, null, false), true));
 
         assertEquals(
                 version("2.121.2.1"),
@@ -121,8 +109,8 @@ class ArtifactVersionsTest {
                         "jar",
                         new DefaultArtifactHandler()),
                 Arrays.asList(versions("1.0.1-SNAPSHOT", "1.0.2-SNAPSHOT")));
-        assertThat(instance.isEmpty(false), is(true));
-        assertThat(instance.isEmpty(true), is(false));
+        assertEquals(true, instance.isEmpty(false));
+        assertEquals(false, instance.isEmpty(true));
     }
 
     @Test
@@ -179,8 +167,8 @@ class ArtifactVersionsTest {
                         "3.1.5-SNAPSHOT",
                         "3.4.0-SNAPSHOT")));
 
-        assertThat(instance.getNewestUpdateWithinSegment(of(SUBINCREMENTAL), false), hasToString("1.1.0-2"));
-        assertThat(instance.getNewestUpdateWithinSegment(of(INCREMENTAL), false), hasToString("1.1.3"));
+        assertEquals("1.1.0-2", String.valueOf(instance.getNewestUpdateWithinSegment(of(SUBINCREMENTAL), false)));
+        assertEquals("1.1.3", String.valueOf(instance.getNewestUpdateWithinSegment(of(INCREMENTAL), false)));
     }
 
     @Test
@@ -189,9 +177,9 @@ class ArtifactVersionsTest {
                 new DefaultArtifact("default-group", "dummy-api", "1.0.0-SNAPSHOT", "foo", "bar", "jar", null),
                 Arrays.asList(versions("1.0.0-SNAPSHOT", "1.0.0")));
 
-        assertThat(
-                instance.getNewerVersions("1.0.0-SNAPSHOT", of(SUBINCREMENTAL), false, false),
-                arrayContaining(version("1.0.0")));
+        assertArrayEquals(
+                new ArtifactVersion[] {version("1.0.0")},
+                instance.getNewerVersions("1.0.0-SNAPSHOT", of(SUBINCREMENTAL), false, false));
     }
 
     private static ArtifactVersions createInstance(ArtifactVersion[] versions) {
@@ -205,8 +193,8 @@ class ArtifactVersionsTest {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.0-1", "1.0.1"));
         ArtifactVersion[] filteredVersions = instance.getVersions(
                 instance.restrictionForIgnoreScope(instance.getCurrentVersion(), of(SUBINCREMENTAL)), false);
-        assertThat(filteredVersions, arrayWithSize(1));
-        assertThat(filteredVersions, arrayContaining(version("1.0.1")));
+        assertEquals(1, filteredVersions.length);
+        assertArrayEquals(new ArtifactVersion[] {version("1.0.1")}, filteredVersions);
     }
 
     @Test
@@ -214,8 +202,8 @@ class ArtifactVersionsTest {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.0-1", "1.0.1", "1.1.0"));
         ArtifactVersion[] filteredVersions = instance.getVersions(
                 instance.restrictionForIgnoreScope(instance.getCurrentVersion(), of(INCREMENTAL)), false);
-        assertThat(filteredVersions, arrayWithSize(1));
-        assertThat(filteredVersions, arrayContaining(version("1.1.0")));
+        assertEquals(1, filteredVersions.length);
+        assertArrayEquals(new ArtifactVersion[] {version("1.1.0")}, filteredVersions);
     }
 
     @Test
@@ -223,8 +211,8 @@ class ArtifactVersionsTest {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"));
         ArtifactVersion[] filteredVersions = instance.getVersions(
                 instance.restrictionForIgnoreScope(instance.getCurrentVersion(), of(MINOR)), false);
-        assertThat(filteredVersions, arrayWithSize(1));
-        assertThat(filteredVersions, arrayContaining(version("2.0.0")));
+        assertEquals(1, filteredVersions.length);
+        assertArrayEquals(new ArtifactVersion[] {version("2.0.0")}, filteredVersions);
     }
 
     @Test
@@ -232,58 +220,74 @@ class ArtifactVersionsTest {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"));
         ArtifactVersion[] filteredVersions = instance.getVersions(
                 instance.restrictionForIgnoreScope(instance.getCurrentVersion(), of(MAJOR)), false);
-        assertThat(filteredVersions, arrayWithSize(0));
+        assertEquals(0, filteredVersions.length);
     }
 
     @Test
     void testGetReportNewestUpdateWithOnlyMajorUpdate() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "2.0.0"));
-        assertThat(instance.getReportNewestUpdate(Optional.empty(), true).toString(), is("2.0.0"));
-        assertThat(instance.getReportNewestUpdate(of(MAJOR), true), hasToString("2.0.0"));
-        assertThat(instance.getReportNewestUpdate(of(MINOR), true), nullValue());
-        assertThat(instance.getReportNewestUpdate(of(INCREMENTAL), true), nullValue());
-        assertThat(instance.getReportNewestUpdate(of(SUBINCREMENTAL), true), nullValue());
+        assertEquals(
+                "2.0.0", instance.getReportNewestUpdate(Optional.empty(), true).toString());
+        assertEquals("2.0.0", String.valueOf(instance.getReportNewestUpdate(of(MAJOR), true)));
+        assertNull(instance.getReportNewestUpdate(of(MINOR), true));
+        assertNull(instance.getReportNewestUpdate(of(INCREMENTAL), true));
+        assertNull(instance.getReportNewestUpdate(of(SUBINCREMENTAL), true));
     }
 
     @Test
     void testGetReportNewestUpdateWithMinorAndMajor() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.1.0", "2.0.0"));
-        assertThat(instance.getReportNewestUpdate(Optional.empty(), true).toString(), is("2.0.0"));
-        assertThat(instance.getReportNewestUpdate(of(MAJOR), true), hasToString("2.0.0"));
-        assertThat(instance.getReportNewestUpdate(of(MINOR), true), hasToString("1.1.0"));
-        assertThat(instance.getReportNewestUpdate(of(INCREMENTAL), true), nullValue());
-        assertThat(instance.getReportNewestUpdate(of(SUBINCREMENTAL), true), nullValue());
+        assertEquals(
+                "2.0.0", instance.getReportNewestUpdate(Optional.empty(), true).toString());
+        assertEquals("2.0.0", String.valueOf(instance.getReportNewestUpdate(of(MAJOR), true)));
+        assertEquals("1.1.0", String.valueOf(instance.getReportNewestUpdate(of(MINOR), true)));
+        assertNull(instance.getReportNewestUpdate(of(INCREMENTAL), true));
+        assertNull(instance.getReportNewestUpdate(of(SUBINCREMENTAL), true));
     }
 
     @Test
     void testGetReportNewestUpdateWithIncrementalAndMajor() {
         ArtifactVersions instance = createInstance(versions("1.0.0", "1.0.1", "2.0.0"));
-        assertThat(instance.getReportNewestUpdate(Optional.empty(), true).toString(), is("2.0.0"));
-        assertThat(instance.getReportNewestUpdate(of(MAJOR), true), hasToString("2.0.0"));
-        assertThat(instance.getReportNewestUpdate(of(MINOR), true), nullValue());
-        assertThat(instance.getReportNewestUpdate(of(INCREMENTAL), true), hasToString("1.0.1"));
-        assertThat(instance.getReportNewestUpdate(of(SUBINCREMENTAL), true), nullValue());
+        assertEquals(
+                "2.0.0", instance.getReportNewestUpdate(Optional.empty(), true).toString());
+        assertEquals("2.0.0", String.valueOf(instance.getReportNewestUpdate(of(MAJOR), true)));
+        assertNull(instance.getReportNewestUpdate(of(MINOR), true));
+        assertEquals("1.0.1", String.valueOf(instance.getReportNewestUpdate(of(INCREMENTAL), true)));
+        assertNull(instance.getReportNewestUpdate(of(SUBINCREMENTAL), true));
     }
 
     @Test
     void testGetNewestVersionWithLesserSegment() throws InvalidSegmentException {
         ArtifactVersions instance = createInstance(versions("1.0.0-1"));
-        assertThat(instance.getNewestVersion("1.0.0", of(MAJOR), false, false).get(), hasToString("1.0.0-1"));
-        assertThat(instance.getNewestVersion("1.0.0", of(MINOR), false, false).get(), hasToString("1.0.0-1"));
-        assertThat(
-                instance.getNewestVersion("1.0.0", of(INCREMENTAL), false, false)
-                        .get(),
-                hasToString("1.0.0-1"));
+        assertEquals(
+                "1.0.0-1",
+                String.valueOf(instance.getNewestVersion("1.0.0", of(MAJOR), false, false)
+                        .get()));
+        assertEquals(
+                "1.0.0-1",
+                String.valueOf(instance.getNewestVersion("1.0.0", of(MINOR), false, false)
+                        .get()));
+        assertEquals(
+                "1.0.0-1",
+                String.valueOf(instance.getNewestVersion("1.0.0", of(INCREMENTAL), false, false)
+                        .get()));
     }
 
     @Test
     void testGetNewestVersionWithLesserSegmentWithSnapshots() throws InvalidSegmentException {
         ArtifactVersions instance = createInstance(versions("1.0.0-1-SNAPSHOT"));
-        assertThat(instance.getNewestVersion("1.0.0", of(MAJOR), true, false).get(), hasToString("1.0.0-1-SNAPSHOT"));
-        assertThat(instance.getNewestVersion("1.0.0", of(MINOR), true, false).get(), hasToString("1.0.0-1-SNAPSHOT"));
-        assertThat(
-                instance.getNewestVersion("1.0.0", of(INCREMENTAL), true, false).get(),
-                hasToString("1.0.0-1-SNAPSHOT"));
+        assertEquals(
+                "1.0.0-1-SNAPSHOT",
+                String.valueOf(instance.getNewestVersion("1.0.0", of(MAJOR), true, false)
+                        .get()));
+        assertEquals(
+                "1.0.0-1-SNAPSHOT",
+                String.valueOf(instance.getNewestVersion("1.0.0", of(MINOR), true, false)
+                        .get()));
+        assertEquals(
+                "1.0.0-1-SNAPSHOT",
+                String.valueOf(instance.getNewestVersion("1.0.0", of(INCREMENTAL), true, false)
+                        .get()));
     }
 
     @ParameterizedTest
@@ -304,8 +308,10 @@ class ArtifactVersionsTest {
         List<String> allUpdates = Arrays.stream(instance.getAllUpdates(false))
                 .map(Object::toString)
                 .collect(Collectors.toList());
-        assertThat(allUpdates, hasItem("4"));
-        assertThat(allUpdates, allOf(not(hasItem("1")), not(hasItem("2")), not(hasItem("3"))));
+        assertTrue(allUpdates.contains("4"), () -> String.valueOf(allUpdates));
+        assertFalse(allUpdates.contains("1"), () -> String.valueOf(allUpdates));
+        assertFalse(allUpdates.contains("2"), () -> String.valueOf(allUpdates));
+        assertFalse(allUpdates.contains("3"), () -> String.valueOf(allUpdates));
     }
 
     @Test
@@ -336,14 +342,14 @@ class ArtifactVersionsTest {
                         "3.1.5-SNAPSHOT",
                         "3.4.0-SNAPSHOT")));
         ArtifactVersions onlySnapshots = new ArtifactVersions(original).filter(ArtifactUtils::isSnapshot);
-        assertThat(onlySnapshots.getVersions(false), emptyArray());
-        assertThat(onlySnapshots.getVersions(true), arrayWithSize(7));
-        assertThat(onlySnapshots.getCurrentVersion(), is(original.getCurrentVersion()));
+        assertEquals(0, onlySnapshots.getVersions(false).length);
+        assertEquals(7, onlySnapshots.getVersions(true).length);
+        assertEquals(original.getCurrentVersion(), onlySnapshots.getCurrentVersion());
 
         ArtifactVersions noSnapshots = new ArtifactVersions(original).filter(v -> !ArtifactUtils.isSnapshot(v));
-        assertThat(noSnapshots.getVersions(false), arrayWithSize(15));
-        assertThat(noSnapshots.getVersions(true), arrayWithSize(15));
-        assertThat(noSnapshots.getCurrentVersion(), nullValue());
+        assertEquals(15, noSnapshots.getVersions(false).length);
+        assertEquals(15, noSnapshots.getVersions(true).length);
+        assertNull(noSnapshots.getCurrentVersion());
     }
 
     @Test
@@ -351,9 +357,9 @@ class ArtifactVersionsTest {
         ArtifactVersions versions = new ArtifactVersions(
                 new DefaultArtifact("default-group", "dummy-api", "(,2)", "foo", "bar", "jar", null),
                 Arrays.asList(versions("1.0.0")));
-        assertThat(
-                versions.restrictionForUnchangedSegment(null, Optional.of(MAJOR), false),
-                is(equalTo(new Restriction(null, false, null, false))));
+        assertEquals(
+                new Restriction(null, false, null, false),
+                versions.restrictionForUnchangedSegment(null, Optional.of(MAJOR), false));
     }
 
     @Test
@@ -361,9 +367,9 @@ class ArtifactVersionsTest {
         ArtifactVersions versions = new ArtifactVersions(
                 new DefaultArtifact("default-group", "dummy-api", "(,)", "foo", "bar", "jar", null),
                 Arrays.asList(versions("1.0.0")));
-        assertThat(
-                versions.restrictionForSelectedSegment(null, Optional.of(MAJOR)),
-                is(equalTo(new Restriction(null, false, null, false))));
+        assertEquals(
+                new Restriction(null, false, null, false),
+                versions.restrictionForSelectedSegment(null, Optional.of(MAJOR)));
     }
 
     @Test
@@ -371,8 +377,8 @@ class ArtifactVersionsTest {
         ArtifactVersions versions = new ArtifactVersions(
                 new DefaultArtifact("default-group", "dummy-api", "(,)", "foo", "bar", "jar", null),
                 Arrays.asList(versions("1.0.0")));
-        assertThat(
-                versions.restrictionForIgnoreScope(null, Optional.of(MAJOR)),
-                is(equalTo(new Restriction(null, false, null, false))));
+        assertEquals(
+                new Restriction(null, false, null, false),
+                versions.restrictionForIgnoreScope(null, Optional.of(MAJOR)));
     }
 }

@@ -31,11 +31,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.codec.CharEncoding.UTF_8;
 import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
-import static org.codehaus.mojo.versions.TextAssertions.assertAnyLineContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextMatches;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextNotMatches;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertAnyLineContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextMatches;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextNotMatches;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;

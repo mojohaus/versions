@@ -33,9 +33,9 @@ import static org.codehaus.mojo.versions.DisplayDependencyUpdatesMojoScenarioTes
 import static org.codehaus.mojo.versions.DisplayDependencyUpdatesMojoScenarioTest.Section.DEPENDENCY_MANAGEMENT;
 import static org.codehaus.mojo.versions.DisplayDependencyUpdatesMojoScenarioTest.Section.PLUGIN_DEPENDENCIES;
 import static org.codehaus.mojo.versions.DisplayDependencyUpdatesMojoScenarioTest.Section.PLUGIN_MANAGEMENT;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContainsPattern;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContainsPattern;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContainsPattern;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextNotContainsPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
