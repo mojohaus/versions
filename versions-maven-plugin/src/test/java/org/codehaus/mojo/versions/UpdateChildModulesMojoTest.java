@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 /**

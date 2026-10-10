@@ -3,10 +3,8 @@ package org.codehaus.mojo.versions.utils;
 import org.apache.maven.model.Dependency;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DependencyComparatorTest {
 
@@ -23,8 +21,12 @@ class DependencyComparatorTest {
         Dependency a1 = dep("a.group", "artifact", "1.0");
         Dependency b1 = dep("b.group", "artifact", "1.0");
 
-        assertThat(DependencyComparator.INSTANCE.compare(a1, b1), lessThan(0));
-        assertThat(DependencyComparator.INSTANCE.compare(b1, a1), greaterThan(0));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(a1, b1) < 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(a1, b1));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(b1, a1) > 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(b1, a1));
     }
 
     @Test
@@ -32,7 +34,9 @@ class DependencyComparatorTest {
         Dependency a1 = dep("g", "a", "1.0");
         Dependency b1 = dep("g", "b", "1.0");
 
-        assertThat(DependencyComparator.INSTANCE.compare(a1, b1), lessThan(0));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(a1, b1) < 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(a1, b1));
     }
 
     @Test
@@ -40,15 +44,21 @@ class DependencyComparatorTest {
         Dependency v1 = dep("g", "a", "1.0");
         Dependency v2 = dep("g", "a", "2.0");
 
-        assertThat(DependencyComparator.INSTANCE.compare(v1, v2), lessThan(0));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(v1, v2) < 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(v1, v2));
     }
 
     @Test
     void nullDependenciesAreHandled() {
         Dependency d = dep("g", "a", "1.0");
-        assertThat(DependencyComparator.INSTANCE.compare(null, d), greaterThan(0));
-        assertThat(DependencyComparator.INSTANCE.compare(d, null), lessThan(0));
-        assertThat(DependencyComparator.INSTANCE.compare(null, null), is(0));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(null, d) > 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(null, d));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(d, null) < 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(d, null));
+        assertEquals(0, DependencyComparator.INSTANCE.compare(null, null));
     }
 
     @Test
@@ -65,7 +75,9 @@ class DependencyComparatorTest {
                 .build();
 
         // Semantic: 2 < 10
-        assertThat(DependencyComparator.INSTANCE.compare(v2, v10), lessThan(0));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(v2, v10) < 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(v2, v10));
         // Lexicographic would wrongly say "10" < "2"
     }
 
@@ -83,7 +95,9 @@ class DependencyComparatorTest {
                 .build();
 
         // Semantic: 1.0.2 < 1.0.10
-        assertThat(DependencyComparator.INSTANCE.compare(v102, v1010), lessThan(0));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(v102, v1010) < 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(v102, v1010));
         // Lexicographic would wrongly say "1.0.10" < "1.0.2"
     }
 
@@ -101,7 +115,9 @@ class DependencyComparatorTest {
                 .build();
 
         // Semantic: alpha < release
-        assertThat(DependencyComparator.INSTANCE.compare(alpha, release), lessThan(0));
+        assertTrue(
+                DependencyComparator.INSTANCE.compare(alpha, release) < 0,
+                () -> "was " + DependencyComparator.INSTANCE.compare(alpha, release));
         // Lexicographic would put "1.0.0-alpha" after "1.0.0"
     }
 
@@ -124,8 +140,8 @@ class DependencyComparatorTest {
                 .build();
 
         // All should compare as equal
-        assertThat(DependencyComparator.INSTANCE.compare(v1, v10), is(0));
-        assertThat(DependencyComparator.INSTANCE.compare(v10, v100), is(0));
-        assertThat(DependencyComparator.INSTANCE.compare(v1, v100), is(0));
+        assertEquals(0, DependencyComparator.INSTANCE.compare(v1, v10));
+        assertEquals(0, DependencyComparator.INSTANCE.compare(v10, v100));
+        assertEquals(0, DependencyComparator.INSTANCE.compare(v1, v100));
     }
 }

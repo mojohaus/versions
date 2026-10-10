@@ -36,8 +36,8 @@ import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
 import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;

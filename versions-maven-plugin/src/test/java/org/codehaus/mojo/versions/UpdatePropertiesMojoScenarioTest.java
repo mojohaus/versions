@@ -23,7 +23,7 @@ import org.apache.maven.api.plugin.testing.InjectMojo;
 import org.apache.maven.api.plugin.testing.MojoParameter;
 import org.junit.jupiter.api.Test;
 
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 
 /**
  * Scenarios of {@link UpdatePropertiesMojo} that used to be the {@code it-update-properties-NNN} integration tests.

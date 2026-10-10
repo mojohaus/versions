@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 
 /**
  * Basic tests for {@linkplain DependencyUpdatesXmlReportRenderer}.

@@ -26,8 +26,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -49,115 +48,115 @@ class AbstractVersionDetailsTest {
 
     @Test
     void testRestrictionForUnchangedSegmentWithSimpleVersion() throws InvalidSegmentException {
-        assertThat(
+        assertEquals(
+                false,
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.0.0")),
-                is(false));
-        assertThat(
+                        .containsVersion(version("1.0.0")));
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.1.0")),
-                is(true));
-        assertThat(
+                        .containsVersion(version("1.1.0")));
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.0.1")),
-                is(true));
-        assertThat(
+                        .containsVersion(version("1.0.1")));
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.0.0-1")),
-                is(true));
+                        .containsVersion(version("1.0.0-1")));
     }
 
     @Test
     void testRestrictionForUnchangedSegmentWithRange()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0]"));
-        assertThat(
+        assertEquals(
+                false,
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.0.0")),
-                is(false));
-        assertThat(
+                        .containsVersion(version("1.0.0")));
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.1.0")),
-                is(true));
-        assertThat(
+                        .containsVersion(version("1.1.0")));
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.0.1")),
-                is(true));
-        assertThat(
+                        .containsVersion(version("1.0.1")));
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("1.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.0.0-1")),
-                is(true));
+                        .containsVersion(version("1.0.0-1")));
     }
 
     @Test
     void testRestrictionForUnchangedSegmentWithTwoRanges()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0],(1.0.0,2.0.0]"));
-        assertThat(
+        assertEquals(
+                false,
                 instance.restrictionForUnchangedSegment(version("2.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.0.0")),
-                is(false));
-        assertThat(
+                        .containsVersion(version("1.0.0")));
+        assertEquals(
+                false,
                 instance.restrictionForUnchangedSegment(version("2.0.0"), of(MAJOR), false)
-                        .containsVersion(version("1.1.0")),
-                is(false));
-        assertThat(
+                        .containsVersion(version("1.1.0")));
+        assertEquals(
+                false,
                 instance.restrictionForUnchangedSegment(version("2.0.0"), of(MAJOR), false)
-                        .containsVersion(version("2.0.0")),
-                is(false));
-        assertThat(
+                        .containsVersion(version("2.0.0")));
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("2.0.0"), of(MAJOR), false)
-                        .containsVersion(version("2.0.0-1")),
-                is(true));
+                        .containsVersion(version("2.0.0-1")));
     }
 
     @Test
     void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges1()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0),(1.0.0,2.0.0]"));
-        assertThat(
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("0.9.0"), empty(), false)
-                        .containsVersion(version("1.0.0")),
-                is(true));
+                        .containsVersion(version("1.0.0")));
     }
 
     @Test
     void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges2()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0),(1.0.0,2.0.0]"));
-        assertThat(
+        assertEquals(
+                false,
                 instance.restrictionForUnchangedSegment(version("1.0.1"), of(MAJOR), false)
-                        .containsVersion(version("1.1.0")),
-                is(false));
+                        .containsVersion(version("1.1.0")));
     }
 
     @Test
     void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges3()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0),(1.0.0,2.0.0]"));
-        assertThat(
+        assertEquals(
+                false,
                 instance.restrictionForUnchangedSegment(version("1.0.1"), empty(), false)
-                        .containsVersion(version("2.0.0")),
-                is(false));
+                        .containsVersion(version("2.0.0")));
     }
 
     @Test
     void testRestrictionForUnchangedSegmentWithTwoNotConnectingRanges4()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("(0.0.1, 1.0.0),(1.0.0,2.0.0]"));
-        assertThat(
+        assertEquals(
+                true,
                 instance.restrictionForUnchangedSegment(version("1.0.1"), empty(), false)
-                        .containsVersion(version("2.0.0-1")),
-                is(true));
+                        .containsVersion(version("2.0.0-1")));
     }
 
     @Test
     void testRestrictionForUnchangedSegmentWithoutVersionInformation()
             throws InvalidSegmentException, InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("[,0]"));
-        assertThat(
-                instance.restrictionForUnchangedSegment(null, empty(), false).containsVersion(version("1.0.0")),
-                is(true));
+        assertEquals(
+                true,
+                instance.restrictionForUnchangedSegment(null, empty(), false).containsVersion(version("1.0.0")));
     }
 
     @Test
@@ -169,46 +168,46 @@ class AbstractVersionDetailsTest {
     @Test
     void testIsPreReleaseVersion() {
         // Stable versions should not be pre-release
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0"), is(false));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("6.2.3"), is(false));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("6.2.4"), is(false));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("2.0.0"), is(false));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("1.0.0"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("6.2.3"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("6.2.4"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("2.0.0"));
 
         // Alpha versions
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha1"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha12"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-ALPHA"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-a"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-a1"), is(true));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha12"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-ALPHA"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-a"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-a1"));
 
         // Beta versions
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-beta"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-beta1"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-BETA"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-b"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-b1"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("2.0.0-beta"), is(true));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-beta"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-beta1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-BETA"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-b"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-b1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("2.0.0-beta"));
 
         // Milestone versions
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-M1"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-M2"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("7.0.0-M3"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-milestone"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-milestone1"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-m"), is(true));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-M1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-M2"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("7.0.0-M3"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-milestone"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-milestone1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-m"));
 
         // Release candidate versions
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-rc"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-rc1"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-RC"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-RC1"), is(true));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-rc"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-rc1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-RC"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-RC1"));
 
         // Preview versions
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-preview"), is(true));
-        assertThat(AbstractVersionDetails.isPreReleaseVersion("1.0.0-PREVIEW"), is(true));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-preview"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-PREVIEW"));
 
         // Null should return false
-        assertThat(AbstractVersionDetails.isPreReleaseVersion(null), is(false));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion(null));
     }
 }

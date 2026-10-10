@@ -19,20 +19,22 @@ package org.codehaus.mojo.versions.filtering;
  * under the License.
  */
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.maven.model.Dependency;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertSameElements;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DependencyFilterTest {
 
@@ -61,10 +63,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.removingFrom(input);
 
-            MatcherAssert.assertThat(
-                    actual,
-                    Matchers.containsInAnyOrder(
-                            HasGAVMatcher.hasGAV("foo", "bar", "1"), HasGAVMatcher.hasGAV("localhost", "my-api", "2")));
+            assertSameElements(Arrays.asList("foo:bar:1", "localhost:my-api:2"), gavs(actual));
         }
 
         @Test
@@ -73,10 +72,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.removingFrom(input);
 
-            MatcherAssert.assertThat(
-                    actual,
-                    Matchers.containsInAnyOrder(
-                            HasGAVMatcher.hasGAV("foo", "bar", "1"), HasGAVMatcher.hasGAV("localhost", "my-api", "2")));
+            assertSameElements(Arrays.asList("foo:bar:1", "localhost:my-api:2"), gavs(actual));
         }
 
         @Test
@@ -85,7 +81,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.removingFrom(input);
 
-            MatcherAssert.assertThat(actual, Matchers.containsInAnyOrder(HasGAVMatcher.hasGAV("foo", "bar", "1")));
+            assertSameElements(Arrays.asList("foo:bar:1"), gavs(actual));
         }
 
         @Test
@@ -94,7 +90,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.removingFrom(input);
 
-            assertThat(actual, empty());
+            assertTrue(actual.isEmpty(), () -> String.valueOf(actual));
         }
 
         @Test
@@ -103,7 +99,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.removingFrom(input);
 
-            MatcherAssert.assertThat(actual, Matchers.containsInAnyOrder(HasGAVMatcher.hasGAV("foo", "bar", "1")));
+            assertSameElements(Arrays.asList("foo:bar:1"), gavs(actual));
         }
     }
 
@@ -132,8 +128,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.retainingIn(input);
 
-            MatcherAssert.assertThat(
-                    actual, Matchers.containsInAnyOrder(HasGAVMatcher.hasGAV("localhost", "my-impl", "3")));
+            assertSameElements(Arrays.asList("localhost:my-impl:3"), gavs(actual));
         }
 
         @Test
@@ -142,8 +137,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.retainingIn(input);
 
-            MatcherAssert.assertThat(
-                    actual, Matchers.containsInAnyOrder(HasGAVMatcher.hasGAV("localhost", "my-api", "2")));
+            assertSameElements(Arrays.asList("localhost:my-api:2"), gavs(actual));
         }
 
         @Test
@@ -152,11 +146,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.retainingIn(input);
 
-            MatcherAssert.assertThat(
-                    actual,
-                    Matchers.containsInAnyOrder(
-                            HasGAVMatcher.hasGAV("localhost", "my-api", "2"),
-                            HasGAVMatcher.hasGAV("localhost", "my-impl", "3")));
+            assertSameElements(Arrays.asList("localhost:my-api:2", "localhost:my-impl:3"), gavs(actual));
         }
 
         @Test
@@ -165,12 +155,7 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.retainingIn(input);
 
-            MatcherAssert.assertThat(
-                    actual,
-                    Matchers.containsInAnyOrder(
-                            HasGAVMatcher.hasGAV("foo", "bar", "1"),
-                            HasGAVMatcher.hasGAV("localhost", "my-api", "2"),
-                            HasGAVMatcher.hasGAV("localhost", "my-impl", "3")));
+            assertSameElements(Arrays.asList("foo:bar:1", "localhost:my-api:2", "localhost:my-impl:3"), gavs(actual));
         }
 
         @Test
@@ -179,11 +164,13 @@ class DependencyFilterTest {
 
             Set<Dependency> actual = exclusions.retainingIn(input);
 
-            MatcherAssert.assertThat(
-                    actual,
-                    Matchers.containsInAnyOrder(
-                            HasGAVMatcher.hasGAV("localhost", "my-api", "2"),
-                            HasGAVMatcher.hasGAV("localhost", "my-impl", "3")));
+            assertSameElements(Arrays.asList("localhost:my-api:2", "localhost:my-impl:3"), gavs(actual));
         }
+    }
+
+    private static List<String> gavs(Collection<Dependency> dependencies) {
+        return dependencies.stream()
+                .map(d -> d.getGroupId() + ":" + d.getArtifactId() + ":" + d.getVersion())
+                .collect(Collectors.toList());
     }
 }

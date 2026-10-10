@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import static java.lang.String.join;
 import static org.apache.commons.io.FileUtils.copyDirectory;
 import static org.apache.maven.api.plugin.testing.MojoExtension.getBasedir;
-import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**

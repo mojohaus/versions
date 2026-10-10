@@ -8,10 +8,8 @@ import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
 
-import static java.util.Optional.empty;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class MavenProjectUtilsTest {
 
@@ -37,7 +35,7 @@ public class MavenProjectUtilsTest {
         };
         // resolve version from model properties if necessary (e.g. "${mycomponent.myversion}"
         Optional<String> result = MavenProjectUtils.interpolateVersion(dep.getVersion(), proj);
-        assertThat(result, is(Optional.of("1.0.0")));
+        assertEquals(Optional.of("1.0.0"), result);
     }
 
     @Test
@@ -48,7 +46,7 @@ public class MavenProjectUtilsTest {
             }
         };
         Optional<String> result = MavenProjectUtils.interpolateVersion("${param}", proj);
-        assertThat(result.orElse(null), is(nullValue()));
+        assertNull(result.orElse(null));
     }
 
     @Test
@@ -65,7 +63,7 @@ public class MavenProjectUtilsTest {
         };
         // resolve version from model properties if necessary (e.g. "${mycomponent.myversion}"
         Optional<String> result = MavenProjectUtils.interpolateVersion(dep.getVersion(), proj);
-        assertThat(result, is(empty()));
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -86,6 +84,6 @@ public class MavenProjectUtilsTest {
             }
         };
         Optional<String> result = MavenProjectUtils.interpolateVersion("${param1}", proj);
-        assertThat(result, is(Optional.of("1.0.0")));
+        assertEquals(Optional.of("1.0.0"), result);
     }
 }

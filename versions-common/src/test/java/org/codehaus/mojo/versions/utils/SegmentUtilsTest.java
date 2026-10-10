@@ -25,8 +25,7 @@ import static org.codehaus.mojo.versions.api.Segment.INCREMENTAL;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.api.Segment.MINOR;
 import static org.codehaus.mojo.versions.utils.SegmentUtils.determineUnchangedSegment;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Unit tests for {@link SegmentUtils}
@@ -34,19 +33,19 @@ import static org.hamcrest.Matchers.is;
 class SegmentUtilsTest {
     @Test
     void testIncremental() {
-        assertThat(determineUnchangedSegment(false, false, false, null), is(of(INCREMENTAL)));
-        assertThat(determineUnchangedSegment(true, false, false, null), is(of(INCREMENTAL)));
-        assertThat(determineUnchangedSegment(true, true, false, null), is(of(INCREMENTAL)));
+        assertEquals(of(INCREMENTAL), determineUnchangedSegment(false, false, false, null));
+        assertEquals(of(INCREMENTAL), determineUnchangedSegment(true, false, false, null));
+        assertEquals(of(INCREMENTAL), determineUnchangedSegment(true, true, false, null));
     }
 
     @Test
     void testMinor() {
-        assertThat(determineUnchangedSegment(false, false, true, null), is(of(MINOR)));
-        assertThat(determineUnchangedSegment(true, false, true, null), is(of(MINOR)));
+        assertEquals(of(MINOR), determineUnchangedSegment(false, false, true, null));
+        assertEquals(of(MINOR), determineUnchangedSegment(true, false, true, null));
     }
 
     @Test
     void testMajor() {
-        assertThat(determineUnchangedSegment(false, true, true, null), is(of(MAJOR)));
+        assertEquals(of(MAJOR), determineUnchangedSegment(false, true, true, null));
     }
 }

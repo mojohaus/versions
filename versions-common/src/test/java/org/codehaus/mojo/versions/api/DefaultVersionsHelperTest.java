@@ -64,13 +64,8 @@ import org.mockito.MockitoAnnotations;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -135,7 +130,7 @@ class DefaultVersionsHelperTest {
                 .collect(Collectors.toList());
 
         assertEquals(3, actual.size());
-        assertThat(actual, hasItems("three", "1.200", "illegalVersion"));
+        assertTrue(actual.containsAll(Arrays.asList("three", "1.200", "illegalVersion")), () -> String.valueOf(actual));
     }
 
     @Test
@@ -172,7 +167,7 @@ class DefaultVersionsHelperTest {
                 .collect(Collectors.toList());
 
         assertEquals(4, actual.size());
-        assertThat(actual, hasItems(one, two, three, illegal));
+        assertTrue(actual.containsAll(Arrays.asList(one, two, three, illegal)), () -> String.valueOf(actual));
     }
 
     @Test
@@ -268,24 +263,24 @@ class DefaultVersionsHelperTest {
         List<RemoteRepository> remoteRepositories =
                 DefaultVersionsHelper.forceDailyRemoteRepositoriesRefreshPolicy(Arrays.asList(repo1, repo2, repo3));
 
-        assertThat(remoteRepositories, hasSize(3));
-        assertThat(remoteRepositories.get(0), not(is(repo1)));
-        assertThat(remoteRepositories.get(1), not(is(repo2)));
-        assertThat(remoteRepositories.get(2), is(repo3));
+        assertEquals(3, remoteRepositories.size(), () -> String.valueOf(remoteRepositories));
+        assertNotEquals(repo1, remoteRepositories.get(0));
+        assertNotEquals(repo2, remoteRepositories.get(1));
+        assertEquals(repo3, remoteRepositories.get(2));
 
-        assertThat(
-                remoteRepositories.get(0).getPolicy(true).getUpdatePolicy(),
-                equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
-        assertThat(
-                remoteRepositories.get(0).getPolicy(false).getUpdatePolicy(),
-                equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
+        assertEquals(
+                RepositoryPolicy.UPDATE_POLICY_DAILY,
+                remoteRepositories.get(0).getPolicy(true).getUpdatePolicy());
+        assertEquals(
+                RepositoryPolicy.UPDATE_POLICY_DAILY,
+                remoteRepositories.get(0).getPolicy(false).getUpdatePolicy());
 
-        assertThat(
-                remoteRepositories.get(1).getPolicy(true).getUpdatePolicy(),
-                equalTo(RepositoryPolicy.UPDATE_POLICY_NEVER));
-        assertThat(
-                remoteRepositories.get(1).getPolicy(false).getUpdatePolicy(),
-                equalTo(RepositoryPolicy.UPDATE_POLICY_DAILY));
+        assertEquals(
+                RepositoryPolicy.UPDATE_POLICY_NEVER,
+                remoteRepositories.get(1).getPolicy(true).getUpdatePolicy());
+        assertEquals(
+                RepositoryPolicy.UPDATE_POLICY_DAILY,
+                remoteRepositories.get(1).getPolicy(false).getUpdatePolicy());
     }
 
     private static Version parseVersion(String version) {
