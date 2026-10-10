@@ -24,8 +24,6 @@ import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Prerequisites;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
@@ -33,18 +31,17 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.TestUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.codec.CharEncoding.UTF_8;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
+import static org.codehaus.mojo.versions.TextAssertions.assertAnyLineContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -55,29 +52,25 @@ import static org.mockito.Mockito.when;
  *
  * @author Andrzej Jarmoniuk
  */
-public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
+@ProjectMojoTest
+public class DisplayPluginUpdatesMojoTest {
 
-    @Rule
-    public MojoRule mojoRule = new MojoRule(this);
+    protected ProjectMojos mojos;
 
     private Path tempDir;
 
     private Path outputPath;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    public void setUp(ProjectMojos mojos) throws Exception {
+        this.mojos = mojos;
         tempDir = TestUtils.createTempDir("display-plugin-updates");
         outputPath = Files.createTempFile(tempDir, "output", "");
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
-        try {
-            TestUtils.tearDownTempDir(tempDir);
-        } finally {
-            super.tearDown();
-        }
+        TestUtils.tearDownTempDir(tempDir);
     }
 
     private static ProjectBuilder mockupProjectBuilder() {
@@ -98,8 +91,7 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
     }
 
     private DisplayPluginUpdatesMojo createMojo() throws Exception {
-        DisplayPluginUpdatesMojo mojo =
-                (DisplayPluginUpdatesMojo) mojoRule.lookupConfiguredMojo(tempDir.toFile(), "display-plugin-updates");
+        DisplayPluginUpdatesMojo mojo = (DisplayPluginUpdatesMojo) mojos.lookup("display-plugin-updates", tempDir);
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = outputPath.toFile();
         mojo.setPluginContext(new HashMap<>());
@@ -123,7 +115,7 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.execute();
 
         List<String> output = Files.readAllLines(outputPath);
-        assertThat(output, hasItem(containsString("Using the minimum version of Maven: 3.3.9")));
+        assertAnyLineContains(output, "Using the minimum version of Maven: 3.3.9");
     }
 
     @Test
@@ -136,7 +128,7 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.execute();
 
         List<String> output = Files.readAllLines(outputPath);
-        assertThat(output, hasItem(containsString("Using the minimum version of Maven: 3.3.9")));
+        assertAnyLineContains(output, "Using the minimum version of Maven: 3.3.9");
     }
 
     @Test
@@ -150,7 +142,7 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.execute();
 
         List<String> output = Files.readAllLines(outputPath);
-        assertThat(output, hasItem(containsString("Using the minimum version of Maven: 3.3.9")));
+        assertAnyLineContains(output, "Using the minimum version of Maven: 3.3.9");
     }
 
     @Test
@@ -164,7 +156,7 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.execute();
 
         List<String> output = Files.readAllLines(outputPath);
-        assertThat(output, hasItem(containsString("Using the minimum version of Maven: 3.3.9")));
+        assertAnyLineContains(output, "Using the minimum version of Maven: 3.3.9");
     }
 
     @Test
@@ -178,9 +170,11 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
             mojo.execute();
             fail("Should throw an exception");
         } catch (MojoExecutionException e) {
-            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, e.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 
@@ -194,8 +188,8 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
                 java.util.Collections.singletonMap("default-plugin", new String[] {"1.0.0", "2.0.0"}));
         mojo.execute();
         List<String> output = Files.readAllLines(outputPath);
-        assertThat(output, hasItem(containsString("Require Maven 3.6.3 to use the following plugin updates:")));
-        assertThat(output, hasItem(containsString("1.0.0 -> 2.0.0")));
+        assertAnyLineContains(output, "Require Maven 3.6.3 to use the following plugin updates:");
+        assertAnyLineContains(output, "1.0.0 -> 2.0.0");
     }
 
     @Test
@@ -208,7 +202,6 @@ public class DisplayPluginUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.execute();
 
         List<String> output = Files.readAllLines(outputPath);
-        assertThat(
-                output, hasItem(containsString("All plugins with a version specified are using the latest versions.")));
+        assertAnyLineContains(output, "All plugins with a version specified are using the latest versions.");
     }
 }

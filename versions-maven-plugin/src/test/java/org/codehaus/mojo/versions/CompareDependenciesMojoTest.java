@@ -1,36 +1,40 @@
 package org.codehaus.mojo.versions;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collections;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.model.Model;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class CompareDependenciesMojoTest extends AbstractMojoTestCase {
+@ProjectMojoTest
+public class CompareDependenciesMojoTest {
 
-    @Rule
-    public final MojoRule mojoRule = new MojoRule(this);
+    protected ProjectMojos mojos;
+
+    @BeforeEach
+    public void injectMojos(ProjectMojos mojos) {
+        this.mojos = mojos;
+    }
 
     @Test
     public void testCompareVersionlessDependencies() throws Exception {
-        CompareDependenciesMojo mojo = (CompareDependenciesMojo) mojoRule.lookupConfiguredMojo(
-                new File("src/test/resources/org/codehaus/mojo/compare-dependencies/versionless"),
-                "compare-dependencies");
+        CompareDependenciesMojo mojo = (CompareDependenciesMojo) mojos.lookup(
+                "compare-dependencies",
+                Paths.get("src/test/resources/org/codehaus/mojo/compare-dependencies/versionless"));
         ProjectBuildingResult result = mock(ProjectBuildingResult.class);
         when(result.getProblems()).thenReturn(Collections.emptyList());
         when(result.getProject()).thenReturn(new MavenProject(new Model() {
