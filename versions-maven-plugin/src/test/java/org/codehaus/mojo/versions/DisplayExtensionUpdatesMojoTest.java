@@ -48,15 +48,13 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
+import static org.codehaus.mojo.versions.TextAssertions.assertAnyLineContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -158,7 +156,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertThat(Files.readAllLines(tempPath), empty());
+        assertEquals(emptyList(), Files.readAllLines(tempPath));
     }
 
     @Test
@@ -182,9 +180,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertThat(
-                String.join("", Files.readAllLines(tempPath)),
-                containsString("default-group:artifactA ... 1.0.0 -> 2.0.0"));
+        assertContains(String.join("", Files.readAllLines(tempPath)), "default-group:artifactA ... 1.0.0 -> 2.0.0");
     }
 
     @Test
@@ -208,7 +204,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertThat(Files.readAllLines(tempPath), empty());
+        assertEquals(emptyList(), Files.readAllLines(tempPath));
     }
 
     @Test
@@ -232,7 +228,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertThat(String.join("", Files.readAllLines(tempPath)), containsString("1.0.0 -> 2.0.0"));
+        assertContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 2.0.0");
     }
 
     @Test
@@ -256,7 +252,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertThat(String.join("", Files.readAllLines(tempPath)), containsString("1.0.0 -> 1.1.0"));
+        assertContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 1.1.0");
     }
 
     @Test
@@ -285,7 +281,7 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
         }
 
-        assertThat(String.join("", Files.readAllLines(tempPath)), containsString("1.0.0 -> 1.0.1"));
+        assertContains(String.join("", Files.readAllLines(tempPath)), "1.0.0 -> 1.0.1");
     }
 
     @Test
@@ -309,9 +305,11 @@ public class DisplayExtensionUpdatesMojoTest {
             mojo.execute();
             fail("Should throw an exception");
         } catch (MojoExecutionException e) {
-            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, e.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 
@@ -337,6 +335,6 @@ public class DisplayExtensionUpdatesMojoTest {
         }
 
         List<String> output = Files.readAllLines(tempPath);
-        assertThat(output, hasItem(containsString("No extensions have newer versions.")));
+        assertAnyLineContains(output, "No extensions have newer versions.");
     }
 }

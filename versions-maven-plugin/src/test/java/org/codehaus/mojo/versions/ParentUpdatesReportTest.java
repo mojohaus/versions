@@ -41,14 +41,12 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.plexus.i18n.I18N;
 import org.junit.jupiter.api.Test;
 
+import static org.codehaus.mojo.versions.TextAssertions.assertContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockI18N;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
@@ -106,14 +104,7 @@ public class ParentUpdatesReportTest {
         }.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
 
         String output = os.toString();
-        assertThat(
-                output,
-                allOf(
-                        containsString("1.0.0"),
-                        containsString("1.0.1"),
-                        containsString("1.1.0"),
-                        containsString("2.0.0"),
-                        containsString("2.0.1-SNAPSHOT")));
+        assertContains(output, "1.0.0", "1.0.1", "1.1.0", "2.0.0", "2.0.1-SNAPSHOT");
     }
 
     @Test
@@ -158,9 +149,11 @@ public class ParentUpdatesReportTest {
             }.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
             fail("Should throw an exception");
         } catch (MavenReportException e) {
-            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, e.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 }
