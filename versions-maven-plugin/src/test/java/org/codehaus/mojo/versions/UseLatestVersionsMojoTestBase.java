@@ -22,24 +22,21 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
-import org.hamcrest.core.Is;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
@@ -62,7 +59,7 @@ public abstract class UseLatestVersionsMojoTestBase {
 
     protected abstract UseLatestVersionsMojoBase createMojo() throws IllegalAccessException, MojoExecutionException;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         openMocks(this);
         changeRecorder = new TestChangeRecorder();
@@ -121,7 +118,7 @@ public abstract class UseLatestVersionsMojoTestBase {
         });
 
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), Is.is(empty()));
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     protected void testIncludeFilter(String expectedNewVersion)
@@ -150,11 +147,13 @@ public abstract class UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "includes", new String[] {"default-group:other-artifact"});
 
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), hasSize(1));
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "other-artifact", "default", "1.0", expectedNewVersion)));
+        assertEquals(1, changeRecorder.getChanges().size(), () -> String.valueOf(changeRecorder.getChanges()));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "other-artifact", "default", "1.0", expectedNewVersion)),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -190,11 +189,13 @@ public abstract class UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "excludes", new String[] {"default-group:other-artifact"});
 
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), hasSize(1));
-        assertThat(
-                changeRecorder.getChanges(),
-                not(hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "other-artifact", "1.0", expectedNewVersion))));
+        assertEquals(1, changeRecorder.getChanges().size(), () -> String.valueOf(changeRecorder.getChanges()));
+        assertFalse(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "other-artifact", "1.0", expectedNewVersion)),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -230,7 +231,9 @@ public abstract class UseLatestVersionsMojoTestBase {
         try {
             tryUpdate();
         } catch (VersionRetrievalException e) {
-            assertThat(e.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    e.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 }
