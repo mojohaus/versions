@@ -43,10 +43,10 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.TestUtils;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static java.util.Collections.singleton;
@@ -64,7 +64,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -87,7 +87,7 @@ public class DisplayParentUpdatesMojoTest {
 
     private Path tempFile;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpStatic() throws MojoExecutionException {
         artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
@@ -102,7 +102,7 @@ public class DisplayParentUpdatesMojoTest {
         });
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws IllegalAccessException, IOException, MojoExecutionException {
         tempDir = TestUtils.createTempDir("display-property-updates");
         tempFile = Files.createTempFile(tempDir, "output", "");
@@ -119,7 +119,7 @@ public class DisplayParentUpdatesMojoTest {
         openMocks(this);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         TestUtils.tearDownTempDir(tempDir);
     }

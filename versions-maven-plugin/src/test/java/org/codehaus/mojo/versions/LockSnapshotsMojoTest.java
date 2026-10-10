@@ -38,8 +38,8 @@ import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.resolution.VersionRequest;
 import org.eclipse.aether.resolution.VersionResolutionException;
 import org.eclipse.aether.resolution.VersionResult;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 
@@ -70,7 +70,7 @@ public class LockSnapshotsMojoTest {
 
     private MavenSession mavenSession;
 
-    @Before
+    @BeforeEach
     public void setUp() throws MojoExecutionException {
         openMocks(this);
         mavenSession = mockMavenSession();
