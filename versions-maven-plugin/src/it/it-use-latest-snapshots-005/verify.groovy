@@ -1,21 +1,2 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "pom.xml" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-
-    if ( buf.indexOf( "<version>3.1.5-SNAPSHOT</version>" ) < 0 )
-    {
-        System.err.println( "Version of dummy-api not bumped to 3.1.5-SNAPSHOT" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "pom.xml").getText("UTF-8")
+assert buf.contains("<version>3.1.5-SNAPSHOT</version>") : "Version of dummy-api not bumped to 3.1.5-SNAPSHOT"

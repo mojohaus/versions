@@ -1,21 +1,2 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "pom.xml" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-
-    if ( buf.indexOf( "<version>2.12.0.0</version>" ) < 0 )
-    {
-        System.err.println( "Version of dummy-lib not bumped to 2.12.0.0" );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "pom.xml").getText("UTF-8")
+assert buf.contains("<version>2.12.0.0</version>") : "Version of dummy-lib not bumped to 2.12.0.0"

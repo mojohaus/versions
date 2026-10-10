@@ -1,26 +1,3 @@
-import java.io.*;
-import org.codehaus.plexus.util.FileUtils;
-
-try
-{
-    File file = new File( basedir, "pom.xml" );
-    String buf = FileUtils.fileRead( file, "UTF-8" );
-
-    if ( buf.indexOf( "<versionProp>3.2-SNAPSHOT</versionProp>" ) < 0 )
-    {
-        System.err.println( "versionProp has been changed which shouldn't happen." );
-        return false;
-    }
-    if ( buf.indexOf( '<version>${versionProp}</version>' ) < 0 )
-    {
-        System.err.println( "version entry has been changed which should not happen." );
-        return false;
-    }
-}
-catch( Throwable t )
-{
-    t.printStackTrace();
-    return false;
-}
-
-return true;
+def buf = new File(basedir, "pom.xml").getText("UTF-8")
+assert buf.contains("<versionProp>3.2-SNAPSHOT</versionProp>") : "versionProp has been changed which shouldn't happen."
+assert buf.contains('<version>${versionProp}</version>') : "version entry has been changed which should not happen."
