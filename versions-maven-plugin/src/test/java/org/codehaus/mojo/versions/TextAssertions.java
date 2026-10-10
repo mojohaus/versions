@@ -63,6 +63,12 @@ final class TextAssertions {
         }
     }
 
+    static void assertTextNotMatches(String actual, String regex) {
+        if (actual != null && Pattern.compile(regex).matcher(actual).matches()) {
+            fail("expected not to match " + regex + " but was:\n" + actual);
+        }
+    }
+
     /** Finds the expression somewhere in the text, like {@link java.util.regex.Matcher#find()}. */
     static void assertTextContainsPattern(String actual, String regex) {
         if (actual == null || !Pattern.compile(regex).matcher(actual).find()) {
@@ -79,6 +85,12 @@ final class TextAssertions {
     static void assertAnyLineContains(List<String> lines, String expected) {
         if (lines.stream().noneMatch(line -> line.contains(expected))) {
             fail("expected a line containing \"" + expected + "\" but was:\n" + String.join("\n", lines));
+        }
+    }
+
+    static void assertNoLineContains(List<String> lines, String unexpected) {
+        if (lines.stream().anyMatch(line -> line.contains(unexpected))) {
+            fail("expected no line containing \"" + unexpected + "\" but was:\n" + String.join("\n", lines));
         }
     }
 }

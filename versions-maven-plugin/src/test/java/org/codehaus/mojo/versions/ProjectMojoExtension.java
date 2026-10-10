@@ -19,12 +19,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.maven.api.plugin.testing.MojoExtension;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.plugin.ContextEnabled;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
@@ -103,8 +105,8 @@ class ProjectMojoExtension extends MojoExtension {
         TestUtils.copyDir(pomPath.getParent(), workDir);
         Path pom = workDir.resolve(pomPath.getFileName().toString());
         MavenProject project = load(extensionContext, build(extensionContext, pom));
-        return super.lookupMojo(
-                extensionContext, coord, withInherited(pluginConfiguration, project, coord), descriptor, pom);
+        return withPluginContext(super.lookupMojo(
+                extensionContext, coord, withInherited(pluginConfiguration, project, coord), descriptor, pom));
     }
 
     /**
@@ -134,7 +136,7 @@ class ProjectMojoExtension extends MojoExtension {
         String[] coord = mojoCoordinates(goal, descriptor);
         Xpp3Dom pomDom = Xpp3DomBuilder.build(new XmlStreamReader(pom.toFile()));
         Xpp3Dom configuration = withInherited(extractPluginConfiguration(coord[1], pomDom), project, coord);
-        return (T) super.lookupMojo(context, coord, configuration, descriptor, pom);
+        return (T) withPluginContext(super.lookupMojo(context, coord, configuration, descriptor, pom));
     }
 
     /**
@@ -147,6 +149,14 @@ class ProjectMojoExtension extends MojoExtension {
             return fromPom;
         }
         return Xpp3Dom.mergeXpp3Dom(fromPom, new Xpp3Dom((Xpp3Dom) plugin.getConfiguration()));
+    }
+
+    /** A mojo run by Maven has a plugin context; the harness leaves it {@code null}. */
+    private static Mojo withPluginContext(Mojo mojo) {
+        if (mojo instanceof ContextEnabled && ((ContextEnabled) mojo).getPluginContext() == null) {
+            ((ContextEnabled) mojo).setPluginContext(new HashMap<>());
+        }
+        return mojo;
     }
 
     private MavenProject build(ExtensionContext context, Path pom) throws Exception {
@@ -170,6 +180,12 @@ class ProjectMojoExtension extends MojoExtension {
         MavenSession session = getContainer(context).lookup(MavenSession.class);
         if (session.getSettings() == null) {
             lenient().doReturn(new Settings()).when(session).getSettings();
+        }
+        if (session.getRepositorySession() == null) {
+            lenient()
+                    .doReturn(new DefaultRepositorySystemSession())
+                    .when(session)
+                    .getRepositorySession();
         }
         // a build of this project alone; lookupInReactor replaces both lists
         List<MavenProject> projects = Collections.singletonList(project);

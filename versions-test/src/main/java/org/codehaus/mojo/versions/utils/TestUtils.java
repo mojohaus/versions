@@ -19,16 +19,11 @@ package org.codehaus.mojo.versions.utils;
  */
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.AbstractMojo;
-import org.codehaus.plexus.util.ReflectionUtils;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -98,24 +93,5 @@ public class TestUtils {
                 return CONTINUE;
             }
         });
-    }
-
-    /**
-     * <p>{@code MojoRule#lookupConfiguredMojo(File, String)} does not initialise {@link MavenSession#getAllProjects()},
-     * which leads to NullPointerExceptions.</p>
-     * <p>This method simply fixes that by setting it as equal to {@link MavenSession#getProjects()}
-     * using reflection.</p>
-     *
-     * @param mojo mojo to fix
-     * @param <T> type of the mojo
-     * @return reconfigured mojo (with the {@code session::allProjects} fixed
-     * @throws IllegalAccessException thrown if reflection operations fail
-     */
-    public static <T extends AbstractMojo> T fixAllProjects(T mojo) throws IllegalAccessException {
-        Field sessionField = ReflectionUtils.getFieldByNameIncludingSuperclasses("session", mojo.getClass());
-        sessionField.setAccessible(true);
-        MavenSession session = (MavenSession) sessionField.get(mojo);
-        session.setAllProjects(session.getProjects());
-        return mojo;
     }
 }

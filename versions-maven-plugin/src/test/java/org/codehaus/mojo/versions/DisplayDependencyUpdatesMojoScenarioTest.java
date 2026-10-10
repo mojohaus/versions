@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,7 +65,6 @@ class DisplayDependencyUpdatesMojoScenarioTest {
     private String run(DisplayDependencyUpdatesMojo mojo) throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             mojo.outputFile = tempFile.getPath().toFile();
-            mojo.setPluginContext(new HashMap<>());
             mojo.repositorySystem = ItRepository.repositorySystem();
             mojo.execute();
             return new String(Files.readAllBytes(tempFile.getPath()), StandardCharsets.UTF_8);

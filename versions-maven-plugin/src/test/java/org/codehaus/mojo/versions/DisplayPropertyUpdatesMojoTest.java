@@ -23,58 +23,52 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.TestUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.codec.CharEncoding.UTF_8;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
+import static org.codehaus.mojo.versions.TextAssertions.assertAnyLineContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextMatches;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextNotMatches;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit tests for {@link DisplayPropertyUpdatesMojo}
  */
-public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
-    @Rule
-    public MojoRule mojoRule = new MojoRule(this);
+@ProjectMojoTest
+public class DisplayPropertyUpdatesMojoTest {
+    protected ProjectMojos mojos;
 
     private Path tempDir;
 
     private Path tempFile;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    public void setUp(ProjectMojos mojos) throws Exception {
+        this.mojos = mojos;
         tempDir = TestUtils.createTempDir("display-property-updates");
         tempFile = Files.createTempFile(tempDir, "output", "");
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
-        try {
-            TestUtils.tearDownTempDir(tempDir);
-        } finally {
-            super.tearDown();
-        }
+        TestUtils.tearDownTempDir(tempDir);
     }
 
     @Test
     public void testPropertiesFromParent() throws Exception {
         TestUtils.copyDir(
                 Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367"), tempDir);
-        DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
-                mojoRule.lookupConfiguredMojo(tempDir.resolve("child").toFile(), "display-property-updates");
+        DisplayPropertyUpdatesMojo mojo =
+                (DisplayPropertyUpdatesMojo) mojos.lookup("display-property-updates", tempDir.resolve("child"));
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
@@ -82,17 +76,15 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.includeParent = true;
         mojo.execute();
 
-        assertThat(
-                String.join("", Files.readAllLines(tempFile)),
-                matchesPattern(".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*"));
+        assertTextMatches(String.join("", Files.readAllLines(tempFile)), ".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*");
     }
 
     @Test
     public void testDisablePropertiesFromParent() throws Exception {
         TestUtils.copyDir(
                 Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-367"), tempDir);
-        DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
-                mojoRule.lookupConfiguredMojo(tempDir.resolve("child").toFile(), "display-property-updates");
+        DisplayPropertyUpdatesMojo mojo =
+                (DisplayPropertyUpdatesMojo) mojos.lookup("display-property-updates", tempDir.resolve("child"));
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
@@ -100,16 +92,15 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.includeParent = false;
         mojo.execute();
 
-        assertThat(
-                String.join("", Files.readAllLines(tempFile)),
-                not(matchesPattern(".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*")));
+        assertTextNotMatches(
+                String.join("", Files.readAllLines(tempFile)), ".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*");
     }
 
     private void testAllowUpdatesFromLesserSegments(String availableVersion) throws Exception {
         TestUtils.copyDir(
                 Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-960"), tempDir);
-        DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
-                mojoRule.lookupConfiguredMojo(tempDir.toFile(), "display-property-updates");
+        DisplayPropertyUpdatesMojo mojo =
+                (DisplayPropertyUpdatesMojo) mojos.lookup("display-property-updates", tempDir);
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
@@ -122,7 +113,7 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         setVariableValueToObject(mojo, "allowMajorUpdates", false);
         mojo.execute();
 
-        assertThat(String.join("", Files.readAllLines(tempFile)), containsString(availableVersion));
+        assertTextContains(String.join("", Files.readAllLines(tempFile)), availableVersion);
     }
 
     @Test
@@ -145,7 +136,7 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         try {
             File projectDir = new File("src/test/resources/org/codehaus/mojo/update-properties/problem-causing");
             DisplayPropertyUpdatesMojo mojo =
-                    (DisplayPropertyUpdatesMojo) mojoRule.lookupConfiguredMojo(projectDir, "display-property-updates");
+                    (DisplayPropertyUpdatesMojo) mojos.lookup("display-property-updates", projectDir);
             mojo.outputEncoding = UTF_8;
             mojo.outputFile = tempFile.toFile();
             mojo.setPluginContext(new HashMap<>());
@@ -153,9 +144,11 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
             mojo.execute();
             fail("Should throw an exception");
         } catch (MojoExecutionException e) {
-            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, e.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 
@@ -163,8 +156,8 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testLatestVersion() throws Exception {
         TestUtils.copyDir(
                 Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/updates-only"), tempDir);
-        DisplayPropertyUpdatesMojo mojo = (DisplayPropertyUpdatesMojo)
-                mojoRule.lookupConfiguredMojo(tempDir.toFile(), "display-property-updates");
+        DisplayPropertyUpdatesMojo mojo =
+                (DisplayPropertyUpdatesMojo) mojos.lookup("display-property-updates", tempDir);
         mojo.outputEncoding = UTF_8;
         mojo.outputFile = tempFile.toFile();
         mojo.setPluginContext(new HashMap<>());
@@ -172,8 +165,6 @@ public class DisplayPropertyUpdatesMojoTest extends AbstractMojoTestCase {
         mojo.execute();
 
         List<String> output = Files.readAllLines(tempFile);
-        assertThat(
-                output,
-                hasItem(containsString("All version properties are referencing the newest version available.")));
+        assertAnyLineContains(output, "All version properties are referencing the newest version available.");
     }
 }

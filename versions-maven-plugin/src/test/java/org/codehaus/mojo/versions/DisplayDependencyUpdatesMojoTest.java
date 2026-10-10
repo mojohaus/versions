@@ -18,10 +18,12 @@ package org.codehaus.mojo.versions;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
@@ -32,49 +34,40 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
-import org.codehaus.mojo.versions.model.TestIgnoreVersions;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.CloseableTempFile;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.codehaus.mojo.versions.model.TestIgnoreVersions.TYPE_REGEX;
-import static org.codehaus.mojo.versions.model.TestIgnoreVersions.matches;
+import static org.codehaus.mojo.versions.TextAssertions.assertNoLineContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
  * Basic tests for {@linkplain DisplayDependencyUpdatesMojo}.
  */
-public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
-    @Rule
-    public final MojoRule mojoRule = new MojoRule(this);
+@ProjectMojoTest
+public class DisplayDependencyUpdatesMojoTest {
+    protected ProjectMojos mojos;
 
     @Mock
     private Log log;
@@ -84,9 +77,9 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     @Mock
     private ExpressionEvaluator expressionEvaluator;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    public void setUp(ProjectMojos mojos) throws Exception {
+        this.mojos = mojos;
         openMocks(this);
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
@@ -112,24 +105,19 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testRuleSetPresentAndWorking() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
 
-            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
-                    new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/ruleset"),
-                    "display-dependency-updates");
-            assertThat(mojo.ruleSet, notNullValue());
-            assertThat(mojo.ruleSet.getIgnoreVersions(), notNullValue());
-            assertThat(mojo.ruleSet.getIgnoreVersions(), Matchers.hasSize(3));
-            assertThat(
-                    mojo.ruleSet.getIgnoreVersions(), hasItem(matches(new TestIgnoreVersions().withVersion("1.0.1"))));
-            assertThat(
-                    mojo.ruleSet.getIgnoreVersions(),
-                    containsInAnyOrder(
-                            matches(new TestIgnoreVersions().withVersion("1.0.1")),
-                            matches(new TestIgnoreVersions()
-                                    .withType(TYPE_REGEX)
-                                    .withVersion(".+-SNAPSHOT")),
-                            matches(new TestIgnoreVersions()
-                                    .withType(TYPE_REGEX)
-                                    .withVersion(".+-M\\d+"))));
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojos.lookup(
+                    "display-dependency-updates",
+                    Paths.get("target/test-classes/org/codehaus/mojo/display-dependency-updates/ruleset"));
+            assertNotNull(mojo.ruleSet);
+            assertNotNull(mojo.ruleSet.getIgnoreVersions());
+            assertEquals(
+                    3, mojo.ruleSet.getIgnoreVersions().size(), () -> String.valueOf(mojo.ruleSet.getIgnoreVersions()));
+            assertEquals(
+                    Arrays.asList("exact 1.0.1", "regex .+-M\\d+", "regex .+-SNAPSHOT"),
+                    mojo.ruleSet.getIgnoreVersions().stream()
+                            .map(v -> v.getType() + " " + v.getVersion())
+                            .sorted()
+                            .collect(Collectors.toList()));
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = tempFile.getPath().toFile();
@@ -139,10 +127,11 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             });
 
-            assertThat(mojo.ruleSet.getIgnoreVersions(), Matchers.hasSize(3));
+            assertEquals(
+                    3, mojo.ruleSet.getIgnoreVersions().size(), () -> String.valueOf(mojo.ruleSet.getIgnoreVersions()));
             mojo.execute();
             List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
-            assertThat(output, not(hasItem(containsString("1.1.0-M1"))));
+            assertNoLineContains(output, "1.1.0-M1");
         }
     }
 
@@ -199,12 +188,11 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             }.execute();
 
-            assertThat(
+            assertTextNotContains(
                     String.join("", Files.readAllLines(tempFile.getPath())),
-                    not(anyOf(
-                            containsString("2.0.0-SNAPSHOT"),
-                            containsString("2.0.0-beta"),
-                            containsString("2.0.0-rc1"))));
+                    "2.0.0-SNAPSHOT",
+                    "2.0.0-beta",
+                    "2.0.0-rc1");
         }
     }
 
@@ -237,8 +225,8 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
-            assertThat(output, containsString("1.1.0"));
-            assertThat(output, not(containsString("2.0.0")));
+            assertTextContains(output, "1.1.0");
+            assertTextNotContains(output, "2.0.0");
         }
     }
 
@@ -271,9 +259,9 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
-            assertThat(output, containsString("1.0.1"));
-            assertThat(output, not(containsString("1.1.0")));
-            assertThat(output, not(containsString("2.0.0")));
+            assertTextContains(output, "1.0.1");
+            assertTextNotContains(output, "1.1.0");
+            assertTextNotContains(output, "2.0.0");
         }
     }
 
@@ -306,10 +294,10 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
-            assertThat(output, containsString("1.0.0-1"));
-            assertThat(output, not(containsString("1.0.1")));
-            assertThat(output, not(containsString("1.1.0")));
-            assertThat(output, not(containsString("2.0.0")));
+            assertTextContains(output, "1.0.0-1");
+            assertTextNotContains(output, "1.0.1");
+            assertTextNotContains(output, "1.1.0");
+            assertTextNotContains(output, "2.0.0");
         }
     }
 
@@ -343,12 +331,11 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             }.execute();
 
-            assertThat(
+            assertTextNotContains(
                     String.join("", Files.readAllLines(tempFile.getPath())),
-                    not(anyOf(
-                            containsString("1.9.0-SNAPSHOT"),
-                            containsString("1.9.0-beta"),
-                            containsString("1.9.0-rc1"))));
+                    "1.9.0-SNAPSHOT",
+                    "1.9.0-beta",
+                    "1.9.0-rc1");
         }
     }
 
@@ -356,25 +343,20 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testDetermineUpdatedSegment() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
 
-            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
-                    new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/ruleset"),
-                    "display-dependency-updates");
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojos.lookup(
+                    "display-dependency-updates",
+                    Paths.get("target/test-classes/org/codehaus/mojo/display-dependency-updates/ruleset"));
 
-            assertThat(mojo.ruleSet, notNullValue());
-            assertThat(mojo.ruleSet.getIgnoreVersions(), notNullValue());
-            assertThat(mojo.ruleSet.getIgnoreVersions(), Matchers.hasSize(3));
-            assertThat(
-                    mojo.ruleSet.getIgnoreVersions(), hasItem(matches(new TestIgnoreVersions().withVersion("1.0.1"))));
-            assertThat(
-                    mojo.ruleSet.getIgnoreVersions(),
-                    containsInAnyOrder(
-                            matches(new TestIgnoreVersions().withVersion("1.0.1")),
-                            matches(new TestIgnoreVersions()
-                                    .withType(TYPE_REGEX)
-                                    .withVersion(".+-SNAPSHOT")),
-                            matches(new TestIgnoreVersions()
-                                    .withType(TYPE_REGEX)
-                                    .withVersion(".+-M\\d+"))));
+            assertNotNull(mojo.ruleSet);
+            assertNotNull(mojo.ruleSet.getIgnoreVersions());
+            assertEquals(
+                    3, mojo.ruleSet.getIgnoreVersions().size(), () -> String.valueOf(mojo.ruleSet.getIgnoreVersions()));
+            assertEquals(
+                    Arrays.asList("exact 1.0.1", "regex .+-M\\d+", "regex .+-SNAPSHOT"),
+                    mojo.ruleSet.getIgnoreVersions().stream()
+                            .map(v -> v.getType() + " " + v.getVersion())
+                            .sorted()
+                            .collect(Collectors.toList()));
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = tempFile.getPath().toFile();
@@ -384,10 +366,11 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             });
 
-            assertThat(mojo.ruleSet.getIgnoreVersions(), Matchers.hasSize(3));
+            assertEquals(
+                    3, mojo.ruleSet.getIgnoreVersions().size(), () -> String.valueOf(mojo.ruleSet.getIgnoreVersions()));
             mojo.execute();
             List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
-            assertThat(output, not(hasItem(containsString("1.1.0-M1"))));
+            assertNoLineContains(output, "1.1.0-M1");
         }
     }
 
@@ -395,9 +378,10 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testVersionInterpolation() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
 
-            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
-                    new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/version-interpolation"),
-                    "display-dependency-updates");
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojos.lookup(
+                    "display-dependency-updates",
+                    Paths.get(
+                            "target/test-classes/org/codehaus/mojo/display-dependency-updates/version-interpolation"));
 
             // This is just an example of how to create it-style tests as unit tests; the advantage is easier debugging
             mojo.outputFile = tempFile.getPath().toFile();
@@ -409,7 +393,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             mojo.processDependencyManagementTransitive = false;
             mojo.execute();
             List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
-            assertThat(output, not(hasItem(containsString("mycomponent.version"))));
+            assertNoLineContains(output, "mycomponent.version");
         }
     }
 
@@ -442,7 +426,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
-            assertThat(output, containsString("2.0.0-SNAPSHOT"));
+            assertTextContains(output, "2.0.0-SNAPSHOT");
         }
     }
 
@@ -474,7 +458,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
 
-            assertThat(output, containsString(availableVersion));
+            assertTextContains(output, availableVersion);
         }
     }
 
@@ -500,10 +484,10 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     @Test
     public void testShowVersionlessFalse() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
-            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojos.lookup(
+                    "display-dependency-updates",
                     new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/"
-                            + "version-from-parent/child"),
-                    "display-dependency-updates");
+                            + "version-from-parent/child"));
             mojo.setPluginContext(new HashMap<>());
             mojo.showVersionless = false;
             mojo.processDependencyManagement = false;
@@ -515,7 +499,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             });
             mojo.execute();
-            assertThat(Files.readAllBytes(tempFile.getPath()).length, is(0));
+            assertEquals(0, Files.readAllBytes(tempFile.getPath()).length);
         }
     }
 
@@ -526,10 +510,10 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     @Test
     public void testShowVersionlessVerbose() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
-            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojos.lookup(
+                    "display-dependency-updates",
                     new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/"
-                            + "version-from-parent/child"),
-                    "display-dependency-updates");
+                            + "version-from-parent/child"));
             mojo.setPluginContext(new HashMap<>());
             mojo.showVersionless = true;
             mojo.verbose = true;
@@ -544,8 +528,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             mojo.execute();
 
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
-            assertThat(
-                    output, containsString("1.0.0 (managed by default-group:parent-artifact:1.0.0-SNAPSHOT) -> 2.0.0"));
+            assertTextContains(output, "1.0.0 (managed by default-group:parent-artifact:1.0.0-SNAPSHOT) -> 2.0.0");
         }
     }
 
@@ -556,10 +539,10 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     @Test
     public void testShowVersionlessFalseDependencyManagementTransitive() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
-            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojos.lookup(
+                    "display-dependency-updates",
                     new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/"
-                            + "dependency-management-from-parent/child"),
-                    "display-dependency-updates");
+                            + "dependency-management-from-parent/child"));
             mojo.setPluginContext(new HashMap<>());
             mojo.showVersionless = false;
             mojo.outputFile = tempFile.getPath().toFile();
@@ -571,7 +554,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             });
             mojo.execute();
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
-            assertThat(output, containsString("1.0.0 -> 2.0.0"));
+            assertTextContains(output, "1.0.0 -> 2.0.0");
         }
     }
 
@@ -581,9 +564,9 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     @Test
     public void testProcessDependencyManagementTransitiveWithProfiles() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
-            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
-                    new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/" + "profiles"),
-                    "display-dependency-updates");
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojos.lookup(
+                    "display-dependency-updates",
+                    Paths.get("target/test-classes/org/codehaus/mojo/display-dependency-updates/" + "profiles"));
             mojo.setPluginContext(new HashMap<>());
             mojo.processDependencyManagementTransitive = false;
             mojo.outputFile = tempFile.getPath().toFile();
@@ -594,9 +577,9 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             });
             mojo.execute();
-            assertThat(Files.exists(tempFile.getPath()), is(true));
+            assertEquals(true, Files.exists(tempFile.getPath()));
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
-            assertThat(output, containsString("1.0.0 -> 2.0.0"));
+            assertTextContains(output, "1.0.0 -> 2.0.0");
         }
     }
 
@@ -607,9 +590,9 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     @Test
     public void testProblemCausingArtifact() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
-            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojoRule.lookupConfiguredMojo(
-                    new File("src/test/resources/org/codehaus/mojo/display-dependency-updates/problem-causing"),
-                    "display-dependency-updates");
+            DisplayDependencyUpdatesMojo mojo = (DisplayDependencyUpdatesMojo) mojos.lookup(
+                    "display-dependency-updates",
+                    Paths.get("src/test/resources/org/codehaus/mojo/display-dependency-updates/problem-causing"));
             mojo.setPluginContext(new HashMap<>());
             mojo.outputFile = tempFile.getPath().toFile();
             mojo.outputEncoding = Charset.defaultCharset().toString();
@@ -617,9 +600,11 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             mojo.execute();
             fail("Should throw an exception");
         } catch (MojoExecutionException e) {
-            assertThat(e.getCause(), instanceOf(VersionRetrievalException.class));
+            assertInstanceOf(VersionRetrievalException.class, e.getCause());
             VersionRetrievalException vre = (VersionRetrievalException) e.getCause();
-            assertThat(vre.getArtifact().map(Artifact::getArtifactId).orElse(""), equalTo("problem-causing-artifact"));
+            assertEquals(
+                    "problem-causing-artifact",
+                    vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
         }
     }
 
@@ -662,12 +647,12 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
             }
 
             List<String> output = Files.readAllLines(tempFile.getPath());
-            assertThat(
-                    output + " should contain 2 strings matching 1.0.0 -> 2.0.0",
+            assertEquals(
+                    overwrite ? 1L : 2L,
                     output.stream()
                             .filter(line -> line.contains("1.0.0 -> 2.0.0"))
                             .count(),
-                    is(overwrite ? 1L : 2L));
+                    output + " should contain 2 strings matching 1.0.0 -> 2.0.0");
         }
     }
 
@@ -682,6 +667,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 .build();
     }
 
+    @Test
     public void testDependenciesMatchTestScope() {
         Dependency dependency = DependencyBuilder.newBuilder()
                 .withGroupId("default-group")
@@ -731,7 +717,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
                 }
             }.execute();
 
-            assertThat(String.join("", Files.readAllLines(tempFile.getPath())), not(containsString("1.0.0")));
+            assertTextNotContains(String.join("", Files.readAllLines(tempFile.getPath())), "1.0.0");
         }
     }
 
@@ -744,9 +730,9 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
     public void testIgnoredVersionsWithNoCurrentVersion() throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
 
-            DisplayDependencyUpdatesMojo mojo = mojoRule.lookupConfiguredMojo(
-                    new File("target/test-classes/org/codehaus/mojo/display-dependency-updates/ranges"),
-                    "display-dependency-updates");
+            DisplayDependencyUpdatesMojo mojo = mojos.lookup(
+                    "display-dependency-updates",
+                    Paths.get("target/test-classes/org/codehaus/mojo/display-dependency-updates/ranges"));
             mojo.ignoredVersions = Collections.singleton("Alpha");
             mojo.outputFile = tempFile.getPath().toFile();
             mojo.setPluginContext(new HashMap<>());
@@ -758,7 +744,7 @@ public class DisplayDependencyUpdatesMojoTest extends AbstractMojoTestCase {
 
             mojo.execute();
             List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
-            assertThat(output, not(hasItem(containsString("1.0.0"))));
+            assertNoLineContains(output, "1.0.0");
         }
     }
 }

@@ -23,25 +23,21 @@ import java.util.Collections;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.TestLog;
 import org.codehaus.mojo.versions.utils.TestUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.TextAssertions.assertTextNotContains;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
-import static org.codehaus.mojo.versions.utils.TestUtils.fixAllProjects;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -50,28 +46,24 @@ import static org.mockito.Mockito.mock;
  *
  * @author Claude Code
  */
-public class SkipParameterTest extends AbstractMojoTestCase {
-    @Rule
-    public MojoRule mojoRule = new MojoRule(this);
+@ProjectMojoTest
+public class SkipParameterTest {
+    protected ProjectMojos mojos;
 
     private Path tempDir;
     private ArtifactFactory artifactFactory;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    @BeforeEach
+    public void setUp(ProjectMojos mojos) throws Exception {
+        this.mojos = mojos;
         tempDir = TestUtils.createTempDir("skip");
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
-        try {
-            TestUtils.tearDownTempDir(tempDir);
-        } finally {
-            super.tearDown();
-        }
+        TestUtils.tearDownTempDir(tempDir);
     }
 
     @Test
@@ -82,23 +74,23 @@ public class SkipParameterTest extends AbstractMojoTestCase {
                 REPLACE_EXISTING);
 
         TestLog testLog = new TestLog();
-        SetMojo mojo = fixAllProjects(mojoRule.lookupConfiguredMojo(tempDir.toFile(), "set"));
+        SetMojo mojo = mojos.lookup("set", tempDir);
         setVariableValueToObject(mojo, "skip", true);
         setVariableValueToObject(mojo, "log", testLog);
 
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertThat(
+        assertEquals(
+                true,
                 testLog.getLoggedMessages().stream()
                         .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")),
-                is(true));
+                                && triple.getMiddle().toString().contains("Skipping execution")));
 
         // Verify the file was not modified (version should still be 1.0-SNAPSHOT, not 1.0)
         String pomContent = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
-        assertThat(pomContent, containsString("<version>1.0-SNAPSHOT</version>"));
-        assertThat(pomContent, not(containsString("<version>1.0</version>")));
+        assertTextContains(pomContent, "<version>1.0-SNAPSHOT</version>");
+        assertTextNotContains(pomContent, "<version>1.0</version>");
     }
 
     @Test
@@ -119,11 +111,11 @@ public class SkipParameterTest extends AbstractMojoTestCase {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertThat(
+        assertEquals(
+                true,
                 testLog.getLoggedMessages().stream()
                         .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")),
-                is(true));
+                                && triple.getMiddle().toString().contains("Skipping execution")));
     }
 
     @Test
@@ -149,14 +141,14 @@ public class SkipParameterTest extends AbstractMojoTestCase {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertThat(
+        assertEquals(
+                true,
                 testLog.getLoggedMessages().stream()
                         .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")),
-                is(true));
+                                && triple.getMiddle().toString().contains("Skipping execution")));
 
         // Verify the backup file was not deleted
-        assertThat(Files.exists(backupFile), is(true));
+        assertEquals(true, Files.exists(backupFile));
     }
 
     @Test
@@ -177,11 +169,11 @@ public class SkipParameterTest extends AbstractMojoTestCase {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertThat(
+        assertEquals(
+                true,
                 testLog.getLoggedMessages().stream()
                         .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")),
-                is(true));
+                                && triple.getMiddle().toString().contains("Skipping execution")));
     }
 
     @Test
@@ -201,11 +193,11 @@ public class SkipParameterTest extends AbstractMojoTestCase {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertThat(
+        assertEquals(
+                true,
                 testLog.getLoggedMessages().stream()
                         .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")),
-                is(true));
+                                && triple.getMiddle().toString().contains("Skipping execution")));
     }
 
     @Test
@@ -226,10 +218,10 @@ public class SkipParameterTest extends AbstractMojoTestCase {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertThat(
+        assertEquals(
+                true,
                 testLog.getLoggedMessages().stream()
                         .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")),
-                is(true));
+                                && triple.getMiddle().toString().contains("Skipping execution")));
     }
 }
