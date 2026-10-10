@@ -19,8 +19,6 @@ package org.codehaus.mojo.versions.ordering;
  * under the License.
  */
 
-import javax.annotation.Nullable;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,7 +88,7 @@ public enum DefaultSegmentCounter implements SegmentCounter {
      * {@inheritDoc}
      */
     @Override
-    public final int getSegmentCount(@Nullable ArtifactVersion v) {
+    public final int getSegmentCount(ArtifactVersion v) {
         if (v == null) {
             return 0;
         }

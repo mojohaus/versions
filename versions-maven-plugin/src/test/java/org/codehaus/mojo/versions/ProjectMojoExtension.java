@@ -26,6 +26,7 @@ import org.apache.maven.api.plugin.testing.MojoExtension;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.plugin.ContextEnabled;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
@@ -162,6 +163,8 @@ class ProjectMojoExtension extends MojoExtension {
     private MavenProject build(ExtensionContext context, Path pom) throws Exception {
         ProjectBuildingRequest request = new DefaultMavenExecutionRequest().getProjectBuildingRequest();
         request.setRepositorySession(new DefaultRepositorySystemSession());
+        // test POMs are inputs for the goals, such as an unresolved ${revision} for set
+        request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
         return getContainer(context)
                 .lookup(ProjectBuilder.class)
                 .build(pom.toFile(), request)

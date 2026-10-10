@@ -15,8 +15,6 @@ package org.codehaus.mojo.versions.ordering;
  * limitations under the License.
  */
 
-import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,7 +128,7 @@ public class BoundArtifactVersion implements ArtifactVersion {
     }
 
     @Override
-    public int compareTo(@Nullable ArtifactVersion other) {
+    public int compareTo(ArtifactVersion other) {
         if (other == null) {
             return -1;
         }
