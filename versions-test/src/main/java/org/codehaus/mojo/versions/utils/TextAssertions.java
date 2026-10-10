@@ -31,6 +31,12 @@ public final class TextAssertions {
 
     private TextAssertions() {}
 
+    /**
+     * Asserts that the text contains each of the parts.
+     *
+     * @param actual the text
+     * @param expected the parts it must contain
+     */
     public static void assertTextContains(String actual, String... expected) {
         for (String part : expected) {
             if (actual == null || !actual.contains(part)) {
@@ -39,6 +45,12 @@ public final class TextAssertions {
         }
     }
 
+    /**
+     * Asserts that the text contains none of the parts.
+     *
+     * @param actual the text
+     * @param unexpected the parts it must not contain
+     */
     public static void assertTextNotContains(String actual, String... unexpected) {
         for (String part : unexpected) {
             if (actual != null && actual.contains(part)) {
@@ -47,6 +59,12 @@ public final class TextAssertions {
         }
     }
 
+    /**
+     * Asserts that the text contains the parts one after another.
+     *
+     * @param actual the text
+     * @param parts the parts, in the order they must appear
+     */
     public static void assertTextContainsInOrder(String actual, String... parts) {
         int from = 0;
         for (String part : parts) {
@@ -59,7 +77,10 @@ public final class TextAssertions {
     }
 
     /**
-     * Matches the whole text against the expression, like {@link java.util.regex.Matcher#matches()}.
+     * Asserts that the whole text matches the expression, like {@link java.util.regex.Matcher#matches()}.
+     *
+     * @param actual the text
+     * @param regex the regular expression
      */
     public static void assertTextMatches(String actual, String regex) {
         if (actual == null || !Pattern.compile(regex).matcher(actual).matches()) {
@@ -67,38 +88,72 @@ public final class TextAssertions {
         }
     }
 
+    /**
+     * Asserts that the whole text does not match the expression.
+     *
+     * @param actual the text
+     * @param regex the regular expression
+     */
     public static void assertTextNotMatches(String actual, String regex) {
         if (actual != null && Pattern.compile(regex).matcher(actual).matches()) {
             fail("expected not to match " + regex + " but was:\n" + actual);
         }
     }
 
-    /** Finds the expression somewhere in the text, like {@link java.util.regex.Matcher#find()}. */
+    /**
+     * Asserts that the expression is found somewhere in the text, like {@link java.util.regex.Matcher#find()}.
+     *
+     * @param actual the text
+     * @param regex the regular expression
+     */
     public static void assertTextContainsPattern(String actual, String regex) {
         if (actual == null || !Pattern.compile(regex).matcher(actual).find()) {
             fail("expected to find " + regex + " in:\n" + actual);
         }
     }
 
+    /**
+     * Asserts that the expression is found nowhere in the text.
+     *
+     * @param actual the text
+     * @param regex the regular expression
+     */
     public static void assertTextNotContainsPattern(String actual, String regex) {
         if (actual != null && Pattern.compile(regex).matcher(actual).find()) {
             fail("expected not to find " + regex + " in:\n" + actual);
         }
     }
 
+    /**
+     * Asserts that at least one line contains the text.
+     *
+     * @param lines the lines
+     * @param expected the text one of them must contain
+     */
     public static void assertAnyLineContains(List<String> lines, String expected) {
         if (lines.stream().noneMatch(line -> line.contains(expected))) {
             fail("expected a line containing \"" + expected + "\" but was:\n" + String.join("\n", lines));
         }
     }
 
+    /**
+     * Asserts that no line contains the text.
+     *
+     * @param lines the lines
+     * @param unexpected the text none of them may contain
+     */
     public static void assertNoLineContains(List<String> lines, String unexpected) {
         if (lines.stream().anyMatch(line -> line.contains(unexpected))) {
             fail("expected no line containing \"" + unexpected + "\" but was:\n" + String.join("\n", lines));
         }
     }
 
-    /** The same elements as {@code expected}, each as often, in any order. */
+    /**
+     * Asserts that both collections have the same elements, each as often, in any order.
+     *
+     * @param expected the expected elements
+     * @param actual the actual elements
+     */
     public static void assertSameElements(Collection<?> expected, Collection<?> actual) {
         assertEquals(
                 counts(expected), counts(actual), () -> "expected the elements " + expected + " but was " + actual);
