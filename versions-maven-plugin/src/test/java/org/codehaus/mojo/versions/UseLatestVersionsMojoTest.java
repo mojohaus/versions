@@ -29,14 +29,13 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
 
@@ -96,10 +95,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowDowngrade", true);
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -125,10 +126,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
                         .build()));
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "default", "1.1.0-SNAPSHOT", "1.1.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "dependency-artifact", "default", "1.1.0-SNAPSHOT", "1.1.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -143,10 +146,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowDowngrade", true);
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -161,10 +166,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowDowngrade", true);
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -190,10 +197,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         });
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "dependency-artifact", "1.1.1-SNAPSHOT", "1.1.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -230,10 +239,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         tryUpdate();
         // So, the regular update should take place despite an irregular, or — if I may — "poison", dependency
         // being present in the dependency list
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "dependency-artifact", "default", "1.1.1-SNAPSHOT", "1.1.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -257,10 +268,12 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         // Should upgrade to 1.1.0, not 1.2.0-beta1 (pre-release should be filtered out by default)
         // Available: 1.2.0-beta1, 1.1.0, 1.0.0
         // With allowPreReleases=false (default), beta is excluded and 1.1.0 is selected
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "pre-release-artifact", "default", "1.0.0", "1.1.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "pre-release-artifact", "default", "1.0.0", "1.1.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -284,9 +297,11 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
         // When allowPreReleases is true, beta version can be selected
         // Available: 1.2.0-beta1, 1.1.0, 1.0.0
         // Beta version 1.2.0-beta1 is highest and will be selected
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "pre-release-artifact", "default", "1.0.0", "1.2.0-beta1")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "pre-release-artifact", "default", "1.0.0", "1.2.0-beta1")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 }

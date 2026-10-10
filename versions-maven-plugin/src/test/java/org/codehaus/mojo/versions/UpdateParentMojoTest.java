@@ -34,27 +34,26 @@ import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.eclipse.aether.RepositorySystem;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
     private static ArtifactHandlerManager artifactHandlerManager;
 
     private static RepositorySystem repositorySystem;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpStatic() {
         artifactHandlerManager = mockArtifactHandlerManager();
         repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
@@ -134,7 +133,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
                         null));
         setVariableValueToObject(mojo, "ignoredVersions", singleton("1.0.0"));
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), empty());
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     @Test
@@ -160,7 +159,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
                         null));
         setVariableValueToObject(mojo, "includes", new String[] {"default-group:parent-artifact"});
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), empty());
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     @Test
@@ -186,7 +185,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
                         null));
         setVariableValueToObject(mojo, "excludes", new String[] {"default-group:parent-artifact"});
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), empty());
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     @Test
@@ -209,9 +208,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
                 "pom",
                 "default",
                 new DefaultArtifactHandlerStub("default"));
-        assertThat(
-                mojo.findLatestVersion(artifact, VersionRange.createFromVersionSpec("1.0.1-SNAPSHOT"), null, false),
-                is(nullValue()));
+        assertNull(mojo.findLatestVersion(artifact, VersionRange.createFromVersionSpec("1.0.1-SNAPSHOT"), null, false));
 
         tryUpdate();
     }
@@ -222,10 +219,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
                     IllegalAccessException {
         setVariableValueToObject(mojo, "allowDowngrade", true);
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "parent-artifact", "1.0.1-SNAPSHOT", "1.0.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "parent-artifact", "1.0.1-SNAPSHOT", "1.0.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -234,7 +233,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
                     IllegalAccessException {
         setVariableValueToObject(mojo, "allowDowngrade", false);
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), is(empty()));
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     @Test
@@ -250,10 +249,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
             }
         });
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "parent-artifact", "[1.0.1-SNAPSHOT,)", "1.0.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "parent-artifact", "[1.0.1-SNAPSHOT,)", "1.0.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -263,7 +264,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowDowngrade", false);
         setVariableValueToObject(mojo, "parentVersion", "[1.0.1-SNAPSHOT,)");
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), is(empty()));
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     @Test
@@ -279,10 +280,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
             }
         });
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "issue-670-artifact", "0.0.1-1", "0.0.1-1-impl-SNAPSHOT")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "issue-670-artifact", "0.0.1-1", "0.0.1-1-impl-SNAPSHOT")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -300,10 +303,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         });
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "issue-670-artifact", "0.0.1-1", "0.0.1-1-impl-SNAPSHOT")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "issue-670-artifact", "0.0.1-1", "0.0.1-1-impl-SNAPSHOT")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -341,9 +346,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         });
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "parent-artifact", "1.0.0", version)));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "parent-artifact", "1.0.0", version)),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -360,10 +368,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowSnapshots", true);
         setVariableValueToObject(mojo, "parentVersion", "[0,1.0.1-SNAPSHOT]");
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "parent-artifact", "0.9.0", "1.0.1-SNAPSHOT")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "parent-artifact", "0.9.0", "1.0.1-SNAPSHOT")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -382,9 +392,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowIncrementalUpdates", true);
         setVariableValueToObject(mojo, "parentVersion", "0.8.0");
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "parent-artifact", "0.8.0", "0.9.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "parent-artifact", "0.8.0", "0.9.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -402,9 +415,12 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowMinorUpdates", false);
         setVariableValueToObject(mojo, "allowIncrementalUpdates", true);
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "test-incremental", "1.1.0", "1.1.1")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "test-incremental", "1.1.0", "1.1.1")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -421,9 +437,11 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowSnapshots", true);
         setVariableValueToObject(mojo, "parentVersion", "[,3.0-!)");
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange("default-group", "dummy-parent2", "1.0", "2.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange("default-group", "dummy-parent2", "1.0", "2.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -440,7 +458,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowSnapshots", true);
         setVariableValueToObject(mojo, "parentVersion", "[,3.0-!)");
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), empty());
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     /*
@@ -460,7 +478,7 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "parentVersion", "[,2.9-!)");
         setVariableValueToObject(mojo, "allowDowngrade", false);
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), empty());
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     /*
@@ -480,6 +498,6 @@ public class UpdateParentMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "parentVersion", "[,79-!)");
         setVariableValueToObject(mojo, "allowDowngrade", true);
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), empty());
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 }

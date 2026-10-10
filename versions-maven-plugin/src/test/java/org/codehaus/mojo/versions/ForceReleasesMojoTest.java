@@ -10,7 +10,6 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -19,21 +18,21 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.TestChangeRecorder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -58,7 +57,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 /**
  * Unit tests for {@link ForceReleasesMojo}
  */
-public class ForceReleasesMojoTest extends AbstractMojoTestCase {
+public class ForceReleasesMojoTest {
     private TestChangeRecorder changeRecorder;
     private ForceReleasesMojo mojo;
 
@@ -72,9 +71,8 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
     @Mock
     private ExpressionEvaluator expressionEvaluator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        super.setUp();
         openMocks(this);
         ArtifactHandlerManager artifactHandlerManager = mockArtifactHandlerManager();
         artifactFactory = new ArtifactFactory(artifactHandlerManager);
@@ -123,11 +121,12 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
                     .thenReturn(mojo.getProject().getModel());
             mojo.update(null);
         }
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "1.0.0-SNAPSHOT", "1.0.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "artifactA", "1.0.0-SNAPSHOT", "1.0.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -150,11 +149,12 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
                     .thenReturn(mojo.getProject().getModel());
             mojo.update(null);
         }
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "1.0.0-SNAPSHOT", "1.0.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "artifactA", "1.0.0-SNAPSHOT", "1.0.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -177,11 +177,12 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
                     .thenReturn(mojo.getProject().getModel());
             mojo.update(null);
         }
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "1.1.0-SNAPSHOT", "2.0.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "artifactA", "1.1.0-SNAPSHOT", "2.0.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -204,11 +205,12 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
                     .thenReturn(mojo.getProject().getModel());
             mojo.update(null);
         }
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "2.1.0-SNAPSHOT", "2.0.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "artifactA", "2.1.0-SNAPSHOT", "2.0.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -234,7 +236,7 @@ public class ForceReleasesMojoTest extends AbstractMojoTestCase {
             mojo.update(null);
             fail("MojoExecutionException is expected");
         } catch (MojoExecutionException e) {
-            assertThat(e.getMessage(), startsWith("No matching"));
+            assertTrue(e.getMessage().startsWith("No matching"), () -> e.getMessage());
         }
     }
 }

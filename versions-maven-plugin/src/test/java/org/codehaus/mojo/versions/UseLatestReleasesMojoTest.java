@@ -27,18 +27,16 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
@@ -87,7 +85,7 @@ public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowIncrementalUpdates", false);
 
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), Matchers.empty());
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
     @Test
@@ -108,11 +106,12 @@ public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "allowDowngrade", true);
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "artifactA",
-                        "1.0.1-SNAPSHOT", "1.0.0")));
+        assertTrue(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "artifactA", "1.0.1-SNAPSHOT", "1.0.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 
     @Test
@@ -131,6 +130,6 @@ public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
                         .build()));
 
         tryUpdate();
-        assertThat(changeRecorder.getChanges(), empty());
+        assertEquals(emptyList(), changeRecorder.getChanges());
     }
 }

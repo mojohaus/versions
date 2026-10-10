@@ -8,12 +8,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
-import static org.apache.maven.plugin.testing.ArtifactStubFactory.setVariableValueToObject;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
 
 public class UseLatestSnapshotsMojoTest extends UseLatestVersionsMojoTestBase {
