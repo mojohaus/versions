@@ -15,9 +15,9 @@
   <dependencies>
         
     <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>1.5.1-20090311.051742-1</version>
+      <groupId>localhost</groupId>
+      <artifactId>dummy-api</artifactId>
+      <version>3.4.0-20090311.051742-1</version>
     </dependency>
     
   </dependencies>
