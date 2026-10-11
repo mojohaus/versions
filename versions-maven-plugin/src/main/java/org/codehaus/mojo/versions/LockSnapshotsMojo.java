@@ -24,8 +24,11 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +36,7 @@ import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -154,6 +158,7 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
             if (getProject().getDependencies() != null && getProcessDependencies()) {
                 lockSnapshots(pom, getProject().getDependencies());
             }
+            lockPropertySnapshots(pom, PomHelper.getRawModel(getProject()));
             if (getProject().getParent() != null && getProcessParent()) {
                 lockParentSnapshot(pom, getProject().getParent());
             }
@@ -207,6 +212,39 @@ public class LockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
                 } else {
                     getLog().info("No timestamped version for " + toString(dep) + " found.");
                 }
+            }
+        }
+    }
+
+    /**
+     * Locks the properties that hold the {@code -SNAPSHOT} version of the processed dependencies. A property is only
+     * rewritten when all dependencies using it resolve to the same timestamped version.
+     */
+    private void lockPropertySnapshots(MutableXMLStreamReader pom, Model rawModel)
+            throws XMLStreamException, MojoExecutionException, VersionResolutionException {
+        Map<String, List<Dependency>> properties = findVersionProperties(pom, rawModel, value -> {
+            Matcher matcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher(value);
+            return matcher.find() && matcher.end() == value.length();
+        });
+        for (Map.Entry<String, List<Dependency>> entry : properties.entrySet()) {
+            Set<String> lockedVersions = new HashSet<>();
+            for (Dependency dep : entry.getValue()) {
+                Optional<String> lockedVersion = resolveSnapshotVersion(dep);
+                if (!lockedVersion.isPresent()) {
+                    getLog().info("No timestamped version for " + toString(dep) + " found.");
+                    lockedVersions.clear();
+                    break;
+                }
+                lockedVersions.add(lockedVersion.get());
+            }
+            if (lockedVersions.size() == 1) {
+                String lockedVersion = lockedVersions.iterator().next();
+                if (PomHelper.setPropertyVersion(pom, null, entry.getKey(), lockedVersion)) {
+                    getLog().info("Locked property " + entry.getKey() + " to version " + lockedVersion);
+                }
+            } else if (lockedVersions.size() > 1) {
+                getLog().info("Leaving property " + entry.getKey()
+                        + " unchanged: the dependencies using it lock to different versions");
             }
         }
     }
