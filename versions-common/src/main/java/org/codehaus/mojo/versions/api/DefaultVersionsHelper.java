@@ -20,6 +20,7 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -440,7 +441,9 @@ public class DefaultVersionsHelper implements VersionsHelper {
         });
 
         log.debug("Processing properties to build PropertyVersions");
-        Map<Property, PropertyVersions> propertyVersions = new LinkedHashMap<>(properties.size());
+        // Phase 1 (sequential, in property order): prepare the builders. Phase 2 resolves their versions concurrently.
+        List<Pair<Property, PropertyVersionsBuilder>> prepared = new ArrayList<>(properties.size());
+        RuntimeException preparationFailure = null;
 
         for (Property property : properties.values()) {
             String propertyName = property.getName();
@@ -502,17 +505,50 @@ public class DefaultVersionsHelper implements VersionsHelper {
                             .withCurrentVersionRange(VersionRange.createFromVersionSpec(currentVersion));
                 }
 
-                PropertyVersions versions = builder.build();
-                propertyVersions.put(property, versions);
-
-            } catch (VersionRetrievalException e) {
-                throw new MojoExecutionException(e.getMessage(), e);
+                prepared.add(ImmutablePair.of(property, builder));
             } catch (InvalidVersionSpecificationException e) {
-                throw new RuntimeException(e);
+                // as in a sequential run, the properties before this one are still resolved first
+                preparationFailure = new RuntimeException(e);
+                break;
             }
         }
 
+        Map<Property, PropertyVersions> propertyVersions = buildPropertyVersions(prepared);
+
+        if (preparationFailure != null) {
+            throw preparationFailure;
+        }
+
         return propertyVersions;
+    }
+
+    /**
+     * Builds the {@link PropertyVersions} of the given properties on a bounded thread pool. The result is
+     * assembled in the order of the input, and the failure reported is that of the first failing property.
+     */
+    private Map<Property, PropertyVersions> buildPropertyVersions(
+            List<Pair<Property, PropertyVersionsBuilder>> prepared) throws MojoExecutionException {
+        Map<Property, PropertyVersions> propertyVersions = new LinkedHashMap<>(prepared.size());
+        ExecutorService executor = Executors.newFixedThreadPool(LOOKUP_PARALLEL_THREADS);
+        try {
+            List<Future<PropertyVersions>> futures = prepared.stream()
+                    .map(p -> executor.submit(p.getValue()::build))
+                    .collect(Collectors.toList());
+            for (int i = 0; i < futures.size(); i++) {
+                propertyVersions.put(prepared.get(i).getKey(), futures.get(i).get());
+            }
+            return propertyVersions;
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof VersionRetrievalException) {
+                throw new MojoExecutionException(e.getCause().getMessage(), e.getCause());
+            }
+            throw new MojoExecutionException(e.getMessage(), e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MojoExecutionException(e.getMessage(), e);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     /**
