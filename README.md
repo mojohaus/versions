@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/mojohaus/versions/actions/workflows/maven.yml/badge.svg?branch=master)](https://github.com/mojohaus/versions/actions/workflows/maven.yml?query=branch%3Amaster)
 
 The Versions Maven Plugin finds newer versions of the dependencies, plugins, parents and
-properties in your POMs, reports them, and updates the POMs. It needs Maven 3.6.3 or later and
+properties in your POMs, reports them, and updates the POMs. It needs Maven 3.9.0 or later and
 JDK 8 or later, and nothing in the POM to run from the command line:
 
 ```shell
