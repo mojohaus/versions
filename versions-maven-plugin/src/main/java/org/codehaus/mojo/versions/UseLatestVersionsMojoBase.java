@@ -31,6 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
@@ -283,8 +285,9 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
                                 getLog().debug("Ignoring dependency with property as version: " + toString(dep));
                             } else {
                                 try {
+                                    ArtifactFilter included = includedArtifacts();
                                     Artifact artifact = toArtifact(dep);
-                                    if (!isIncluded(artifact)) {
+                                    if (!included.include(artifact)) {
                                         return;
                                     } else if (getLog().isDebugEnabled()) {
                                         ArtifactVersion selectedVersion =
@@ -294,25 +297,18 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
                                     }
 
                                     ArtifactVersions versions = getHelper().lookupArtifactVersions(artifact, false);
+                                    Artifact candidate = ArtifactUtils.copyArtifact(artifact);
                                     versionProducer(Arrays.stream(versions.getNewerVersions(
                                                             dep.getVersion(),
                                                             unchangedSegment,
                                                             getAllowSnapshots(),
                                                             getAllowDowngrade()))
                                                     .filter(this::artifactVersionsFilter)
-                                                    // isIncluded() above only checked the artifact's *current*
-                                                    // version; excludes/includes patterns targeting a candidate
-                                                    // version (e.g. "groupId:artifactId:*:*:4*") were silently
-                                                    // never applied after #1202 removed the old per-candidate
-                                                    // getLastFiltered() method -- restore that check here (gh-1378).
-                                                    .filter(ver -> isIncluded(artifactFactory.createArtifact(
-                                                            artifact.getGroupId(),
-                                                            artifact.getArtifactId(),
-                                                            ver.toString(),
-                                                            artifact.getType(),
-                                                            artifact.getClassifier(),
-                                                            artifact.getScope(),
-                                                            artifact.isOptional()))))
+                                                    // includes and excludes can name versions (#1378)
+                                                    .filter(ver -> {
+                                                        candidate.setVersion(ver.toString());
+                                                        return included.include(candidate);
+                                                    }))
                                             .ifPresent(ver -> updates.add(
                                                     new DependencyVersionChange(changeKind, dep, ver.toString())));
                                 } catch (VersionRetrievalException
