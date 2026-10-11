@@ -835,7 +835,7 @@ public class PomHelper {
      * @return An array of properties that are associated within the project.
      * @throws ExpressionEvaluationException if an expression cannot be evaluated.
      * @throws IOException                   if the project's pom file cannot be parsed.
-     * @since 2.22.1
+     * @since 2.23.0
      */
     public PropertyVersionsBuilder[] getPropertyVersionsBuilders(
             ResolverAdapter resolverAdapter,
