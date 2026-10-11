@@ -17,16 +17,26 @@ package org.codehaus.mojo.versions;
 
 import javax.xml.stream.XMLStreamException;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
+import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
@@ -174,7 +184,7 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
             Property property = entry.getKey();
             PropertyVersions version = entry.getValue();
 
-            final String currentVersion = getProject().getProperties().getProperty(property.getName());
+            String currentVersion = getProject().getProperties().getProperty(property.getName());
             if (currentVersion == null) {
                 continue;
             }
@@ -200,8 +210,25 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
                                 .orElse("ALL") + " version changes allowed");
             }
             try {
+                File parentFile = getReactorParentDefining(property.getName(), version.getProfileId());
+                MutableXMLStreamReader targetPom = pom;
+                if (parentFile != null) {
+                    targetPom = new MutableXMLStreamReader(parentFile.toPath());
+                    String parentValue = propertiesOf(PomHelper.getRawModel(parentFile), version.getProfileId())
+                            .getProperty(property.getName());
+                    if (parentValue != null && !parentValue.contains("${")) {
+                        // the value on disk, which an earlier module of the reactor may have updated
+                        currentVersion = parentValue;
+                    }
+                }
+
                 ArtifactVersion targetVersion = updatePropertyToNewestVersion(
-                        pom, property, version, currentVersion, allowDowngrade, unchangedSegment);
+                        targetPom, property, version, currentVersion, allowDowngrade, unchangedSegment);
+
+                if (parentFile != null && targetPom.isModified()) {
+                    writePom(parentFile, targetPom);
+                    getLog().info("Updated ${" + property.getName() + "} in the parent POM " + parentFile);
+                }
 
                 if (targetVersion != null) {
                     getChangeRecorder()
@@ -223,11 +250,59 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
                         }
                     }
                 }
-            } catch (InvalidSegmentException | InvalidVersionSpecificationException | MojoExecutionException e) {
+            } catch (IOException
+                    | InvalidSegmentException
+                    | InvalidVersionSpecificationException
+                    | MojoExecutionException e) {
                 getLog().warn(String.format(
                         "Skipping the processing of %s:%s due to: %s",
                         property.getName(), property.getVersion(), e.getMessage()));
             }
         }
+    }
+
+    /**
+     * Finds the POM that defines the property for the project: the project's own POM, or the nearest parent
+     * defining it. Returns the parent's file if that parent is part of the reactor, so that a property used in a
+     * module and defined in the reactor's parent is updated there. Parents outside the reactor are never written,
+     * even when their file is reachable by {@code relativePath}.
+     *
+     * @param name      the name of the property
+     * @param profileId the profile defining the property, {@code null} for the project's properties
+     * @return the POM file of the reactor parent defining the property, or {@code null} if the project itself
+     *         defines it, or the parent defining it is not part of the reactor
+     * @throws IOException if a POM cannot be read
+     */
+    private File getReactorParentDefining(String name, String profileId) throws IOException {
+        for (MavenProject p = getProject(); p != null; p = p.getParent()) {
+            Model model = p.getFile() != null ? PomHelper.getRawModel(p.getFile()) : p.getOriginalModel();
+            if (model != null && propertiesOf(model, profileId).containsKey(name)) {
+                return p != getProject() && isInReactor(p) ? p.getFile() : null;
+            }
+        }
+        return null;
+    }
+
+    private boolean isInReactor(MavenProject candidate) {
+        if (candidate.getFile() == null || session == null || session.getAllProjects() == null) {
+            return false;
+        }
+        Set<File> reactorFiles = session.getAllProjects().stream()
+                .map(MavenProject::getFile)
+                .filter(Objects::nonNull)
+                .map(File::getAbsoluteFile)
+                .collect(Collectors.toSet());
+        return reactorFiles.contains(candidate.getFile().getAbsoluteFile());
+    }
+
+    private static Properties propertiesOf(Model model, String profileId) {
+        if (profileId == null) {
+            return model.getProperties();
+        }
+        return model.getProfiles().stream()
+                .filter(profile -> profileId.equals(profile.getId()))
+                .map(Profile::getProperties)
+                .findFirst()
+                .orElseGet(Properties::new);
     }
 }
