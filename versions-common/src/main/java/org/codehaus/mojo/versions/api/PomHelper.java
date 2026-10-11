@@ -44,6 +44,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -818,6 +819,31 @@ public class PomHelper {
     public PropertyVersionsBuilder[] getPropertyVersionsBuilders(
             ResolverAdapter resolverAdapter, Log log, MavenProject project, boolean includeParent)
             throws ExpressionEvaluationException, IOException {
+        return getPropertyVersionsBuilders(resolverAdapter, log, project, includeParent, Collections.emptyList());
+    }
+
+    /**
+     * Examines the project to find any properties which are associated with versions of artifacts in the project
+     * or in the reactor projects that inherit from it.
+     *
+     * @param resolverAdapter        {@link ResolverAdapter} instance
+     * @param log           {@link Log} instance
+     * @param project       The project to examine.
+     * @param includeParent whether parent POMs should be included
+     * @param reactorProjects the projects of the reactor; the ones that inherit from {@code project} add their uses of
+     *                      the properties to the result
+     * @return An array of properties that are associated within the project.
+     * @throws ExpressionEvaluationException if an expression cannot be evaluated.
+     * @throws IOException                   if the project's pom file cannot be parsed.
+     * @since 2.22.1
+     */
+    public PropertyVersionsBuilder[] getPropertyVersionsBuilders(
+            ResolverAdapter resolverAdapter,
+            Log log,
+            MavenProject project,
+            boolean includeParent,
+            Collection<MavenProject> reactorProjects)
+            throws ExpressionEvaluationException, IOException {
 
         Map<MavenProject, Model> reactorModels = includeParent
                 ? getRawModelWithParents(project)
@@ -843,10 +869,29 @@ public class PomHelper {
             }
         }
 
+        // A property inherited by a module is also used by the module's own dependencies and plugins
+        for (MavenProject reactorProject : reactorProjects) {
+            if (reactorProject.getFile() != null && isDescendantOf(reactorProject, project)) {
+                processModel(propertiesMap, getRawModel(reactorProject), activeProfileIds);
+            }
+        }
+
         // Finally, remove any properties without associations
         propertiesMap.values().removeIf(versions -> !versions.isAssociated());
 
         return propertiesMap.values().toArray(new PropertyVersionsBuilder[0]);
+    }
+
+    private static boolean isDescendantOf(MavenProject candidate, MavenProject ancestor) {
+        for (MavenProject p = candidate.getParent(); p != null; p = p.getParent()) {
+            if (p == ancestor
+                    || (Objects.equals(p.getGroupId(), ancestor.getGroupId())
+                            && Objects.equals(p.getArtifactId(), ancestor.getArtifactId())
+                            && Objects.equals(p.getVersion(), ancestor.getVersion()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void processProfiles(

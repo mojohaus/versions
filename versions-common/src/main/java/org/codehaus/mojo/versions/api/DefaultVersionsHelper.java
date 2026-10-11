@@ -392,7 +392,11 @@ public class DefaultVersionsHelper implements VersionsHelper {
         if (request.isAutoLinkItems()) {
             try {
                 PropertyVersionsBuilder[] propertyVersionsBuilders = pomHelper.getPropertyVersionsBuilders(
-                        this, log, request.getMavenProject(), request.isIncludeParent());
+                        this,
+                        log,
+                        request.getMavenProject(),
+                        request.isIncludeParent(),
+                        Optional.ofNullable(mavenSession.getAllProjects()).orElse(Collections.emptyList()));
 
                 for (PropertyVersionsBuilder builder : propertyVersionsBuilders) {
                     String propertyName = builder.getName();

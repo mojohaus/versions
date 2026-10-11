@@ -15,7 +15,9 @@ package org.codehaus.mojo.versions;
  *  limitations under the License.
  */
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
@@ -112,6 +114,23 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
 
         mojo.execute();
         assertEquals(emptyList(), changeRecorder.getChanges());
+    }
+
+    @Test
+    public void testIssue1199() throws Exception {
+        Path baseDir = pomDir.resolve("issue-1199");
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/update-properties/issue-1199"), baseDir);
+        UpdatePropertiesMojo mojo = mojos.lookupInReactor("update-properties", baseDir, ".", "bom");
+        setVariableValueToObject(mojo, "repositorySystem", repositorySystem);
+        setVariableValueToObject(mojo, "generateBackupPoms", false);
+        setVariableValueToObject(mojo, "changeRecorderFormat", "none");
+        changeRecorder = new TestChangeRecorder();
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+        setVariableValueToObject(mojo, "excludesList", "default-group:excluded-artifact");
+        mojo.execute();
+        assertEquals(emptyList(), changeRecorder.getChanges());
+        assertTrue(new String(Files.readAllBytes(baseDir.resolve("pom.xml")), StandardCharsets.UTF_8)
+                .contains("<shared.version>1.0.0</shared.version>"));
     }
 
     @Test
