@@ -1,0 +1,22 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>default-group</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <ver>1.0.0</ver>
+        <native.classifier>linux-x86_64</native.classifier>
+        <native.type>jar</native.type>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>default-group</groupId>
+            <artifactId>artifactA</artifactId>
+            <version>${ver}</version>
+            <type>${native.type}</type>
+            <classifier>${native.classifier}</classifier>
+        </dependency>
+    </dependencies>
+</project>

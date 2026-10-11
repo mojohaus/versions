@@ -1044,8 +1044,8 @@ public class PomHelper {
                                         groupId,
                                         artifactId,
                                         versionEvaluated,
-                                        dependency.getType(),
-                                        dependency.getClassifier(),
+                                        (String) expressionEvaluator.evaluate(dependency.getType()),
+                                        (String) expressionEvaluator.evaluate(dependency.getClassifier()),
                                         dependency.getScope(),
                                         dependency.isOptional()),
                                 usePluginRepositories);
