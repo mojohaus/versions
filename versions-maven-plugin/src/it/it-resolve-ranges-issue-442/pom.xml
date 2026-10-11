@@ -13,8 +13,8 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-test-lib</artifactId>
       </dependency>
     </dependencies>
   </dependencyManagement>

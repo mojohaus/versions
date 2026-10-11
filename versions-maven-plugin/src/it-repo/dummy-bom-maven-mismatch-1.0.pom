@@ -10,13 +10,13 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-artifact</artifactId>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-artifact</artifactId>
         <version>2.0.9</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-model</artifactId>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-model</artifactId>
         <version>2.0.8</version>
       </dependency>
     </dependencies>

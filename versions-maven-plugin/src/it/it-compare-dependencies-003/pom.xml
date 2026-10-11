@@ -16,13 +16,13 @@
     <dependencies>
 
       <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-artifact</artifactId>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-artifact</artifactId>
         <version>${maven.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-model</artifactId>
+        <groupId>localhost</groupId>
+        <artifactId>dummy-model</artifactId>
         <version>${maven.version}</version>
       </dependency>
 

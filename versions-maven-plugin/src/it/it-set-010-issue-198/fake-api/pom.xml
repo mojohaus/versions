@@ -17,8 +17,8 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>localhost</groupId>
+      <artifactId>dummy-test-lib</artifactId>
       <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
