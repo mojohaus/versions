@@ -36,8 +36,8 @@ import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValue
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -136,9 +136,7 @@ public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
     }
 
     @Test
-    public void testExcludeFilterAppliesToCandidateVersion()
-            throws MojoExecutionException, XMLStreamException, MojoFailureException, IllegalAccessException,
-                    VersionRetrievalException {
+    public void testExcludeFilterAppliesToCandidateVersion() throws Exception {
         mojo.getProject()
                 .getModel()
                 .setDependencies(Arrays.asList(
@@ -164,9 +162,11 @@ public class UseLatestReleasesMojoTest extends UseLatestVersionsMojoTestBase {
         setVariableValueToObject(mojo, "excludes", new String[] {"default-group:other-artifact:*:*:2*"});
 
         tryUpdate();
-        assertThat(
-                changeRecorder.getChanges(),
-                not(hasItem(new DefaultDependencyVersionChange(
-                        "default-group", "other-artifact", "default", "1.0", "2.0"))));
+        assertFalse(
+                changeRecorder
+                        .getChanges()
+                        .contains(new DefaultDependencyVersionChange(
+                                "default-group", "other-artifact", "default", "1.0", "2.0")),
+                () -> String.valueOf(changeRecorder.getChanges()));
     }
 }
