@@ -21,11 +21,16 @@ package org.codehaus.mojo.versions;
 
 import javax.inject.Inject;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
 
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.wagon.Wagon;
@@ -35,6 +40,7 @@ import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.reporting.model.ParentUpdatesModel;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
+import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
 
@@ -46,6 +52,14 @@ import org.eclipse.aether.RepositorySystem;
  */
 @Mojo(name = "parent-updates-report", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesModel> {
+
+    /**
+     * Report formats (html and/or xml). HTML by default.
+     *
+     * @since 2.23.0
+     */
+    @Parameter(property = "parentUpdatesReportFormats", defaultValue = "html")
+    protected String[] formats = new String[] {"html"};
 
     /**
      * Creates a new report instance.
@@ -101,31 +115,33 @@ public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesMod
     protected void doGenerateReport(Locale locale, Sink sink) throws MavenReportException {
         try {
             ArtifactVersions artifactVersions = getHelper().lookupArtifactVersions(project.getParentArtifact(), false);
-            rendererFactory
-                    .createReportRenderer(
-                            getOutputPath(),
-                            sink,
-                            locale,
-                            new ParentUpdatesModel(
-                                    DependencyBuilder.newBuilder()
-                                            .withGroupId(artifactVersions.getGroupId())
-                                            .withArtifactId(artifactVersions.getArtifactId())
-                                            .withVersion(artifactVersions
-                                                    .getArtifact()
-                                                    .getVersion())
-                                            .withScope(artifactVersions
-                                                    .getArtifact()
-                                                    .getScope())
-                                            .withType(artifactVersions
-                                                    .getArtifact()
-                                                    .getType())
-                                            .withClassifier(artifactVersions
-                                                    .getArtifact()
-                                                    .getClassifier())
-                                            .build(),
-                                    artifactVersions),
-                            allowSnapshots)
-                    .render();
+            ParentUpdatesModel model = new ParentUpdatesModel(
+                    DependencyBuilder.newBuilder()
+                            .withGroupId(artifactVersions.getGroupId())
+                            .withArtifactId(artifactVersions.getArtifactId())
+                            .withVersion(artifactVersions.getArtifact().getVersion())
+                            .withScope(artifactVersions.getArtifact().getScope())
+                            .withType(artifactVersions.getArtifact().getType())
+                            .withClassifier(artifactVersions.getArtifact().getClassifier())
+                            .build(),
+                    artifactVersions);
+            for (String format : formats) {
+                if ("html".equals(format)) {
+                    rendererFactory
+                            .createReportRenderer(getOutputPath(), sink, locale, model, allowSnapshots)
+                            .render();
+                } else if ("xml".equals(format)) {
+                    Path outputDir = Paths.get(getProject().getBuild().getDirectory());
+                    try {
+                        Files.createDirectories(outputDir);
+                    } catch (IOException e) {
+                        throw new MavenReportException("Could not create the output directory", e);
+                    }
+                    new DependencyUpdatesXmlReportRenderer(
+                                    model, outputDir.resolve(getOutputPath() + ".xml"), allowSnapshots)
+                            .render();
+                }
+            }
         } catch (VersionRetrievalException e) {
             throw new MavenReportException(e.getMessage(), e);
         }
