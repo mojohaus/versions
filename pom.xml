@@ -120,8 +120,8 @@
 
   <properties>
     <mavenVersion>3.9.16</mavenVersion>
-    <!-- the plugin still runs on, and builds with, Maven 3.6.3 -->
-    <minimalMavenBuildVersion>3.6.3</minimalMavenBuildVersion>
+    <!-- the plugin runs on, and builds with, Maven 3.9.0 and later -->
+    <minimalMavenBuildVersion>3.9.0</minimalMavenBuildVersion>
 
     <doxiaVersion>2.1.0</doxiaVersion>
     <doxia-sitetoolsVersion>2.1.0</doxia-sitetoolsVersion>

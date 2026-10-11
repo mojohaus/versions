@@ -22,7 +22,7 @@ what the code and the POMs do not make obvious.
 - Main code must use the Java 8 API only: animal-sniffer checks it against the `java18`
   signature, and CI builds on JDK 8 as well as JDK 17, 21 and 25.
 - The plugin compiles against Maven 3.9.16 and resolver 1.9.27 and keeps
-  `<prerequisites><maven>3.6.3</maven>`. CI runs it on Maven 3.10.0 and 4.0.0-rc-7.
+  `<prerequisites><maven>3.9.0</maven>`. CI runs it on Maven 3.10.0 and 4.0.0-rc-7.
 - Protected methods of the mojo base classes, such as `AbstractVersionsUpdaterMojo`, are API for
   subclasses in other plugins. Deprecate them; remove them only in a major version.
 - The site is built from `src/site/markdown`; `.md.vm` files go through Velocity. Public classes
