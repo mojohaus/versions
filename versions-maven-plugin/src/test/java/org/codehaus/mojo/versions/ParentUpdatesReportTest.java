@@ -22,6 +22,8 @@ package org.codehaus.mojo.versions;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -30,6 +32,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.doxia.module.xhtml5.Xhtml5SinkFactory;
 import org.apache.maven.doxia.sink.SinkFactory;
+import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.testing.stubs.DefaultArtifactHandlerStub;
@@ -154,6 +157,67 @@ public class ParentUpdatesReportTest {
             assertEquals(
                     "problem-causing-artifact",
                     vre.getArtifact().map(Artifact::getArtifactId).orElse(""));
+        }
+    }
+
+    @Test
+    public void testXmlReportContainsCurrentAndNewerVersion() throws IOException, MavenReportException {
+        Path buildDir = Files.createTempDirectory("parent-updates-report");
+        try {
+            OutputStream os = new ByteArrayOutputStream();
+            SinkFactory sinkFactory = new Xhtml5SinkFactory();
+            new ParentUpdatesReport(
+                    MOCK_I18N,
+                    mock(ArtifactFactory.class),
+                    mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                        {
+                            put("default-artifact", new String[] {"1.0.0", "2.0.0"});
+                        }
+                    }),
+                    null,
+                    new ReportRendererFactoryImpl(MOCK_I18N)) {
+                {
+                    formats = new String[] {"xml"};
+                    project = new MavenProject(new Model() {
+                        {
+                            setGroupId("default-group");
+                            setArtifactId("child-artifact");
+                            setVersion("1.0.0");
+                            setBuild(new Build() {
+                                {
+                                    setDirectory(buildDir.toString());
+                                }
+                            });
+                        }
+                    });
+                    project.setParent(new MavenProject(new Model() {
+                        {
+                            setGroupId("default-group");
+                            setArtifactId("default-artifact");
+                            setVersion("1.0.0");
+                        }
+                    }));
+                    reactorProjects = new ArrayList<>();
+                    project.setParentArtifact(new DefaultArtifact(
+                            project.getParent().getGroupId(),
+                            project.getParent().getArtifactId(),
+                            project.getParent().getVersion(),
+                            Artifact.SCOPE_COMPILE,
+                            "pom",
+                            "default",
+                            new DefaultArtifactHandlerStub("default")));
+
+                    session = mockMavenSession();
+                    mojoExecution = mock(MojoExecution.class);
+                }
+            }.generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
+
+            String xml = String.join("", Files.readAllLines(buildDir.resolve("parent-updates-report.xml")))
+                    .replaceAll("\\s+", "");
+            assertTextContains(xml, "<currentVersion>1.0.0</currentVersion>", "<lastVersion>2.0.0</lastVersion>");
+        } finally {
+            Files.deleteIfExists(buildDir.resolve("parent-updates-report.xml"));
+            Files.deleteIfExists(buildDir);
         }
     }
 }
