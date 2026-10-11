@@ -68,16 +68,26 @@ public abstract class UpdatePropertiesMojoTestBase {
         tearDownTempDir(pomDir);
     }
 
-    @SuppressWarnings("unchecked")
     protected <T extends Mojo> T setUpMojo(String goal) throws Exception {
-        T mojo = mojos.lookup(goal, pomDir);
+        return configure(mojos.lookup(goal, pomDir));
+    }
+
+    /**
+     * Looks up {@code goal} in a reactor of the {@code modules} of {@link #pomDir}, running in the first module,
+     * and configures it like {@link #setUpMojo(String)}.
+     */
+    protected <T extends Mojo> T setUpReactorMojo(String goal, String... modules) throws Exception {
+        return configure(mojos.lookupInReactor(goal, pomDir, modules));
+    }
+
+    private <T extends Mojo> T configure(T mojo) throws Exception {
         setVariableValueToObject(mojo, "repositorySystem", repositorySystem);
         setVariableValueToObject(mojo, "generateBackupPoms", false);
         setVariableValueToObject(mojo, "changeRecorderFormat", "none");
         changeRecorder = new TestChangeRecorder();
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 
-        return (T) mojo;
+        return mojo;
     }
 
     @SuppressWarnings("unchecked")

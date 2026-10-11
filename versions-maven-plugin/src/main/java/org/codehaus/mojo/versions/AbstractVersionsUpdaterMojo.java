@@ -366,28 +366,39 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
             update(newPom);
 
             if (newPom.isModified()) {
-                if (generateBackupPoms) {
-                    File backupFile = new File(outFile.getParentFile(), outFile.getName() + ".versionsBackup");
-                    if (!backupFile.exists()) {
-                        getLog().debug("Backing up " + outFile + " to " + backupFile);
-                        Files.copy(outFile.toPath(), backupFile.toPath(), REPLACE_EXISTING);
-                    } else {
-                        getLog().debug("Leaving existing backup " + backupFile + " unmodified");
-                    }
-                } else {
-                    getLog().debug("Skipping generation of backup file");
-                }
-                try (Writer writer = Files.newBufferedWriter(
-                        outFile.toPath(),
-                        ofNullable(newPom.getEncoding()).map(Charset::forName).orElse(Charset.defaultCharset()))) {
-                    writer.write(newPom.getSource());
-                }
+                writePom(outFile, newPom);
             }
             saveChangeRecorderResults();
         } catch (IOException e) {
             getLog().error(e);
         } catch (VersionRetrievalException | XMLStreamException e) {
             throw new MojoExecutionException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Writes {@code pom} to {@code outFile}, backing up the file first if {@link #generateBackupPoms} is set.
+     *
+     * @param outFile the file to write
+     * @param pom     the modified POM
+     * @throws IOException if the file cannot be backed up or written
+     */
+    void writePom(File outFile, MutableXMLStreamReader pom) throws IOException {
+        if (generateBackupPoms) {
+            File backupFile = new File(outFile.getParentFile(), outFile.getName() + ".versionsBackup");
+            if (!backupFile.exists()) {
+                getLog().debug("Backing up " + outFile + " to " + backupFile);
+                Files.copy(outFile.toPath(), backupFile.toPath(), REPLACE_EXISTING);
+            } else {
+                getLog().debug("Leaving existing backup " + backupFile + " unmodified");
+            }
+        } else {
+            getLog().debug("Skipping generation of backup file");
+        }
+        try (Writer writer = Files.newBufferedWriter(
+                outFile.toPath(),
+                ofNullable(pom.getEncoding()).map(Charset::forName).orElse(Charset.defaultCharset()))) {
+            writer.write(pom.getSource());
         }
     }
 
