@@ -130,7 +130,9 @@ public class PropertyUpdatesXmlReportRenderer implements ReportRenderer {
                                     })
                                     .collect(Collectors.toList()));
                         }
-                        setCurrentVersion(e.getKey().getVersion());
+                        ofNullable(e.getValue().getCurrentVersion())
+                                .map(ArtifactVersion::toString)
+                                .ifPresent(this::setCurrentVersion);
                         ofNullable(e.getValue().getNewestUpdateWithinSegment(empty(), allowSnapshots))
                                 .map(ArtifactVersion::toString)
                                 .ifPresent(this::setLastVersion);

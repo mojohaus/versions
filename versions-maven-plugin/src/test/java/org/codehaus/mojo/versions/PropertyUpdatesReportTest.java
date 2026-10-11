@@ -20,7 +20,10 @@ package org.codehaus.mojo.versions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.apache.maven.artifact.Artifact;
@@ -30,6 +33,7 @@ import org.apache.maven.doxia.tools.SiteTool;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
+import org.codehaus.mojo.versions.utils.TestUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +61,35 @@ public class PropertyUpdatesReportTest {
 
     private static final RepositorySystem AETHER_REPOSITORY_SYSTEM = mockAetherRepositorySystem();
     private static final SiteTool SITE_TOOL = mockSiteTool();
+
+    @Test
+    public void testXmlReportContainsCurrentVersion() throws Exception {
+        Path tempDir = TestUtils.createTempDir("property-updates-report");
+        try {
+            TestUtils.copyDir(
+                    Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-960"), tempDir);
+            SinkFactory sinkFactory = new Xhtml5SinkFactory();
+            PropertyUpdatesReport mojo = (PropertyUpdatesReport) mojos.lookup("property-updates-report", tempDir);
+            setVariableValueToObject(mojo, "siteTool", SITE_TOOL);
+            setVariableValueToObject(
+                    mojo, "repositorySystem", mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                        {
+                            put("artifactA", new String[] {"1.0.0", "2.0.0"});
+                        }
+                    }));
+            setVariableValueToObject(mojo, "includeParent", false);
+            setVariableValueToObject(mojo, "formats", new String[] {"xml"});
+            mojo.generate(sinkFactory.createSink(new ByteArrayOutputStream()), sinkFactory, Locale.getDefault());
+
+            String xml = String.join("", Files.readAllLines(tempDir.resolve("target/property-updates-report.xml")))
+                    .replaceAll(">\\s*<", "><");
+            // the property's value, not its optional version range
+            assertTextContains(xml, "<currentVersion>1.0.0</currentVersion>");
+            assertTextContains(xml, "<lastVersion>2.0.0</lastVersion>");
+        } finally {
+            TestUtils.tearDownTempDir(tempDir);
+        }
+    }
 
     @Test
     public void testIncludeParentTrueShouldContainProperty() throws Exception {
