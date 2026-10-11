@@ -324,6 +324,21 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
+    /**
+     * <p>If {@code true}, shows the newest version of each version segment for every dependency
+     * with updates, instead of only the newest version overall, for example
+     * {@code 1.0.3 -> 1.0.9, 1.3.9, 4.0.6}: the newest incremental, minor and major update.</p>
+     * <p>A version is listed only once, so a dependency with no newer incremental or minor version
+     * shows fewer versions. {@link #allowMajorUpdates}, {@link #allowMinorUpdates},
+     * {@link #allowIncrementalUpdates}, {@link #allowSnapshots}, {@link #ruleSet} and
+     * {@link #ignoredVersions} apply to each version listed, as they do to the single version
+     * shown by default.</p>
+     *
+     * @since 2.23.0
+     */
+    @Parameter(property = "versions.showNewestPerSegment", defaultValue = "false")
+    protected boolean showNewestPerSegment;
+
     // --------------------- GETTER / SETTER METHODS ---------------------
 
     /**
@@ -424,7 +439,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                 unchangedSegment,
                 allowSnapshots,
                 INFO_PAD_SIZE + getOutputLineWidthOffset(),
-                verbose);
+                verbose,
+                showNewestPerSegment);
 
         try {
             if (processDependencyManagement) {

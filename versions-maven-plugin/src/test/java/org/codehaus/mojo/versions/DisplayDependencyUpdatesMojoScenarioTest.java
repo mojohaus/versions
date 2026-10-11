@@ -116,6 +116,32 @@ class DisplayDependencyUpdatesMojoScenarioTest {
     }
 
     @Test
+    @InjectMojo(goal = "display-dependency-updates", pom = "issue-1001/pom.xml")
+    @MojoParameter(name = "showNewestPerSegment", value = "true")
+    void newestVersionOfEachSegment(DisplayDependencyUpdatesMojo mojo) throws Exception {
+        assertTextContainsPattern(run(mojo), update("dummy-api", "1.0", "1.0.1, 1.3, 3.0"));
+    }
+
+    @Test
+    @InjectMojo(goal = "display-dependency-updates", pom = "issue-1001/pom.xml")
+    @MojoParameter(name = "showNewestPerSegment", value = "true")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    void newestVersionOfEachSegmentWithoutMajorUpdates(DisplayDependencyUpdatesMojo mojo) throws Exception {
+        String output = run(mojo);
+        assertTextContainsPattern(output, update("dummy-api", "1.0", "1.0.1, 1.3"));
+        assertTextNotContainsPattern(output, "3\\.0");
+    }
+
+    @Test
+    @InjectMojo(goal = "display-dependency-updates", pom = "it-002/pom.xml")
+    @MojoParameter(name = "showNewestPerSegment", value = "true")
+    void newestVersionOfEachSegmentForARange(DisplayDependencyUpdatesMojo mojo) throws Exception {
+        String output = run(mojo);
+        assertTextContainsPattern(output, update("dummy-api", "[1.1,3.0)", "3.0"));
+        assertTextNotContainsPattern(output, "3\\.0,");
+    }
+
+    @Test
     @InjectMojo(goal = "display-dependency-updates", pom = "issue-973/pom.xml")
     void versionlessDependencyIsListedOnce(DisplayDependencyUpdatesMojo mojo) throws Exception {
         assertEquals(1, count(run(mojo), "\\Qlocalhost:dummy-api\\E.*->\\s+\\Q3.0\\E\\b"));
