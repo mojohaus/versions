@@ -346,27 +346,21 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @return true if the artifact should be processed, false otherwise.
      */
     protected boolean isIncluded(Artifact artifact) {
-        boolean result = true;
+        return includedArtifacts().include(artifact);
+    }
 
-        ArtifactFilter includesFilter = this.getIncludesArtifactFilter();
-
-        if (includesFilter != null) {
-            result = includesFilter.include(artifact);
-        }
-
-        ArtifactFilter excludesFilter = this.getExcludesArtifactFilter();
-
-        if (excludesFilter != null) {
-            result = result && excludesFilter.include(artifact);
-        }
-
-        ArtifactFilter scopeFilter = this.getScopeArtifactFilter();
-
-        if (scopeFilter != null) {
-            result = result && scopeFilter.include(artifact);
-        }
-
-        return result;
+    /**
+     * Returns the includes, excludes and scope as one filter, for callers that check many artifacts.
+     *
+     * @return the filter {@link #isIncluded(Artifact)} applies
+     */
+    protected ArtifactFilter includedArtifacts() {
+        ArtifactFilter includesFilter = getIncludesArtifactFilter();
+        ArtifactFilter excludesFilter = getExcludesArtifactFilter();
+        ArtifactFilter scopeFilter = getScopeArtifactFilter();
+        return artifact -> (includesFilter == null || includesFilter.include(artifact))
+                && (excludesFilter == null || excludesFilter.include(artifact))
+                && (scopeFilter == null || scopeFilter.include(artifact));
     }
 
     /**
