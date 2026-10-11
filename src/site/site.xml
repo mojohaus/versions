@@ -4,11 +4,11 @@
 
   <custom>
     <fluidoSkin>
-      <gitHub>
-        <projectId>mojohaus/versions</projectId>
-        <ribbonOrientation>right</ribbonOrientation>
-        <ribbonColor>gray</ribbonColor>
-      </gitHub>
+      <!-- menus in a collapsible top bar, so phones show the page before the navigation -->
+      <topBarEnabled>true</topBarEnabled>
+      <sideBarEnabled>false</sideBarEnabled>
+      <!-- drop the ribbon inherited from mojo-parent: on phones it covers the breadcrumb -->
+      <gitHub combine.self="override"/>
     </fluidoSkin>
   </custom>
 
