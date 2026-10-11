@@ -58,6 +58,26 @@ Which produces the following output:
 [INFO] ------------------------------------------------------------------------
 ```
 
+$h3 Showing the newest version of each segment
+
+By default, the goal shows only the newest version of each dependency. If you cannot move to a new
+major version yet, set `showNewestPerSegment` to see the newest incremental, minor and major update
+as well:
+
+```sh
+mvn versions:$goal -Dversions.showNewestPerSegment=true
+```
+
+```log
+[INFO] The following dependencies in Dependencies have newer versions:
+[INFO]   io.dropwizard:dropwizard-client ......... 1.0.3 -> 1.0.9, 1.3.9, 4.0.6
+[INFO]   jakarta.xml.bind:jakarta.xml.bind-api ................. 3.0.1 -> 4.0.1
+```
+
+Each version is listed once, so a dependency without a newer incremental or minor version, such as
+`jakarta.xml.bind-api` above, shows fewer versions. `allowMajorUpdates`, `allowMinorUpdates`,
+`allowIncrementalUpdates`, `allowSnapshots`, `ignoredVersions` and `ruleSet` apply to every version listed.
+
 <!--- Ignoring specific version suffixes -->
 #set( $goal = "display-dependency-updates" )
 #parse( "ignore-versions.md.vm" )

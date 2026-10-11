@@ -1,9 +1,12 @@
 package org.codehaus.mojo.versions.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.ArtifactUtils;
@@ -40,6 +43,8 @@ public class DependencyUpdatesLoggingHelper {
 
     private final boolean displayManagedBy;
 
+    private final boolean showNewestPerSegment;
+
     private final MavenProject project;
 
     private final ArtifactFactory artifactFactory;
@@ -70,6 +75,46 @@ public class DependencyUpdatesLoggingHelper {
             boolean allowSnapshots,
             int maxLineWidth,
             boolean displayManagedBy) {
+        this(
+                project,
+                log,
+                artifactFactory,
+                ruleService,
+                unchangedSegment,
+                allowSnapshots,
+                maxLineWidth,
+                displayManagedBy,
+                false);
+    }
+
+    /**
+     * Constructs a new instance.
+     *
+     * @param project a {@link MavenProject} object
+     * @param log a {@link Log} instance
+     * @param artifactFactory {@link ArtifactFactory} instance
+     * @param ruleService      a {@link RuleService} instance
+     * @param unchangedSegment the most major version segment that is not to be changed or {@link Optional#empty()}
+     *                         if all version segments can be changed
+     * @param allowSnapshots   whether snapshots should be allowed as updates
+     * @param maxLineWidth     maximum line width
+     * @param displayManagedBy if {@code true}, will display information on the pom managing the given dependency
+     *                         for dependencies not managed by the current project
+     * @param showNewestPerSegment if {@code true}, will display the newest version of each version segment
+     *                         allowed by {@code unchangedSegment} instead of only the newest version
+     * @since 2.23.0
+     */
+    @SuppressWarnings("checkstyle:parameterNumber")
+    public DependencyUpdatesLoggingHelper(
+            MavenProject project,
+            Log log,
+            ArtifactFactory artifactFactory,
+            RuleService ruleService,
+            Optional<Segment> unchangedSegment,
+            boolean allowSnapshots,
+            int maxLineWidth,
+            boolean displayManagedBy,
+            boolean showNewestPerSegment) {
         this.project = project;
         this.log = log;
         this.artifactFactory = artifactFactory;
@@ -78,6 +123,7 @@ public class DependencyUpdatesLoggingHelper {
         this.allowSnapshots = allowSnapshots;
         this.maxLineWidth = maxLineWidth;
         this.displayManagedBy = displayManagedBy;
+        this.showNewestPerSegment = showNewestPerSegment;
     }
 
     /**
@@ -109,7 +155,6 @@ public class DependencyUpdatesLoggingHelper {
 
             String left = "  " + ArtifactUtils.versionlessKey(versions.getArtifact()) + " ";
             String currentVersion;
-            Optional<ArtifactVersion> latestVersion;
             if (versions.getCurrentVersion() != null) {
                 currentVersion = versions.getCurrentVersion()
                         + (!displayManagedBy || dependencyVersionLocalToProject(dep)
@@ -118,34 +163,35 @@ public class DependencyUpdatesLoggingHelper {
                                         + dep.getLocation(VERSION.toString())
                                                 .getSource()
                                                 .getModelId() + ")");
-                try {
-                    latestVersion = versions.getNewestVersion(currentVersion, unchangedSegment, allowSnapshots, false);
-                } catch (InvalidSegmentException e) {
-                    latestVersion = empty();
-                }
             } else {
                 currentVersion = versions.getArtifact().getVersionRange().toString();
-                ArtifactVersion actualVersion =
-                        versions.getNewestVersion(versions.getArtifact().getVersionRange(), allowSnapshots);
-                Restriction newVersionRestriction;
-                try {
-                    Restriction segmentRestriction =
-                            versions.restrictionForUnchangedSegment(actualVersion, unchangedSegment, false);
-                    newVersionRestriction = new Restriction(
-                            actualVersion,
-                            false,
-                            segmentRestriction.getUpperBound(),
-                            segmentRestriction.isUpperBoundInclusive());
-                } catch (InvalidSegmentException e) {
-                    throw new RuntimeException(e);
-                }
-                latestVersion = Optional.of(newVersionRestriction)
-                        .map(restriction -> versions.getNewestVersion(restriction, allowSnapshots));
+            }
+            List<ArtifactVersion> newerVersions;
+            if (showNewestPerSegment) {
+                String lookupVersion = Optional.ofNullable(versions.getCurrentVersion())
+                        .map(ArtifactVersion::toString)
+                        .orElse(null);
+                newerVersions = segmentsToShow()
+                        .map(segment -> getNewestVersion(versions, lookupVersion, segment))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .distinct()
+                        .sorted()
+                        .collect(Collectors.toList());
+            } else {
+                newerVersions = getNewestVersion(versions, currentVersion, unchangedSegment)
+                        .map(Collections::singletonList)
+                        .orElse(Collections.emptyList());
             }
 
-            String right =
-                    " " + latestVersion.map(v -> currentVersion + " -> " + v).orElse(currentVersion);
-            List<String> t = latestVersion.isPresent() ? withUpdates : usingCurrent;
+            String right = " "
+                    + (newerVersions.isEmpty()
+                            ? currentVersion
+                            : currentVersion + " -> "
+                                    + newerVersions.stream()
+                                            .map(ArtifactVersion::toString)
+                                            .collect(Collectors.joining(", ")));
+            List<String> t = newerVersions.isEmpty() ? usingCurrent : withUpdates;
             if (right.length() + left.length() + 3 > maxLineWidth) {
                 t.add(left + "...");
                 t.add(StringUtils.leftPad(right, maxLineWidth));
@@ -166,6 +212,56 @@ public class DependencyUpdatesLoggingHelper {
                 return withUpdates;
             }
         };
+    }
+
+    /**
+     * Returns the unchanged segments for which {@link #showNewestPerSegment} shows the newest version: an incremental,
+     * a minor and a major update, limited to the segments {@link #unchangedSegment} allows to change.
+     * If only sub-incremental updates are allowed, that is the only segment.
+     */
+    private Stream<Optional<Segment>> segmentsToShow() {
+        if (unchangedSegment.filter(Segment.INCREMENTAL::equals).isPresent()) {
+            return Stream.of(unchangedSegment);
+        }
+        return Stream.of(Optional.of(Segment.MINOR), Optional.of(Segment.MAJOR), Optional.<Segment>empty())
+                .filter(segment -> !unchangedSegment.isPresent()
+                        || segment.filter(s -> !s.isMajorTo(unchangedSegment.get()))
+                                .isPresent());
+    }
+
+    /**
+     * Returns the newest version of the given artifact that keeps the given segment unchanged.
+     *
+     * @param versions the available versions, already filtered by the rules
+     * @param currentVersion the current version, ignored if the artifact has a version range
+     * @param unchangedSegment the most major segment not to be changed, or empty if all segments can change
+     * @return the newest version, or empty if there is no newer version
+     */
+    private Optional<ArtifactVersion> getNewestVersion(
+            ArtifactVersions versions, String currentVersion, Optional<Segment> unchangedSegment) {
+        if (versions.getCurrentVersion() != null) {
+            try {
+                return versions.getNewestVersion(currentVersion, unchangedSegment, allowSnapshots, false);
+            } catch (InvalidSegmentException e) {
+                return empty();
+            }
+        }
+        ArtifactVersion actualVersion =
+                versions.getNewestVersion(versions.getArtifact().getVersionRange(), allowSnapshots);
+        Restriction newVersionRestriction;
+        try {
+            Restriction segmentRestriction =
+                    versions.restrictionForUnchangedSegment(actualVersion, unchangedSegment, false);
+            newVersionRestriction = new Restriction(
+                    actualVersion,
+                    false,
+                    segmentRestriction.getUpperBound(),
+                    segmentRestriction.isUpperBoundInclusive());
+        } catch (InvalidSegmentException e) {
+            throw new RuntimeException(e);
+        }
+        return Optional.of(newVersionRestriction)
+                .map(restriction -> versions.getNewestVersion(restriction, allowSnapshots));
     }
 
     /**

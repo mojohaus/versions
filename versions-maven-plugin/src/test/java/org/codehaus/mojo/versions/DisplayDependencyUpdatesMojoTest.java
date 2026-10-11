@@ -22,7 +22,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
@@ -746,5 +748,178 @@ public class DisplayDependencyUpdatesMojoTest {
             List<String> output = Files.readAllLines(tempFile.getPath(), UTF_8);
             assertNoLineContains(output, "1.0.0");
         }
+    }
+
+    private static final String[] SEGMENT_VERSIONS = {
+        "1.0.0", "1.0.1", "1.0.9", "1.0.10-SNAPSHOT", "1.1.0", "1.3.9", "2.0.0", "4.0.6", "5.0.0-SNAPSHOT"
+    };
+
+    private static final String DEPENDENCIES_HEADER = "The following dependencies in Dependencies have newer versions:";
+
+    /**
+     * Runs the goal against {@link #createProject()}, a single dependency on version 1.0.0, with the given
+     * versions available and the default output line width, and returns the lines of the output file.
+     */
+    private List<String> runWithVersions(String[] availableVersions, Consumer<DisplayDependencyUpdatesMojo> configure)
+            throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            DisplayDependencyUpdatesMojo mojo =
+                    new DisplayDependencyUpdatesMojo(
+                            artifactFactory,
+                            mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                                {
+                                    put("default-dependency", availableVersions);
+                                }
+                            }),
+                            null,
+                            null) {
+                        {
+                            setProject(createProject());
+                            processDependencies = true;
+                            processDependencyManagement = false;
+                            dependencyIncludes = singletonList(WildcardMatcher.WILDCARD);
+                            dependencyExcludes = emptyList();
+                            outputLineWidth = 80;
+                            outputFile = tempFile.getPath().toFile();
+                            setPluginContext(new HashMap<>());
+
+                            session = mockMavenSession();
+                            mojoExecution = mock(MojoExecution.class);
+                        }
+                    };
+            configure.accept(mojo);
+            mojo.execute();
+            return Files.readAllLines(tempFile.getPath(), UTF_8);
+        }
+    }
+
+    @Test
+    public void testDefaultOutputShowsOnlyTheNewestVersion() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ...................... 1.0.0 -> 4.0.6",
+                        ""),
+                runWithVersions(SEGMENT_VERSIONS, mojo -> {}));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentFalseKeepsTheDefaultOutput() throws Exception {
+        assertEquals(
+                runWithVersions(SEGMENT_VERSIONS, mojo -> {}),
+                runWithVersions(SEGMENT_VERSIONS, mojo -> mojo.showNewestPerSegment = false));
+    }
+
+    @Test
+    public void testShowNewestPerSegment() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ........ 1.0.0 -> 1.0.9, 1.3.9, 4.0.6",
+                        ""),
+                runWithVersions(SEGMENT_VERSIONS, mojo -> mojo.showNewestPerSegment = true));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentAllowMajorUpdatesFalse() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ............... 1.0.0 -> 1.0.9, 1.3.9",
+                        ""),
+                runWithVersions(SEGMENT_VERSIONS, mojo -> {
+                    mojo.showNewestPerSegment = true;
+                    mojo.allowMajorUpdates = false;
+                }));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentAllowMinorUpdatesFalse() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ...................... 1.0.0 -> 1.0.9",
+                        ""),
+                runWithVersions(SEGMENT_VERSIONS, mojo -> {
+                    mojo.showNewestPerSegment = true;
+                    mojo.allowMinorUpdates = false;
+                }));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentAllowIncrementalUpdatesFalse() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency .................... 1.0.0 -> 1.0.0-1",
+                        ""),
+                runWithVersions(new String[] {"1.0.0", "1.0.0-1", "1.0.1", "1.1.0", "2.0.0"}, mojo -> {
+                    mojo.showNewestPerSegment = true;
+                    mojo.allowIncrementalUpdates = false;
+                }));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentIgnoredVersions() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ........ 1.0.0 -> 1.0.1, 1.3.9, 2.0.0",
+                        ""),
+                runWithVersions(SEGMENT_VERSIONS, mojo -> {
+                    mojo.showNewestPerSegment = true;
+                    mojo.ignoredVersions = new HashSet<>(Arrays.asList("1.0.9", "4.0.6"));
+                }));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentAllowSnapshots() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ......... 1.0.0 -> 1.0.10-SNAPSHOT, 1.3.9, 5.0.0-SNAPSHOT",
+                        ""),
+                runWithVersions(SEGMENT_VERSIONS, mojo -> {
+                    mojo.showNewestPerSegment = true;
+                    mojo.allowSnapshots = true;
+                    mojo.outputLineWidth = 100;
+                }));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentListsEachVersionOnce() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ...................... 1.0.0 -> 2.0.0",
+                        ""),
+                runWithVersions(new String[] {"1.0.0", "2.0.0"}, mojo -> mojo.showNewestPerSegment = true));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentOutputLineWidth() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ................................................"
+                                + " 1.0.0 -> 1.0.9, 1.3.9, 4.0.6",
+                        ""),
+                runWithVersions(SEGMENT_VERSIONS, mojo -> {
+                    mojo.showNewestPerSegment = true;
+                    mojo.outputLineWidth = 120;
+                }));
+    }
+
+    @Test
+    public void testShowNewestPerSegmentWrapsLongLines() throws Exception {
+        assertEquals(
+                Arrays.asList(
+                        DEPENDENCIES_HEADER,
+                        "  default-group:default-dependency ...",
+                        "          1.0.0 -> 1.0.9-a-long-qualifier, 1.3.9-a-long-qualifier, 4.0.6",
+                        ""),
+                runWithVersions(
+                        new String[] {"1.0.0", "1.0.9-a-long-qualifier", "1.3.9-a-long-qualifier", "4.0.6"},
+                        mojo -> mojo.showNewestPerSegment = true));
     }
 }
