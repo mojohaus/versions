@@ -146,8 +146,8 @@
     <sisuVersion>1.1.0</sisuVersion>
 
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
-    <!-- execute ITS in parallel by default -->
-    <invoker.parallelThreads>0.75C</invoker.parallelThreads>
+    <!-- one IT per core: each IT is a short-lived Maven JVM, and at 0.75C one core of the 4-vCPU CI runners stays idle -->
+    <invoker.parallelThreads>1C</invoker.parallelThreads>
     <!-- mono-module doesn't require site:stage for scm-publish -->
     <project.build.outputTimestamp>2026-09-11T20:49:26Z</project.build.outputTimestamp>
   </properties>
