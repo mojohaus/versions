@@ -24,6 +24,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -60,6 +62,8 @@ import static org.codehaus.mojo.versions.api.Segment.MINOR;
  * and {@link UpdatePropertyMojo}
  */
 public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependencyUpdaterMojo {
+
+    private static final ConcurrentMap<File, Object> PARENT_POM_LOCKS = new ConcurrentHashMap<>();
     /**
      * Whether properties linking versions should be auto-detected or not.
      *
@@ -211,23 +215,27 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
             }
             try {
                 File parentFile = getReactorParentDefining(property.getName(), version.getProfileId());
-                MutableXMLStreamReader targetPom = pom;
-                if (parentFile != null) {
-                    targetPom = new MutableXMLStreamReader(parentFile.toPath());
-                    String parentValue = propertiesOf(PomHelper.getRawModel(parentFile), version.getProfileId())
-                            .getProperty(property.getName());
-                    if (parentValue != null && !parentValue.contains("${")) {
-                        // the value on disk, which an earlier module of the reactor may have updated
-                        currentVersion = parentValue;
+                ArtifactVersion targetVersion;
+                if (parentFile == null) {
+                    targetVersion = updatePropertyToNewestVersion(
+                            pom, property, version, currentVersion, allowDowngrade, unchangedSegment);
+                } else {
+                    // modules built in parallel (-T) may update the same parent POM
+                    synchronized (PARENT_POM_LOCKS.computeIfAbsent(parentFile.getCanonicalFile(), f -> new Object())) {
+                        MutableXMLStreamReader parentPom = new MutableXMLStreamReader(parentFile.toPath());
+                        String parentValue = propertiesOf(PomHelper.getRawModel(parentFile), version.getProfileId())
+                                .getProperty(property.getName());
+                        if (parentValue != null && !parentValue.contains("${")) {
+                            // the value on disk, which an earlier module of the reactor may have updated
+                            currentVersion = parentValue;
+                        }
+                        targetVersion = updatePropertyToNewestVersion(
+                                parentPom, property, version, currentVersion, allowDowngrade, unchangedSegment);
+                        if (parentPom.isModified()) {
+                            writePom(parentFile, parentPom);
+                            getLog().info("Updated ${" + property.getName() + "} in the parent POM " + parentFile);
+                        }
                     }
-                }
-
-                ArtifactVersion targetVersion = updatePropertyToNewestVersion(
-                        targetPom, property, version, currentVersion, allowDowngrade, unchangedSegment);
-
-                if (parentFile != null && targetPom.isModified()) {
-                    writePom(parentFile, targetPom);
-                    getLog().info("Updated ${" + property.getName() + "} in the parent POM " + parentFile);
                 }
 
                 if (targetVersion != null) {
