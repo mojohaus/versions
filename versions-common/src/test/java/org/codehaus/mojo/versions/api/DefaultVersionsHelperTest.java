@@ -26,15 +26,22 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.ConnectionException;
@@ -52,6 +59,7 @@ import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResolutionException;
 import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.InvalidVersionSpecificationException;
@@ -65,7 +73,9 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -187,6 +197,110 @@ class DefaultVersionsHelperTest {
                         .withAutoLinkItems(false)
                         .build());
         assertTrue(result.isEmpty());
+    }
+
+    private static final List<String> PROPERTY_NAMES =
+            Arrays.asList("a.version", "b.version", "c.version", "d.version");
+
+    private static Property propertyOn(String propertyName) {
+        Dependency dependency = new Dependency();
+        dependency.setGroupId("localhost");
+        dependency.setArtifactId(propertyName.replace(".version", "-artifact"));
+        dependency.setVersion("1.0");
+        Property property = new Property(propertyName);
+        property.setAutoLinkDependencies(false);
+        property.setDependencies(new Dependency[] {dependency});
+        return property;
+    }
+
+    private Map<Property, PropertyVersions> versionPropertiesMapOf(DefaultVersionsHelper helper) throws Exception {
+        when(artifactFactory.createArtifact(any(Dependency.class))).then(i -> {
+            Dependency d = i.getArgument(0);
+            return new DefaultArtifact(
+                    d.getGroupId(),
+                    d.getArtifactId(),
+                    d.getVersion(),
+                    "compile",
+                    "jar",
+                    null,
+                    new DefaultArtifactHandler("jar"));
+        });
+        MavenProject project = mock(MavenProject.class);
+        when(project.getProperties()).thenReturn(new java.util.Properties());
+        return helper.getVersionPropertiesMap(VersionsHelper.VersionPropertiesMapRequest.builder()
+                .withMavenProject(project)
+                .withPropertyDefinitions(PROPERTY_NAMES.stream()
+                        .map(DefaultVersionsHelperTest::propertyOn)
+                        .collect(Collectors.toList()))
+                .withIncludeParent(false)
+                .withAutoLinkItems(false)
+                .build());
+    }
+
+    @Test
+    void testVersionPropertiesMapKeepsContentAndOrder() throws Exception {
+        when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> {
+                    VersionRangeRequest request = i.getArgument(1);
+                    String artifactId = request.getArtifact().getArtifactId();
+                    return new VersionRangeResult(request)
+                            .setVersions(Arrays.asList(parseVersion("1.0"), parseVersion("2." + artifactId.charAt(0))));
+                });
+
+        Map<Property, PropertyVersions> result = versionPropertiesMapOf(createHelper(repositorySystem));
+
+        // the order is that of a HashMap keyed by property name, as before properties were looked up concurrently
+        Map<String, Object> expectedOrder = new HashMap<>();
+        PROPERTY_NAMES.forEach(n -> expectedOrder.put(n, n));
+        assertEquals(
+                new ArrayList<>(expectedOrder.keySet()),
+                result.keySet().stream().map(Property::getName).collect(Collectors.toList()));
+        assertEquals(
+                new ArrayList<>(expectedOrder.keySet()),
+                result.values().stream().map(PropertyVersions::getName).collect(Collectors.toList()));
+        for (Map.Entry<Property, PropertyVersions> e : new LinkedHashMap<>(result).entrySet()) {
+            String letter = e.getKey().getName().substring(0, 1);
+            assertEquals(
+                    Arrays.asList("1.0", "2." + letter),
+                    Arrays.stream(e.getValue().getVersions(true))
+                            .map(ArtifactVersion::toString)
+                            .collect(Collectors.toList()));
+        }
+    }
+
+    @Test
+    void testVersionPropertiesMapLooksUpPropertiesConcurrently() throws Exception {
+        CountDownLatch allInFlight = new CountDownLatch(PROPERTY_NAMES.size());
+        when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> {
+                    allInFlight.countDown();
+                    // a sequential implementation never gets the other lookups started, so the wait times out
+                    if (!allInFlight.await(5, TimeUnit.SECONDS)) {
+                        throw new VersionRangeResolutionException(
+                                new VersionRangeResult(i.getArgument(1)), "not concurrent");
+                    }
+                    return new VersionRangeResult(i.getArgument(1)).setVersions(Arrays.asList(parseVersion("1.0")));
+                });
+
+        Map<Property, PropertyVersions> result = versionPropertiesMapOf(createHelper(repositorySystem));
+
+        assertEquals(PROPERTY_NAMES.size(), result.size());
+    }
+
+    @Test
+    void testVersionPropertiesMapPropagatesRetrievalFailure() throws Exception {
+        when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                .then(i -> {
+                    VersionRangeRequest request = i.getArgument(1);
+                    if (request.getArtifact().getArtifactId().startsWith("c-")) {
+                        throw new VersionRangeResolutionException(new VersionRangeResult(request), "boom");
+                    }
+                    return new VersionRangeResult(request).setVersions(Arrays.asList(parseVersion("1.0")));
+                });
+
+        MojoExecutionException e = assertThrows(
+                MojoExecutionException.class, () -> versionPropertiesMapOf(createHelper(repositorySystem)));
+        assertInstanceOf(VersionRetrievalException.class, e.getCause());
     }
 
     private DefaultVersionsHelper createHelper() throws Exception {
