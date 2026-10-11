@@ -25,6 +25,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.utils.TestUtils;
+import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextNotMatch
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link DisplayPropertyUpdatesMojo}
@@ -129,6 +133,33 @@ public class DisplayPropertyUpdatesMojoTest {
     @Test
     public void testAllowUpdatesFromLesserSegmentsSubIncremental() throws Exception {
         testAllowUpdatesFromLesserSegments("1.0.0-1");
+    }
+
+    @Test
+    public void testClassifierAndTypeAreInterpolated() throws Exception {
+        TestUtils.copyDir(
+                Paths.get("src/test/resources/org/codehaus/mojo/display-property-updates/issue-1409"), tempDir);
+        DisplayPropertyUpdatesMojo mojo =
+                (DisplayPropertyUpdatesMojo) mojos.lookup("display-property-updates", tempDir);
+        mojo.outputEncoding = UTF_8;
+        mojo.outputFile = tempFile.toFile();
+        mojo.setPluginContext(new HashMap<>());
+        mojo.repositorySystem = mockAetherRepositorySystem(new HashMap<String, String[]>() {
+            {
+                put("artifactA", new String[] {"1.0.0", "2.0.0"});
+            }
+        });
+        mojo.includeParent = false;
+        mojo.execute();
+
+        // Resolver 2 rejects coordinates that still contain ${...}
+        verify(mojo.repositorySystem)
+                .resolveVersionRange(
+                        any(),
+                        argThat((VersionRangeRequest request) ->
+                                "linux-x86_64".equals(request.getArtifact().getClassifier())
+                                        && "jar".equals(request.getArtifact().getExtension())));
+        assertTextMatches(String.join("", Files.readAllLines(tempFile)), ".*\\$\\{ver} \\.* 1\\.0\\.0 -> 2\\.0\\.0.*");
     }
 
     @Test
