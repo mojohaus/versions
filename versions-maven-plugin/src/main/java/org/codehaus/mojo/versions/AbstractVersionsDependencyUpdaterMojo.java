@@ -423,6 +423,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * Returns the includes, excludes and scope as one filter, for callers that check many artifacts.
      *
      * @return the filter {@link #isIncluded(Artifact)} applies
+     * @since 2.23.0
      */
     protected ArtifactFilter includedArtifacts() {
         ArtifactFilter includesFilter = getIncludesArtifactFilter();

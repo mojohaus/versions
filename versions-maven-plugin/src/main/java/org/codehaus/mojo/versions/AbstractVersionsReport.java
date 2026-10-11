@@ -189,7 +189,14 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         return helper;
     }
 
-    /** Creates a helper with a project-specific repository context, without changing the live session. */
+    /**
+     * Creates a helper with a project-specific repository context, without changing the live session.
+     *
+     * @param project the project whose repositories the helper uses
+     * @return the helper
+     * @throws MavenReportException if the helper cannot be created
+     * @since 2.23.0
+     */
     protected VersionsHelper createHelper(MavenProject project) throws MavenReportException {
         MavenSession analysisSession = project == getProject() ? session : session.clone();
         if (project != getProject()) {
