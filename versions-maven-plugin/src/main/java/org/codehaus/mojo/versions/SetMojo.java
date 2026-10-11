@@ -314,6 +314,12 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
         if (session.getProjects().size() != session.getAllProjects().size()) {
             // we are running on a restricted module set (-pl)
             for (MavenProject currentProject : session.getProjects()) {
+                if (currentProject.getOriginalModel().getVersion() == null
+                        && session.getProjects().contains(currentProject.getParent())) {
+                    // Maven 4 selects the modules of a selected aggregator too; the parent's change covers them
+                    getLog().debug("Skipping " + currentProject.getArtifactId() + ", which inherits its version");
+                    continue;
+                }
                 if (getLog().isDebugEnabled()) {
                     getLog().debug("Processing " + currentProject.getGroupId() + ":" + currentProject.getArtifactId()
                             + ":" + currentProject.getVersion() + "...");
