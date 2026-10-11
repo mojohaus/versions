@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -149,6 +150,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
             if (getProject().getDependencies() != null && getProcessDependencies()) {
                 unlockSnapshots(pom, getProject().getDependencies(), DependencyChangeRecord.ChangeKind.DEPENDENCY);
             }
+            unlockPropertySnapshots(pom, PomHelper.getRawModel(getProject()));
             if (getProject().getParent() != null && getProcessParent()) {
                 unlockParentSnapshot(pom, getProject().getParent());
             }
@@ -195,6 +197,33 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
                                     .withNewVersion(unlockedVersion)
                                     .build());
                     getLog().info("Unlocked " + toString(dep) + " to version " + unlockedVersion);
+                }
+            }
+        }
+    }
+
+    /**
+     * Unlocks the properties that hold the timestamped version of the processed dependencies.
+     */
+    private void unlockPropertySnapshots(MutableXMLStreamReader pom, Model rawModel)
+            throws XMLStreamException, MojoExecutionException {
+        Map<String, List<Dependency>> properties = findVersionProperties(pom, rawModel, value -> {
+            Matcher matcher = TIMESTAMPED_SNAPSHOT_REGEX.matcher(value);
+            return matcher.find() && matcher.end() == value.length();
+        });
+        for (Map.Entry<String, List<Dependency>> entry : properties.entrySet()) {
+            String lockedVersion = entry.getValue().get(0).getVersion();
+            String unlockedVersion =
+                    TIMESTAMPED_SNAPSHOT_REGEX.matcher(lockedVersion).replaceFirst("-SNAPSHOT");
+            if (PomHelper.setPropertyVersion(pom, null, entry.getKey(), unlockedVersion)) {
+                getLog().info("Unlocked property " + entry.getKey() + " to version " + unlockedVersion);
+                for (Dependency dep : entry.getValue()) {
+                    getChangeRecorder()
+                            .recordChange(DefaultDependencyChangeRecord.builder()
+                                    .withKind(DependencyChangeRecord.ChangeKind.DEPENDENCY)
+                                    .withDependency(dep)
+                                    .withNewVersion(unlockedVersion)
+                                    .build());
                 }
             }
         }

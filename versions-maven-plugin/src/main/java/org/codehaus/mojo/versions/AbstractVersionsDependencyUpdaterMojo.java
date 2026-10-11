@@ -21,15 +21,20 @@ import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -56,6 +61,8 @@ import org.eclipse.aether.RepositorySystem;
  * @since 1.0-alpha-3
  */
 public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVersionsUpdaterMojo {
+    private static final Pattern VERSION_PROPERTY_REGEX = Pattern.compile("^\\$\\{([^}]+)}$");
+
     private static final String END_RANGE_CHARS = "])";
 
     private static final String START_RANGE_CHARS = "[(";
@@ -184,6 +191,69 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
     protected boolean isHandledByProperty(Dependency dependency) {
         String version = dependency.getVersion();
         return version != null && version.startsWith("${");
+    }
+
+    /**
+     * Finds the properties of the given raw model that hold the version of dependencies and can safely be rewritten
+     * as a whole: the property is defined in this pom, its value passes the filter, every dependency whose version is
+     * exactly that property is processed by the goal, and nothing else in the pom refers to the property. Properties
+     * that pass the value filter but are shared with something that is not processed are logged and skipped.
+     *
+     * @param pom the pom being updated
+     * @param rawModel the raw (uninterpolated) model of the pom
+     * @param valueFilter selects the property values of interest
+     * @return the dependencies per property name, each with its version set to the property value
+     * @throws MojoExecutionException when a dependency cannot be converted to an artifact
+     */
+    Map<String, List<Dependency>> findVersionProperties(
+            MutableXMLStreamReader pom, Model rawModel, Predicate<String> valueFilter) throws MojoExecutionException {
+        List<Dependency> candidates = new ArrayList<>();
+        DependencyManagement dependencyManagement = rawModel.getDependencyManagement();
+        if (getProcessDependencyManagement() && dependencyManagement != null) {
+            candidates.addAll(dependencyManagement.getDependencies());
+        }
+        if (getProcessDependencies()) {
+            candidates.addAll(rawModel.getDependencies());
+        }
+
+        Map<String, List<Dependency>> byProperty = new LinkedHashMap<>();
+        for (Dependency candidate : candidates) {
+            Matcher matcher = VERSION_PROPERTY_REGEX.matcher(String.valueOf(candidate.getVersion()));
+            if (!matcher.matches()) {
+                continue;
+            }
+            String value = rawModel.getProperties().getProperty(matcher.group(1));
+            if (value == null || !valueFilter.test(value.trim())) {
+                continue;
+            }
+            Dependency dep = candidate.clone();
+            dep.setVersion(value.trim());
+            byProperty.computeIfAbsent(matcher.group(1), k -> new ArrayList<>()).add(dep);
+        }
+
+        String source = pom.getSource();
+        Map<String, List<Dependency>> result = new LinkedHashMap<>();
+        for (Map.Entry<String, List<Dependency>> entry : byProperty.entrySet()) {
+            boolean allProcessed = true;
+            for (Dependency dep : entry.getValue()) {
+                if ((getExcludeReactor() && isProducedByReactor(dep)) || !isIncluded(toArtifact(dep))) {
+                    allProcessed = false;
+                    break;
+                }
+            }
+            String reference = "${" + entry.getKey() + "}";
+            int references = 0;
+            for (int i = source.indexOf(reference); i >= 0; i = source.indexOf(reference, i + 1)) {
+                references++;
+            }
+            if (!allProcessed || references != entry.getValue().size()) {
+                getLog().info("Leaving property " + entry.getKey()
+                        + " unchanged: it is also used by something this goal does not process");
+                continue;
+            }
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
     }
 
     /**
