@@ -1247,7 +1247,7 @@ public class PomHelper {
      * @param project        the project to start from
      * @param logger         the logger
      * @return the local aggregation root, which may be the supplied project
-     * @since 2.21.1
+     * @since 2.23.0
      */
     public static MavenProject getLocalRoot(
             ProjectBuilder projectBuilder, MavenSession mavenSession, MavenProject project, Log logger) {

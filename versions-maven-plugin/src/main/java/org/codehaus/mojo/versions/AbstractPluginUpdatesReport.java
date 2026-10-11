@@ -204,7 +204,12 @@ public abstract class AbstractPluginUpdatesReport extends AbstractVersionsReport
                         .collect(Collectors.toList()));
     }
 
-    /** Analyze aggregate projects separately to use each project's repositories and effective plugin versions. */
+    /**
+     * Analyze aggregate projects separately to use each project's repositories and effective plugin versions.
+     *
+     * @return the projects whose plugins the report analyzes
+     * @since 2.23.0
+     */
     protected List<MavenProject> getProjectsToAnalyze() {
         return Collections.singletonList(getProject());
     }
