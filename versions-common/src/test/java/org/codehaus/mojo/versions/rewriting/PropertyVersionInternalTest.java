@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -33,6 +34,111 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PropertyVersionInternalTest {
+
+    @Test
+    void testUpdateUsesLastDuplicateProperty() throws Exception {
+        String xml = "<project>\n"
+                + "  <properties>\n"
+                + "    <myVersion>first</myVersion>\n"
+                + "    <someKey>someValue</someKey>\n"
+                + "    <myVersion>second</myVersion>\n"
+                + "  </properties>\n"
+                + "</project>\n";
+
+        MutableXMLStreamReader pom = new MutableXMLStreamReader(
+                new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), new File("pom.xml").toPath());
+
+        String newVersion = "1.2.345";
+        boolean modified = new PropertyVersionInternal(pom, null, "myVersion", newVersion).update(true);
+        assertTrue(modified);
+
+        String result = pom.getSource();
+        assertTrue(result.contains("<myVersion>first</myVersion>"));
+        assertEquals(1, StringUtils.countMatches(result, "<myVersion>" + newVersion + "</myVersion>"), result);
+        assertEquals(0, StringUtils.countMatches(result, "<myVersion>second</myVersion>"));
+    }
+
+    @Test
+    void testUpdateUsesLastDuplicateProfileIdProperty() throws Exception {
+        String xml = "<project>\n"
+                + "  <profiles>\n"
+                + "    <profile>\n"
+                + "      <id>myProfile</id>\n"
+                + "      <properties>\n"
+                + "        <myVersion>first</myVersion>\n"
+                + "      </properties>\n"
+                + "    </profile>\n"
+                + "    <profile>\n"
+                + "      <id>myProfile</id>\n"
+                + "      <properties>\n"
+                + "        <myVersion>second</myVersion>\n"
+                + "      </properties>\n"
+                + "    </profile>\n"
+                + "  </profiles>\n"
+                + "</project>\n";
+
+        MutableXMLStreamReader pom = new MutableXMLStreamReader(
+                new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), new File("pom.xml").toPath());
+
+        String newVersion = "1.2.345";
+        boolean modified = new PropertyVersionInternal(pom, "myProfile", "myVersion", newVersion).update(true);
+        assertTrue(modified);
+
+        String result = pom.getSource();
+        assertTrue(result.contains("<myVersion>first</myVersion>"));
+        assertEquals(1, StringUtils.countMatches(result, "<myVersion>" + newVersion + "</myVersion>"), result);
+        assertEquals(0, StringUtils.countMatches(result, "<myVersion>second</myVersion>"));
+    }
+
+    @Test
+    void testUpdateProfilePropertyWhenPropertiesComesBeforeId() throws Exception {
+        String xml = "<project>\n"
+                + "  <profiles>\n"
+                + "    <profile>\n"
+                + "      <properties>\n"
+                + "        <myVersion>changeit</myVersion>\n"
+                + "      </properties>\n"
+                + "      <id>myProfile</id>\n"
+                + "    </profile>\n"
+                + "  </profiles>\n"
+                + "</project>\n";
+
+        MutableXMLStreamReader pom = new MutableXMLStreamReader(
+                new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), new File("pom.xml").toPath());
+
+        String newVersion = "1.2.345";
+        boolean modified = new PropertyVersionInternal(pom, "myProfile", "myVersion", newVersion).update(true);
+        assertTrue(modified);
+
+        String result = pom.getSource();
+        assertEquals(1, StringUtils.countMatches(result, "<myVersion>" + newVersion + "</myVersion>"));
+        assertEquals(0, StringUtils.countMatches(result, "<myVersion>changeit</myVersion>"));
+    }
+
+    @Test
+    void testInsertProfilePropertyWhenPropertiesComesBeforeId() throws Exception {
+        String xml = "<project>\n"
+                + "  <profiles>\n"
+                + "    <profile>\n"
+                + "      <properties>\n"
+                + "        <someKey>someValue</someKey>\n"
+                + "      </properties>\n"
+                + "      <id>myProfile</id>\n"
+                + "    </profile>\n"
+                + "  </profiles>\n"
+                + "</project>\n";
+
+        MutableXMLStreamReader pom = new MutableXMLStreamReader(
+                new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), new File("pom.xml").toPath());
+
+        String newVersion = "1.2.345";
+        boolean modified = new PropertyVersionInternal(pom, "myProfile", "myVersion", newVersion).update(true);
+        assertTrue(modified);
+
+        String result = pom.getSource();
+        assertEquals(1, StringUtils.countMatches(result, "<myVersion>" + newVersion + "</myVersion>"));
+        assertEquals(1, StringUtils.countMatches(result, "<properties>"));
+    }
 
     @ParameterizedTest
     @MethodSource("updatablePoms")
