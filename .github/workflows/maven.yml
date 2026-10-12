@@ -24,6 +24,9 @@ jobs:
     name: Verify
     uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v5
     with:
+      # Temurin comes from the runners' tool cache; Zulu is downloaded on every job
+      jdk-distribution-matrix: '[ "temurin" ]'
+      ff-jdk-distribution: 'temurin'
       matrix-exclude: >
         [
           {"os": "macos-latest", "jdk": "8"},
