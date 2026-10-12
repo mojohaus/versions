@@ -14,6 +14,19 @@ updates:
       patterns: ["*"]
       update-types: ["minor", "patch"]
   ignore:
+    # Stay on the Maven 3.9.x line; 3.10 is not the plugin baseline yet
+    - dependency-name: "org.apache.maven:maven-artifact"
+      versions: [">= 3.10.0"]
+    - dependency-name: "org.apache.maven:maven-core"
+      versions: [">= 3.10.0"]
+    - dependency-name: "org.apache.maven:maven-model"
+      versions: [">= 3.10.0"]
+    - dependency-name: "org.apache.maven:maven-model-builder"
+      versions: [">= 3.10.0"]
+    - dependency-name: "org.apache.maven:maven-plugin-api"
+      versions: [">= 3.10.0"]
+    - dependency-name: "org.apache.maven:maven-settings"
+      versions: [">= 3.10.0"]
     # plexus-xml 4.x depends on the Maven 4 XML API
     - dependency-name: "org.codehaus.plexus:plexus-xml"
       versions: [">= 4.0.0"]
