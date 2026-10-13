@@ -24,7 +24,7 @@ jobs:
     name: Verify
     uses: mojohaus/.github/.github/workflows/maven-verify.yml@master
     with:
-      ff-goal: 'install'                # site use project version for reporting, no ITs
+      ff-goal: 'verify'                 # no ITs in the fail-fast build; the matrix runs them
       timeout-minutes: 45                # Windows with Maven 4 came close to the default 30
 
 #  deploy:
