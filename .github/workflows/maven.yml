@@ -24,6 +24,8 @@ jobs:
     name: Verify
     uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v5
     with:
+      # only master saves the Maven and JDK caches; other branches and pull requests restore them
+      cache-save-default-branch-only: true
       # Temurin comes from the runners' tool cache; Zulu is downloaded on every job
       jdk-distribution-matrix: '[ "temurin" ]'
       ff-jdk-distribution: 'temurin'
