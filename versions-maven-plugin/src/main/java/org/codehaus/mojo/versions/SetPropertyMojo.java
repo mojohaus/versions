@@ -89,12 +89,21 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
     private String propertiesVersionsFile;
 
     /**
-     * The Maven profile to apply the changes. If the provided profile is not found, no changes will be applied
+     * The Maven profile to apply the changes. If the provided profile is not found, no changes will be applied,
+     * unless {@code insert=true}, in which case the profile and property are created.
      *
      * @since 2.15
      */
     @Parameter(property = "profileId")
     private String profileId = null;
+
+    /**
+     * Whether to insert a new version property or just replace an existing one.
+     *
+     * @since 2.23.1
+     */
+    @Parameter(property = "insert", defaultValue = "false")
+    private boolean insert;
 
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.
@@ -197,11 +206,11 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
                         .map(profile -> profile.getProperties().getProperty(currentProperty.getName()))
                         .orElse(null);
             }
-            if (currentVersion == null) {
+            if (currentVersion == null && !insert) {
                 continue;
             }
             PomHelper.setPropertyVersion(
-                    pom, profileToApply, currentProperty.getName(), defaultString(newVersionGiven));
+                    pom, profileToApply, currentProperty.getName(), defaultString(newVersionGiven), insert);
         }
     }
 
