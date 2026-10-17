@@ -44,10 +44,11 @@ public class PropertyVersionInternal {
         END,
         VALUE_START,
         VALUE_END,
-        PRE_PROFILE_PROPERTY_START,
-        PRE_PROFILE_PROPERTY_END,
-        PRE_PROFILE_VALUE_START,
-        PRE_PROFILE_VALUE_END
+
+        CANDIDATE_START,
+        CANDIDATE_END,
+        VALUE_CANDIDATE_START,
+        VALUE_CANDIDATE_END
     }
 
     /**
@@ -60,35 +61,16 @@ public class PropertyVersionInternal {
         PROJECT_PROPERTY,
 
         PROFILES,
-
         PROFILE_CANDIDATE,
-        PROFILE_CANDIDATE_WITH_PRE_ID_PROPERTIES,
-        PROFILE_CANDIDATE_WITH_PRE_ID_VALUE,
-
         PROFILE_MATCHED,
-        PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES,
-        PROFILE_MATCHED_WITH_PRE_ID_VALUE,
         PROFILE_MATCHED_PROPERTIES,
         PROFILE_MATCHED_PROPERTY,
-        PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTIES,
-        PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTY,
-        PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTIES,
-        PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTY,
         PROFILE_UNMATCHED,
 
         PROJECT_END;
 
-        boolean isCandidate() {
-            return this == PROFILE_CANDIDATE
-                    || this == PROFILE_CANDIDATE_WITH_PRE_ID_PROPERTIES
-                    || this == PROFILE_CANDIDATE_WITH_PRE_ID_VALUE;
-        }
-
         boolean isPropertyValueState() {
-            return this == State.PROJECT_PROPERTY
-                    || this == State.PROFILE_MATCHED_PROPERTY
-                    || this == State.PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTY
-                    || this == State.PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTY;
+            return this == State.PROJECT_PROPERTY || this == State.PROFILE_MATCHED_PROPERTY;
         }
     }
 
@@ -103,12 +85,7 @@ public class PropertyVersionInternal {
          */
         NONE {
             @Override
-            boolean apply(
-                    MutableXMLStreamReader pom,
-                    String propertyName,
-                    String value,
-                    String indentation,
-                    String lineSeparator) {
+            boolean apply(PropertyVersionInternal context) {
                 return false;
             }
         },
@@ -117,28 +94,15 @@ public class PropertyVersionInternal {
          */
         VALUE {
             @Override
-            boolean apply(
-                    MutableXMLStreamReader pom,
-                    String propertyName,
-                    String value,
-                    String indentation,
-                    String lineSeparator) {
-                pom.replaceBetween(Marks.VALUE_START, Marks.VALUE_END, value);
-                return true;
-            }
-        },
-        /**
-         * Replaces a property value found in a profile section scanned before its {@code id} was encountered.
-         */
-        PRE_PROFILE_VALUE {
-            @Override
-            boolean apply(
-                    MutableXMLStreamReader pom,
-                    String propertyName,
-                    String value,
-                    String indentation,
-                    String lineSeparator) {
-                pom.replaceBetween(Marks.PRE_PROFILE_VALUE_START, Marks.PRE_PROFILE_VALUE_END, value);
+            boolean apply(PropertyVersionInternal context) {
+                boolean useValueMark = context.pom.hasMark(Marks.VALUE_END);
+                Marks startMark = useValueMark ? Marks.VALUE_START : Marks.VALUE_CANDIDATE_START;
+                Marks endMark = useValueMark ? Marks.VALUE_END : Marks.VALUE_CANDIDATE_END;
+                String oldValue = context.pom.getBetween(startMark, endMark);
+                if (oldValue.equals(context.value)) {
+                    return false;
+                }
+                context.pom.replaceBetween(startMark, endMark, context.value);
                 return true;
             }
         },
@@ -147,17 +111,13 @@ public class PropertyVersionInternal {
          */
         PROJECT_PROPERTY {
             @Override
-            boolean apply(
-                    MutableXMLStreamReader pom,
-                    String propertyName,
-                    String value,
-                    String indentation,
-                    String lineSeparator) {
-                pom.replaceBetween(
+            boolean apply(PropertyVersionInternal context) {
+                context.pom.replaceBetween(
                         Marks.START,
                         Marks.END,
                         String.format(
-                                "%3$s<%1$s>%2$s</%1$s>%4$s%3$s", propertyName, value, indentation, lineSeparator));
+                                "%3$s<%1$s>%2$s</%1$s>%4$s%3$s",
+                                context.propertyName, context.value, context.indentation, context.lineSeparator));
                 return true;
             }
         },
@@ -166,38 +126,16 @@ public class PropertyVersionInternal {
          */
         PROFILE_PROPERTY {
             @Override
-            boolean apply(
-                    MutableXMLStreamReader pom,
-                    String propertyName,
-                    String value,
-                    String indentation,
-                    String lineSeparator) {
-                pom.replaceBetween(
-                        Marks.START,
-                        Marks.END,
+            boolean apply(PropertyVersionInternal context) {
+                boolean useCandidateMark = context.pom.hasMark(Marks.CANDIDATE_END);
+                Marks startMark = useCandidateMark ? Marks.CANDIDATE_START : Marks.START;
+                Marks endMark = useCandidateMark ? Marks.CANDIDATE_END : Marks.END;
+                context.pom.replaceBetween(
+                        startMark,
+                        endMark,
                         String.format(
                                 "%3$s<%1$s>%2$s</%1$s>%4$s%3$s%3$s%3$s",
-                                propertyName, value, indentation, lineSeparator));
-                return true;
-            }
-        },
-        /**
-         * Inserts a missing property entry into a profile {@code properties} section that appears before profile {@code id}.
-         */
-        PRE_PROFILE_PROPERTY {
-            @Override
-            boolean apply(
-                    MutableXMLStreamReader pom,
-                    String propertyName,
-                    String value,
-                    String indentation,
-                    String lineSeparator) {
-                pom.replaceBetween(
-                        Marks.PRE_PROFILE_PROPERTY_START,
-                        Marks.PRE_PROFILE_PROPERTY_END,
-                        String.format(
-                                "%3$s<%1$s>%2$s</%1$s>%4$s%3$s%3$s%3$s",
-                                propertyName, value, indentation, lineSeparator));
+                                context.propertyName, context.value, context.indentation, context.lineSeparator));
                 return true;
             }
         },
@@ -206,18 +144,13 @@ public class PropertyVersionInternal {
          */
         PROJECT_PROPERTIES {
             @Override
-            boolean apply(
-                    MutableXMLStreamReader pom,
-                    String propertyName,
-                    String value,
-                    String indentation,
-                    String lineSeparator) {
-                pom.replaceBetween(
+            boolean apply(PropertyVersionInternal context) {
+                context.pom.replaceBetween(
                         Marks.START,
                         Marks.END,
                         String.format(
                                 "%3$s<properties>%4$s%3$s%3$s<%1$s>%2$s</%1$s>%4$s%3$s</properties>%4$s",
-                                propertyName, value, indentation, lineSeparator));
+                                context.propertyName, context.value, context.indentation, context.lineSeparator));
                 return true;
             }
         },
@@ -226,18 +159,51 @@ public class PropertyVersionInternal {
          */
         PROFILE_PROPERTIES {
             @Override
-            boolean apply(
-                    MutableXMLStreamReader pom,
-                    String propertyName,
-                    String value,
-                    String indentation,
-                    String lineSeparator) {
-                pom.replaceBetween(
+            boolean apply(PropertyVersionInternal context) {
+                context.pom.replaceBetween(
                         Marks.START,
                         Marks.END,
                         String.format(
                                 "%3$s<properties>%4$s%3$s%3$s%3$s%3$s<%1$s>%2$s</%1$s>%4$s%3$s%3$s%3$s</properties>%4$s%3$s%3$s",
-                                propertyName, value, indentation, lineSeparator));
+                                context.propertyName, context.value, context.indentation, context.lineSeparator));
+                return true;
+            }
+        },
+        /**
+         * Inserts a missing {@code profiles} container with the requested profile and property.
+         */
+        PROJECT_PROFILES {
+            @Override
+            boolean apply(PropertyVersionInternal context) {
+                context.pom.replaceBetween(
+                        Marks.START,
+                        Marks.END,
+                        String.format(
+                                "%4$s<profiles>%5$s%4$s%4$s<profile>%5$s%4$s%4$s%4$s<id>%1$s</id>%5$s%4$s%4$s%4$s<properties>%5$s%4$s%4$s%4$s%4$s<%2$s>%3$s</%2$s>%5$s%4$s%4$s%4$s</properties>%5$s%4$s%4$s</profile>%5$s%4$s</profiles>%5$s",
+                                context.profileId,
+                                context.propertyName,
+                                context.value,
+                                context.indentation,
+                                context.lineSeparator));
+                return true;
+            }
+        },
+        /**
+         * Inserts a missing profile into an existing {@code profiles} container.
+         */
+        PROFILES_PROFILE {
+            @Override
+            boolean apply(PropertyVersionInternal context) {
+                context.pom.replaceBetween(
+                        Marks.START,
+                        Marks.END,
+                        String.format(
+                                "%4$s<profile>%5$s%4$s%4$s%4$s<id>%1$s</id>%5$s%4$s%4$s%4$s<properties>%5$s%4$s%4$s%4$s%4$s<%2$s>%3$s</%2$s>%5$s%4$s%4$s%4$s</properties>%5$s%4$s%4$s</profile>%5$s%4$s",
+                                context.profileId,
+                                context.propertyName,
+                                context.value,
+                                context.indentation,
+                                context.lineSeparator));
                 return true;
             }
         };
@@ -247,12 +213,7 @@ public class PropertyVersionInternal {
          *
          * @return {@code true} if the pom was modified
          */
-        abstract boolean apply(
-                MutableXMLStreamReader pom,
-                String propertyName,
-                String value,
-                String indentation,
-                String lineSeparator);
+        abstract boolean apply(PropertyVersionInternal context);
     }
 
     /**
@@ -300,18 +261,18 @@ public class PropertyVersionInternal {
         }
 
         boolean replaced = false;
-        if (insert || result == Template.VALUE || result == Template.PRE_PROFILE_VALUE) {
-            replaced = result.apply(pom, propertyName, value, indentation, lineSeparator);
+        if (insert || result == Template.VALUE) {
+            replaced = result.apply(this);
         }
 
         pom.clearMark(Marks.START);
         pom.clearMark(Marks.END);
         pom.clearMark(Marks.VALUE_START);
         pom.clearMark(Marks.VALUE_END);
-        pom.clearMark(Marks.PRE_PROFILE_PROPERTY_START);
-        pom.clearMark(Marks.PRE_PROFILE_PROPERTY_END);
-        pom.clearMark(Marks.PRE_PROFILE_VALUE_START);
-        pom.clearMark(Marks.PRE_PROFILE_VALUE_END);
+        pom.clearMark(Marks.CANDIDATE_START);
+        pom.clearMark(Marks.CANDIDATE_END);
+        pom.clearMark(Marks.VALUE_CANDIDATE_START);
+        pom.clearMark(Marks.VALUE_CANDIDATE_END);
         return replaced;
     }
 
@@ -331,22 +292,23 @@ public class PropertyVersionInternal {
                     }
                 } else {
                     if ("profiles".equals(name)) {
+                        markStartWhileSearchingInsertionTarget();
                         return State.PROFILES;
                     }
                 }
                 break;
             case PROFILES:
                 if ("profile".equals(name)) {
-                    clearPreIdProfileMarks();
+                    if (result != Template.NONE) {
+                        pom.skipElement();
+                        return State.PROFILES;
+                    }
+                    clearCandidateMarks();
                     return State.PROFILE_CANDIDATE;
                 }
                 break;
             case PROFILE_CANDIDATE:
-            case PROFILE_CANDIDATE_WITH_PRE_ID_PROPERTIES:
-            case PROFILE_CANDIDATE_WITH_PRE_ID_VALUE:
             case PROFILE_MATCHED:
-            case PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES:
-            case PROFILE_MATCHED_WITH_PRE_ID_VALUE:
             case PROFILE_UNMATCHED:
                 if ("id".equals(name)) {
                     return handleStartProfileId(state);
@@ -356,16 +318,8 @@ public class PropertyVersionInternal {
                         markStartWhileSearchingInsertionTarget();
                         return State.PROFILE_MATCHED_PROPERTIES;
                     }
-                    if (state == State.PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES) {
-                        markStartWhileSearchingInsertionTarget();
-                        return State.PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTIES;
-                    }
-                    if (state == State.PROFILE_MATCHED_WITH_PRE_ID_VALUE) {
-                        markStartWhileSearchingInsertionTarget();
-                        return State.PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTIES;
-                    }
-                    if (state.isCandidate()) {
-                        return scanPropertiesBeforeProfileId(state);
+                    if (state == State.PROFILE_CANDIDATE) {
+                        return scanPropertiesBeforeProfileId();
                     } else {
                         pom.skipElement();
                     }
@@ -382,18 +336,6 @@ public class PropertyVersionInternal {
                 if (propertyName.equals(name)) {
                     pom.mark(Marks.VALUE_START);
                     return State.PROFILE_MATCHED_PROPERTY;
-                }
-                break;
-            case PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTIES:
-                if (propertyName.equals(name)) {
-                    pom.mark(Marks.VALUE_START);
-                    return State.PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTY;
-                }
-                break;
-            case PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTIES:
-                if (propertyName.equals(name)) {
-                    pom.mark(Marks.VALUE_START);
-                    return State.PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTY;
                 }
                 break;
             default:
@@ -413,17 +355,13 @@ public class PropertyVersionInternal {
 
     private State handleStartProfileId(State state) throws XMLStreamException {
         if (profileId.equals(pom.getElementText().trim())) {
-            if (state == State.PROFILE_CANDIDATE_WITH_PRE_ID_VALUE) {
-                result = Template.PRE_PROFILE_VALUE;
-                state = State.PROFILE_MATCHED_WITH_PRE_ID_VALUE;
-            } else if (state == State.PROFILE_CANDIDATE_WITH_PRE_ID_PROPERTIES) {
-                state = State.PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES;
-            } else {
-                state = State.PROFILE_MATCHED;
+            if (state == State.PROFILE_CANDIDATE && pom.hasMark(Marks.VALUE_CANDIDATE_END)) {
+                result = Template.VALUE;
             }
+            state = State.PROFILE_MATCHED;
         } else {
             state = State.PROFILE_UNMATCHED;
-            clearPreIdProfileMarks();
+            clearCandidateMarks();
         }
         // getElementText could've pushed the pointer to END_ELEMENT
         if (!pom.isEndElement()) {
@@ -433,11 +371,9 @@ public class PropertyVersionInternal {
         return state;
     }
 
-    private State scanPropertiesBeforeProfileId(State state) throws XMLStreamException {
-        State resultState = state == State.PROFILE_CANDIDATE_WITH_PRE_ID_VALUE
-                ? State.PROFILE_CANDIDATE_WITH_PRE_ID_VALUE
-                : State.PROFILE_CANDIDATE_WITH_PRE_ID_PROPERTIES;
-        pom.mark(Marks.PRE_PROFILE_PROPERTY_START);
+    private State scanPropertiesBeforeProfileId() throws XMLStreamException {
+        State resultState = State.PROFILE_CANDIDATE;
+        pom.mark(Marks.CANDIDATE_START);
         boolean inTargetProperty = false;
 
         while (pom.hasNext()) {
@@ -445,7 +381,7 @@ public class PropertyVersionInternal {
 
             if (pom.isStartElement()) {
                 if (propertyName.equals(pom.getLocalName())) {
-                    pom.mark(Marks.PRE_PROFILE_VALUE_START);
+                    pom.mark(Marks.VALUE_CANDIDATE_START);
                     inTargetProperty = true;
                     continue;
                 }
@@ -455,30 +391,29 @@ public class PropertyVersionInternal {
 
             if (pom.isEndElement()) {
                 if (inTargetProperty && propertyName.equals(pom.getLocalName())) {
-                    pom.mark(Marks.PRE_PROFILE_VALUE_END);
-                    resultState = State.PROFILE_CANDIDATE_WITH_PRE_ID_VALUE;
+                    pom.mark(Marks.VALUE_CANDIDATE_END);
                     inTargetProperty = false;
                     continue;
                 }
                 if ("properties".equals(pom.getLocalName())) {
-                    pom.mark(Marks.PRE_PROFILE_PROPERTY_END);
+                    pom.mark(Marks.CANDIDATE_END);
                     return resultState;
                 }
                 continue;
             }
 
             if (!inTargetProperty) {
-                pom.mark(Marks.PRE_PROFILE_PROPERTY_START);
+                pom.mark(Marks.CANDIDATE_START);
             }
         }
         return resultState;
     }
 
-    private void clearPreIdProfileMarks() {
-        pom.clearMark(Marks.PRE_PROFILE_PROPERTY_START);
-        pom.clearMark(Marks.PRE_PROFILE_PROPERTY_END);
-        pom.clearMark(Marks.PRE_PROFILE_VALUE_START);
-        pom.clearMark(Marks.PRE_PROFILE_VALUE_END);
+    private void clearCandidateMarks() {
+        pom.clearMark(Marks.CANDIDATE_START);
+        pom.clearMark(Marks.CANDIDATE_END);
+        pom.clearMark(Marks.VALUE_CANDIDATE_START);
+        pom.clearMark(Marks.VALUE_CANDIDATE_END);
     }
 
     private State handleEndElement(State state, String name) {
@@ -490,15 +425,11 @@ public class PropertyVersionInternal {
                 break;
             case PROFILES:
                 if ("profiles".equals(name)) {
-                    return State.PROJECT;
+                    return handleEndProfiles();
                 }
                 break;
             case PROFILE_CANDIDATE:
-            case PROFILE_CANDIDATE_WITH_PRE_ID_PROPERTIES:
-            case PROFILE_CANDIDATE_WITH_PRE_ID_VALUE:
             case PROFILE_MATCHED:
-            case PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES:
-            case PROFILE_MATCHED_WITH_PRE_ID_VALUE:
             case PROFILE_UNMATCHED:
                 if ("profile".equals(name)) {
                     return handleEndProfile(state);
@@ -514,16 +445,6 @@ public class PropertyVersionInternal {
                     return handleEndMatchedProfileProperties(State.PROFILE_MATCHED);
                 }
                 break;
-            case PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTIES:
-                if ("properties".equals(name)) {
-                    return handleEndMatchedProfileProperties(State.PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES);
-                }
-                break;
-            case PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTIES:
-                if ("properties".equals(name)) {
-                    return handleEndMatchedProfileProperties(State.PROFILE_MATCHED_WITH_PRE_ID_VALUE);
-                }
-                break;
             case PROJECT_PROPERTY:
                 if (propertyName.equals(name)) {
                     return handleEndProperty(State.PROJECT_PROPERTIES);
@@ -534,42 +455,44 @@ public class PropertyVersionInternal {
                     return handleEndProperty(State.PROFILE_MATCHED_PROPERTIES);
                 }
                 break;
-            case PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTY:
-                if (propertyName.equals(name)) {
-                    return handleEndProperty(State.PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES_PROPERTIES);
-                }
-                break;
-            case PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTY:
-                if (propertyName.equals(name)) {
-                    return handleEndProperty(State.PROFILE_MATCHED_WITH_PRE_ID_VALUE_PROPERTIES);
-                }
-                break;
             default:
                 break;
         }
         return state;
     }
 
-    private State handleEndProject() {
-        if (result == Template.NONE && profileId == null) {
+    private State handleEndProfiles() {
+        if (result == Template.NONE && profileId != null) {
             pom.mark(Marks.END);
-            result = Template.PROJECT_PROPERTIES;
+            result = Template.PROFILES_PROFILE;
+        }
+        return State.PROJECT;
+    }
+
+    private State handleEndProject() {
+        if (result == Template.NONE) {
+            pom.mark(Marks.END);
+            if (profileId == null) {
+                result = Template.PROJECT_PROPERTIES;
+            } else {
+                result = Template.PROJECT_PROFILES;
+            }
         }
         return State.PROJECT_END;
     }
 
     private State handleEndProfile(State state) {
-        if (state == State.PROFILE_MATCHED_WITH_PRE_ID_PROPERTIES || state == State.PROFILE_MATCHED_WITH_PRE_ID_VALUE) {
+        if (state == State.PROFILE_MATCHED) {
             if (result == Template.NONE) {
-                result = Template.PRE_PROFILE_PROPERTY;
-            }
-        } else if (state == State.PROFILE_MATCHED) {
-            if (result == Template.NONE) {
-                pom.mark(Marks.END);
-                result = Template.PROFILE_PROPERTIES;
+                if (pom.hasMark(Marks.CANDIDATE_END)) {
+                    result = Template.PROFILE_PROPERTY;
+                } else {
+                    pom.mark(Marks.END);
+                    result = Template.PROFILE_PROPERTIES;
+                }
             }
         } else {
-            clearPreIdProfileMarks();
+            clearCandidateMarks();
         }
 
         return State.PROFILES;

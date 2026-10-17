@@ -89,7 +89,8 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
     private String propertiesVersionsFile;
 
     /**
-     * The Maven profile to apply the changes. If the provided profile is not found, no changes will be applied
+     * The Maven profile to apply the changes. If the provided profile is not found, no changes will be applied,
+     * unless {@code insert=true}, in which case the profile and property are created.
      *
      * @since 2.15
      */
@@ -205,7 +206,7 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
                         .map(profile -> profile.getProperties().getProperty(currentProperty.getName()))
                         .orElse(null);
             }
-            if (currentVersion == null) {
+            if (currentVersion == null && !insert) {
                 continue;
             }
             PomHelper.setPropertyVersion(
