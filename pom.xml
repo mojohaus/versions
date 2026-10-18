@@ -123,7 +123,7 @@
     <!-- the plugin runs on, and builds with, Maven 3.9.0 and later -->
     <minimalMavenBuildVersion>3.9.0</minimalMavenBuildVersion>
 
-    <doxiaVersion>2.1.0</doxiaVersion>
+    <doxiaVersion>2.2.0</doxiaVersion>
     <doxia-sitetoolsVersion>2.1.0</doxia-sitetoolsVersion>
     <reportingApiVersion>4.0.0</reportingApiVersion>
     <reportingImplVersion>4.0.0</reportingImplVersion>
@@ -139,7 +139,7 @@
     <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
     <modelloNamespaceRuleVersion>3.0.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
-    <byteBuddyVersion>1.18.14</byteBuddyVersion>
+    <byteBuddyVersion>1.18.15</byteBuddyVersion>
 
     <!-- use the same version as in Maven core -->
     <mavenResolverVersion>1.9.27</mavenResolverVersion>
