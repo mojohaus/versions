@@ -17,25 +17,14 @@
 
 name: GitHub CI
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
     name: Verify
-    uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v5
+    uses: mojohaus/.github/.github/workflows/maven-verify.yml@master
     with:
-      # Temurin comes from the runners' tool cache; Zulu is downloaded on every job
-      jdk-distribution-matrix: '[ "temurin" ]'
-      ff-jdk-distribution: 'temurin'
-      matrix-exclude: >
-        [
-          {"os": "macos-latest", "jdk": "8"},
-          {"os": "macos-latest", "jdk": "21"},
-          {"os": "windows-latest", "jdk": "21"}
-        ]
-      ff-goal: 'install'                # site use project version for reporting, no ITs
-      verify-goal: '-P run-its verify'
-      maven4-enabled: true
+      ff-goal: 'verify'                 # no ITs in the fail-fast build; the matrix runs them
       timeout-minutes: 45                # Windows with Maven 4 came close to the default 30
 
 #  deploy:
