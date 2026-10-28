@@ -221,7 +221,7 @@ public class PomHelper {
      * @param property  The property to modify.
      * @param value     The new value of the property.
      * @return <code>true</code> if a replacement was made.
-     * @throws XMLStreamException if somethinh went wrong.
+     * @throws XMLStreamException if something went wrong.
      */
     public static boolean setPropertyVersion(
             MutableXMLStreamReader pom, String profileId, String property, String value) throws XMLStreamException {
@@ -286,7 +286,7 @@ public class PomHelper {
      * @param pom   The pom to modify.
      * @param value The new value of the property.
      * @return <code>true</code> if a replacement was made.
-     * @throws XMLStreamException if somethinh went wrong.
+     * @throws XMLStreamException if something went wrong.
      */
     public static boolean setProjectVersion(final MutableXMLStreamReader pom, final String value)
             throws XMLStreamException {
