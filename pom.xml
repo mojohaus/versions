@@ -131,6 +131,7 @@
     <mockitoVersion>4.11.0</mockitoVersion>
     <woodstoxVersion>7.3.0</woodstoxVersion>
     <stax2ApiVersion>4.3.2</stax2ApiVersion>
+    <mavenSharedUtilsVersion>3.4.2</mavenSharedUtilsVersion>
 
     <!-- dotted property can not be used in .vm -->
     <pluginVersion>${project.version}</pluginVersion>
@@ -202,6 +203,11 @@
         <groupId>org.codehaus.woodstox</groupId>
         <artifactId>stax2-api</artifactId>
         <version>${stax2ApiVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.maven.shared</groupId>
+        <artifactId>maven-shared-utils</artifactId>
+        <version>${mavenSharedUtilsVersion}</version>
       </dependency>
 
       <dependency>
