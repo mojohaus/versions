@@ -125,13 +125,13 @@
 
     <doxiaVersion>2.2.0</doxiaVersion>
     <doxia-sitetoolsVersion>2.1.0</doxia-sitetoolsVersion>
-    <reportingApiVersion>4.0.0</reportingApiVersion>
+    <reportingApiVersion>4.1.0</reportingApiVersion>
     <reportingImplVersion>4.0.0</reportingImplVersion>
 
     <mockitoVersion>4.11.0</mockitoVersion>
     <woodstoxVersion>7.3.0</woodstoxVersion>
     <stax2ApiVersion>4.3.2</stax2ApiVersion>
-    <mavenSharedUtilsVersion>3.4.2</mavenSharedUtilsVersion>
+    <mavenSharedUtilsVersion>3.5.0</mavenSharedUtilsVersion>
 
     <!-- dotted property can not be used in .vm -->
     <pluginVersion>${project.version}</pluginVersion>
@@ -140,11 +140,11 @@
     <fluidoVersion>${maven-fluido-skin.version}</fluidoVersion>
     <modelloNamespaceRuleVersion>3.0.0</modelloNamespaceRuleVersion>
     <modelloNamespaceReportVersion>2.0.0</modelloNamespaceReportVersion>
-    <byteBuddyVersion>1.18.15</byteBuddyVersion>
+    <byteBuddyVersion>1.18.16</byteBuddyVersion>
 
     <!-- use the same version as in Maven core -->
     <mavenResolverVersion>1.9.27</mavenResolverVersion>
-    <sisuVersion>1.1.0</sisuVersion>
+    <sisuVersion>1.1.1</sisuVersion>
 
     <scmpublish.content>${project.build.directory}/staging/versions</scmpublish.content>
     <!-- one IT per core: each IT is a short-lived Maven JVM, and at 0.75C one core of the 4-vCPU CI runners stays idle -->
@@ -363,7 +363,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-archiver</artifactId>
-        <version>4.14.0</version>
+        <version>4.15.0</version>
       </dependency>
       <dependency>
         <groupId>javax.inject</groupId>
