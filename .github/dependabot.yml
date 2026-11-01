@@ -39,6 +39,9 @@ updates:
     # Maven 3 so use SLF4J 1.7.x
     - dependency-name: "org.slf4j:*"
       versions: [">= 2.0.0"]
+    # Report plugin: maven-site-plugin 3.22 and older load maven-reporting-api 4.0.0
+    - dependency-name: "org.apache.maven.reporting:maven-reporting-api"
+      versions: [">= 4.1.0"]
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
