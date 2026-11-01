@@ -94,17 +94,17 @@ public abstract class VersionsReportRendererBase extends AbstractMavenReportRend
     }
 
     /**
-     * Renders a warning icon.
+     * Renders the warning status as text.
      */
-    protected void renderWarningIcon() {
-        sink.figureGraphics("images/icon_warning_sml.gif");
+    protected void renderWarningStatus() {
+        sink.text(getText("report.status.warning"));
     }
 
     /**
-     * Renders a success icon.
+     * Renders the success status as text.
      */
-    protected void renderSuccessIcon() {
-        sink.figureGraphics("images/icon_success_sml.gif");
+    protected void renderSuccessStatus() {
+        sink.text(getText("report.status.success"));
     }
 
     /**

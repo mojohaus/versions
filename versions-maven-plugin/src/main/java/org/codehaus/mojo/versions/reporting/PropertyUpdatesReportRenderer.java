@@ -116,7 +116,7 @@ public class PropertyUpdatesReportRenderer extends AbstractVersionsReportRendere
         sink.tableRow();
 
         sink.tableCell();
-        renderIcon(upToDate);
+        renderStatus(upToDate);
         sink.tableCell_();
 
         renderCells("${" + property.getName() + "}", details.getCurrentVersion());

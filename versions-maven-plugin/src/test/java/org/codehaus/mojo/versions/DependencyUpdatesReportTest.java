@@ -192,6 +192,9 @@ public class DependencyUpdatesReportTest {
         assertTextContains(output, "artifactA");
         assertTextNotContains(output, "artifactB");
         assertTextNotContains(output, "artifactC");
+        // status is text, not the site skin's images
+        assertTextContains(output, "report.status.warning");
+        assertTextNotContains(output, "icon_warning_sml");
     }
 
     @Test

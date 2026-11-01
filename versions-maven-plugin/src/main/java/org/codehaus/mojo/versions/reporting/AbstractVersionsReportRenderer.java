@@ -159,7 +159,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     protected void renderStatRow(String textKey, int statCount, boolean forceSuccessIcon) {
         sink.tableRow();
         sink.tableCell();
-        renderIcon(statCount == 0 || forceSuccessIcon);
+        renderStatus(statCount == 0 || forceSuccessIcon);
         sink.tableCell_();
         sink.tableCell();
         sink.text(getText(textKey));
@@ -171,14 +171,14 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
     }
 
     /**
-     * Renders the success or warning icon.
-     * @param success if true, the success icon will be rendered, otherwise the warning icon will be rendered.
+     * Renders the success or warning status.
+     * @param success if true, the success status will be rendered, otherwise the warning status will be rendered.
      */
-    protected void renderIcon(boolean success) {
+    protected void renderStatus(boolean success) {
         if (success) {
-            renderSuccessIcon();
+            renderSuccessStatus();
         } else {
-            renderWarningIcon();
+            renderWarningStatus();
         }
     }
 
@@ -246,7 +246,7 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
         sink.tableRow();
 
         sink.tableCell();
-        renderIcon(upToDate);
+        renderStatus(upToDate);
         sink.tableCell_();
 
         renderCells(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
@@ -340,23 +340,23 @@ public abstract class AbstractVersionsReportRenderer<T> extends VersionsReportRe
      */
     protected void renderStatus(AbstractVersionDetails details) {
         if (newestUpdateCache.get(details, of(SUBINCREMENTAL), isAllowSnapshots()) != null) {
-            renderWarningIcon();
+            renderWarningStatus();
             sink.nonBreakingSpace();
             sink.text(getText("report.otherUpdatesAvailable"));
         } else if (newestUpdateCache.get(details, of(INCREMENTAL), isAllowSnapshots()) != null) {
-            renderWarningIcon();
+            renderWarningStatus();
             sink.nonBreakingSpace();
             sink.text(getText("report.incrementalUpdatesAvailable"));
         } else if (newestUpdateCache.get(details, of(MINOR), isAllowSnapshots()) != null) {
-            renderWarningIcon();
+            renderWarningStatus();
             sink.nonBreakingSpace();
             sink.text(getText("report.minorUpdatesAvailable"));
         } else if (newestUpdateCache.get(details, of(MAJOR), isAllowSnapshots()) != null) {
-            renderWarningIcon();
+            renderWarningStatus();
             sink.nonBreakingSpace();
             sink.text(getText("report.majorUpdatesAvailable"));
         } else {
-            renderSuccessIcon();
+            renderSuccessStatus();
             sink.nonBreakingSpace();
             sink.text(getText("report.noUpdatesAvailable"));
         }
