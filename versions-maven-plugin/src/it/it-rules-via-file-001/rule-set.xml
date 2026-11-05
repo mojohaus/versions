@@ -1,0 +1,5 @@
+<ruleset>
+  <ignoreVersions>
+    <ignoreVersion type="exact">3.0.1-1.1</ignoreVersion>
+  </ignoreVersions>
+</ruleset>
