@@ -36,7 +36,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.ResolverAdapter;
 import org.codehaus.mojo.versions.api.Segment;
@@ -55,6 +54,7 @@ import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.ExtensionUtils;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Displays all build and core extensions that have newer versions available.
@@ -166,7 +166,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
      *
      * @param artifactFactory an {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
-     * @param wagonMap       a map of wagon providers per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders a map of change recorders
      * @throws MojoExecutionException when things go wrong
      */
@@ -174,10 +174,10 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
     public DisplayExtensionUpdatesMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                 new DefaultResolverAdapter(artifactFactory, repositorySystem, getLog(), session);
         RuleService ruleService = new RulesServiceBuilder()
                 .withMavenSession(session)
-                .withWagonMap(wagonMap)
+                .withTransporterProvider(transporterProvider)
                 .withServerId(serverId)
                 .withRulesUri(rulesUri)
                 .withRuleSet(ruleSet)

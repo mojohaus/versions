@@ -55,7 +55,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.rtinfo.RuntimeInformation;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Segment;
@@ -70,6 +69,7 @@ import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static java.util.Collections.singletonList;
 
@@ -162,17 +162,17 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      *
      * @param artifactFactory   an {@link ArtifactFactory} instance
      * @param repositorySystem  a {@link RepositorySystem} instance
-     * @param wagonMap          a map of wagon providers per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders   a map of change recorders
      * @throws MojoExecutionException when things go wrong
      */
     public UseLatestVersionsMojoBase(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        this(artifactFactory, repositorySystem, null, null, wagonMap, changeRecorders);
+        this(artifactFactory, repositorySystem, null, null, transporterProvider, changeRecorders);
     }
 
     /**
@@ -182,7 +182,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      * @param repositorySystem   a {@link RepositorySystem} instance
      * @param projectBuilder     a {@link ProjectBuilder} instance, used to read the Maven prerequisites of plugins
      * @param runtimeInformation a {@link RuntimeInformation} instance
-     * @param wagonMap           a map of wagon providers per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders    a map of change recorders
      * @throws MojoExecutionException when things go wrong
      * @since 2.25.0
@@ -192,10 +192,10 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
             RepositorySystem repositorySystem,
             ProjectBuilder projectBuilder,
             RuntimeInformation runtimeInformation,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
         this.projectBuilder = projectBuilder;
         this.runtimeInformation = runtimeInformation;
     }

@@ -36,12 +36,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Scans the current projects child modules, updating the versions of any which use the current project to the version
@@ -80,7 +80,7 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
      *
      * @param artifactFactory  the artifact factory
      * @param repositorySystem the repository system
-     * @param wagonMap         the map of wagon implementations
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders  the change recorders
      * @throws MojoExecutionException when things go wrong
      */
@@ -88,10 +88,10 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
     public UpdateChildModulesMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
     }
 
     @Override

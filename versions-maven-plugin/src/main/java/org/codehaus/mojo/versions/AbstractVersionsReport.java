@@ -20,7 +20,6 @@ package org.codehaus.mojo.versions;
  */
 
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.doxia.sink.Sink;
@@ -30,7 +29,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionsHelper;
@@ -42,6 +40,7 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Base class for all versions reports.
@@ -72,7 +71,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     protected RepositorySystem repositorySystem;
 
     /**
-     * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
+     * settings.xml's server id for the URL. This is used when the server hosting the rules needs authentication.
      *
      * @since 1.0-alpha-3
      */
@@ -81,7 +80,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
 
     /**
      * URI of a ruleSet file containing the rules that control how to compare
-     * version numbers. The URI could be either a Wagon URI or a classpath URI
+     * version numbers. The URI could be either a URI served by a Maven Resolver transport (e.g. <code>file:</code> or <code>https:</code>) or a classpath URI
      * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
      *
      * @since 1.0-alpha-3
@@ -145,11 +144,11 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     protected ReportRendererFactory rendererFactory;
 
     /**
-     * (injected) map of {@link Wagon} instances per protocol
+     * (injected) provider of the Maven Resolver transporters used to load the rules
      *
      * @since 2.14.0
      */
-    protected Map<String, Wagon> wagonMap;
+    protected TransporterProvider transporterProvider;
 
     private final ArtifactFactory artifactFactory;
 
@@ -160,19 +159,19 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
      * @param i18n a {@link I18N} instance
      * @param artifactFactory a {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
-     * @param wagonMap a map of {@link Wagon} instances per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param rendererFactory a {@link ReportRendererFactory} instance
      */
     protected AbstractVersionsReport(
             I18N i18n,
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             ReportRendererFactory rendererFactory) {
         this.i18n = i18n;
         this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
-        this.wagonMap = wagonMap;
+        this.transporterProvider = transporterProvider;
         this.rendererFactory = rendererFactory;
     }
 
@@ -204,7 +203,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
         }
         try {
             RuleService ruleService = new RulesServiceBuilder()
-                    .withWagonMap(wagonMap)
+                    .withTransporterProvider(transporterProvider)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)

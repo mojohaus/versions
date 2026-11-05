@@ -3,33 +3,30 @@ package org.codehaus.mojo.versions.rule;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.observers.Debug;
-import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.model.IgnoreVersion;
 import org.codehaus.mojo.versions.model.RuleSet;
 import org.codehaus.mojo.versions.model.io.stax.RuleStaxReader;
-import org.eclipse.aether.repository.AuthenticationContext;
+import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.spi.connector.transport.GetTask;
+import org.eclipse.aether.spi.connector.transport.Transporter;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
+import org.eclipse.aether.transfer.NoTransporterException;
 
-import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -60,7 +57,7 @@ public class RulesServiceBuilder {
     private Log log;
     private MavenSession mavenSession;
 
-    private Map<String, Wagon> wagonMap;
+    private TransporterProvider transporterProvider;
 
     /**
      * Configure an additional collection of ignored versions to be merged into the resulting rules.
@@ -97,7 +94,7 @@ public class RulesServiceBuilder {
 
     /**
      * Configure a URI that points to an external rules XML document. Can be a classpath resource
-     * (prefix {@code classpath:}) or a remote URI handled via Wagon.
+     * (prefix {@code classpath:}) or a remote URI handled by a Maven Resolver transport.
      *
      * @param rulesUri the rules URI
      * @return this builder
@@ -130,13 +127,14 @@ public class RulesServiceBuilder {
     }
 
     /**
-     * Configure a map of Wagon implementations keyed by protocol.
+     * Configure the {@link TransporterProvider} used to fetch a remote {@code rulesUri} with the transports
+     * Maven Resolver is configured with (for example {@code file:}, {@code http:} and {@code https:}).
      *
-     * @param wagonMap map of protocol to {@link Wagon}
+     * @param transporterProvider the transporter provider
      * @return this builder
      */
-    public RulesServiceBuilder withWagonMap(Map<String, Wagon> wagonMap) {
-        this.wagonMap = wagonMap;
+    public RulesServiceBuilder withTransporterProvider(TransporterProvider transporterProvider) {
+        this.transporterProvider = transporterProvider;
         return this;
     }
 
@@ -160,7 +158,7 @@ public class RulesServiceBuilder {
                     ? new RuleSet()
                     : rulesUri.startsWith(CLASSPATH_PROTOCOL + ":")
                             ? getRulesFromClasspath(rulesUri, log)
-                            : getRulesUsingWagon(rulesUri);
+                            : getRulesUsingTransporter(rulesUri);
         }
         if (ignoredVersions != null && !ignoredVersions.isEmpty()) {
             ruleSet = enrichRuleSet(ignoredVersions, ruleSet);
@@ -217,7 +215,7 @@ public class RulesServiceBuilder {
         }
     }
 
-    private RuleSet getRulesUsingWagon(String rulesUri) throws MojoExecutionException {
+    private RuleSet getRulesUsingTransporter(String rulesUri) throws MojoExecutionException {
         RulesUri uri;
         try {
             uri = RulesUri.build(rulesUri);
@@ -226,103 +224,53 @@ public class RulesServiceBuilder {
             return null;
         }
 
+        if (transporterProvider == null) {
+            throw new MojoExecutionException(
+                    "Could not load specified rules from " + rulesUri + ": no TransporterProvider configured");
+        }
+
         RemoteRepository repository = remoteRepository(uri);
-        return ofNullable(wagonMap.get(repository.getProtocol()))
-                .map(wagon -> {
-                    if (log.isDebugEnabled()) {
-                        Debug debug = new Debug();
-                        wagon.addSessionListener(debug);
-                        wagon.addTransferListener(debug);
-                    }
+        if (log.isDebugEnabled()) {
+            log.debug("Connecting to remote repository \"" + repository.getId() + "\""
+                    + ofNullable(repository.getProxy())
+                            .map(p -> " using proxy " + p.getHost() + ":" + p.getPort())
+                            .orElse("")
+                    + (repository.getAuthentication() != null ? " with authentication" : ""));
+        }
 
-                    try {
-                        Optional<ProxyInfo> proxyInfo = getProxyInfo(repository);
-                        Optional<AuthenticationInfo> authenticationInfo = getAuthenticationInfo(repository);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Connecting to remote repository \"" + repository.getId() + "\""
-                                    + proxyInfo
-                                            .map(pi -> " using proxy " + pi.getHost() + ":" + pi.getPort())
-                                            .orElse("")
-                                    + authenticationInfo
-                                            .map(ai -> " as " + ai.getUserName())
-                                            .orElse(""));
-                        }
-                        wagon.connect(
-                                wagonRepository(repository),
-                                getAuthenticationInfo(repository).orElse(null),
-                                getProxyInfo(repository).orElse(null));
-                        try {
-                            Path tempFile = Files.createTempFile("rules-", ".xml");
-                            wagon.get(uri.resource, tempFile.toFile());
-                            try (InputStream is = Files.newInputStream(tempFile)) {
-                                return new RuleStaxReader().read(is);
-                            } finally {
-                                Files.deleteIfExists(tempFile);
-                            }
+        Transporter transporter;
+        try {
+            transporter = transporterProvider.newTransporter(mavenSession.getRepositorySession(), repository);
+        } catch (NoTransporterException e) {
+            throw new MojoExecutionException(
+                    "Could not load specified rules from " + rulesUri + ": no transport available for protocol \""
+                            + repository.getProtocol() + "\"",
+                    e);
+        }
 
-                        } finally {
-                            wagon.disconnect();
-                        }
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .orElseThrow(() -> new MojoExecutionException("Could not load specified rules from " + rulesUri));
-    }
-
-    private Optional<AuthenticationInfo> getAuthenticationInfo(RemoteRepository repository) {
-        return ofNullable(repository.getAuthentication()).map(authentication -> new AuthenticationInfo() {
-            {
-                try (AuthenticationContext authCtx =
-                        AuthenticationContext.forRepository(mavenSession.getRepositorySession(), repository)) {
-                    ofNullable(authCtx.get(AuthenticationContext.USERNAME)).ifPresent(this::setUserName);
-                    ofNullable(authCtx.get(AuthenticationContext.PASSWORD)).ifPresent(this::setPassword);
-                    ofNullable(authCtx.get(AuthenticationContext.PRIVATE_KEY_PASSPHRASE))
-                            .ifPresent(this::setPassphrase);
-                    ofNullable(authCtx.get(AuthenticationContext.PRIVATE_KEY_PATH))
-                            .ifPresent(this::setPrivateKey);
-                }
+        try {
+            GetTask task = new GetTask(URI.create(uri.resource));
+            transporter.get(task);
+            try (InputStream is = new ByteArrayInputStream(task.getDataBytes())) {
+                RuleSet result = new RuleStaxReader().read(is);
+                log.debug("Loaded rules from \"" + rulesUri + "\" successfully");
+                return result;
             }
-        });
-    }
-
-    private org.apache.maven.wagon.repository.Repository wagonRepository(RemoteRepository repository) {
-        return new org.apache.maven.wagon.repository.Repository(repository.getId(), repository.getUrl());
-    }
-
-    private Optional<ProxyInfo> getProxyInfo(RemoteRepository repository) {
-        return ofNullable(repository.getProxy()).map(proxy -> new ProxyInfo() {
-            {
-                setHost(proxy.getHost());
-                setPort(proxy.getPort());
-                setType(proxy.getType());
-                ofNullable(proxy.getAuthentication()).ifPresent(auth -> {
-                    try (AuthenticationContext authCtx =
-                            AuthenticationContext.forProxy(mavenSession.getRepositorySession(), repository)) {
-                        ofNullable(authCtx.get(AuthenticationContext.USERNAME)).ifPresent(this::setUserName);
-                        ofNullable(authCtx.get(AuthenticationContext.PASSWORD)).ifPresent(this::setPassword);
-                        ofNullable(authCtx.get(AuthenticationContext.NTLM_DOMAIN))
-                                .ifPresent(this::setNtlmDomain);
-                        ofNullable(authCtx.get(AuthenticationContext.NTLM_WORKSTATION))
-                                .ifPresent(this::setNtlmHost);
-                    }
-                });
-            }
-        });
+        } catch (Exception e) {
+            throw new MojoExecutionException("Could not load specified rules from " + rulesUri, e);
+        } finally {
+            transporter.close();
+        }
     }
 
     private RemoteRepository remoteRepository(RulesUri uri) {
-        RemoteRepository prototype = new RemoteRepository.Builder(serverId, null, uri.basePath).build();
+        // The rules location is a plain URL and not a repository, so mirrors are deliberately not applied
+        RemoteRepository prototype = new RemoteRepository.Builder(serverId, "default", uri.basePath).build();
         RemoteRepository.Builder builder = new RemoteRepository.Builder(prototype);
-        ofNullable(mavenSession.getRepositorySession().getProxySelector().getProxy(prototype))
-                .ifPresent(builder::setProxy);
-        ofNullable(mavenSession
-                        .getRepositorySession()
-                        .getAuthenticationSelector()
-                        .getAuthentication(prototype))
+        RepositorySystemSession repositorySession = mavenSession.getRepositorySession();
+        ofNullable(repositorySession.getProxySelector().getProxy(prototype)).ifPresent(builder::setProxy);
+        ofNullable(repositorySession.getAuthenticationSelector().getAuthentication(prototype))
                 .ifPresent(builder::setAuthentication);
-        ofNullable(mavenSession.getRepositorySession().getMirrorSelector().getMirror(prototype))
-                .ifPresent(mirror -> builder.setMirroredRepositories(singletonList(mirror)));
         return builder.build();
     }
 

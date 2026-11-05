@@ -34,7 +34,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.Segment;
@@ -44,6 +43,7 @@ import org.codehaus.mojo.versions.ordering.InvalidSegmentException;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -156,7 +156,7 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
      *
      * @param artifactFactory an {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
-     * @param wagonMap       a map of wagon providers per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders a map of change recorders
      * @throws MojoExecutionException when things go wrong
      */
@@ -164,10 +164,10 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
     public DisplayPropertyUpdatesMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
     }
 
     @Override

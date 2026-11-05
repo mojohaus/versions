@@ -46,7 +46,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
@@ -61,6 +60,7 @@ import org.codehaus.mojo.versions.utils.RegexUtils;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -270,7 +270,7 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
      * @param artifactFactory   the artifact factory
      * @param repositorySystem  the repository system
      * @param projectBuilder    the project builder
-     * @param wagonMap          the map of wagon implementations
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders   the change recorders
      * @param prompter          the prompter
      * @throws MojoExecutionException when things go wrong
@@ -280,11 +280,11 @@ public class SetMojo extends AbstractVersionsUpdaterMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             ProjectBuilder projectBuilder,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders,
             Prompter prompter)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
         this.projectBuilder = projectBuilder;
         this.prompter = prompter;
     }

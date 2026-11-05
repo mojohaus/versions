@@ -27,13 +27,13 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
@@ -50,7 +50,7 @@ public class PropertyUpdatesReport extends AbstractPropertyUpdatesReport {
      * @param i18n an {@link I18N} instance
      * @param artifactFactory a {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
-     * @param wagonMap a map of wagon implementations
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param rendererFactory a {@link ReportRendererFactory} instance
      */
     @Inject
@@ -58,9 +58,9 @@ public class PropertyUpdatesReport extends AbstractPropertyUpdatesReport {
             I18N i18n,
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             ReportRendererFactory rendererFactory) {
-        super(i18n, artifactFactory, repositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactFactory, repositorySystem, transporterProvider, rendererFactory);
     }
 
     /**

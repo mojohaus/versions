@@ -36,7 +36,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactAssociation;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.Property;
@@ -50,6 +49,7 @@ import org.codehaus.mojo.versions.recording.DefaultPropertyChangeRecord;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -158,17 +158,17 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
      *
      * @param artifactFactory   the artifact factory
      * @param repositorySystem  the repository system
-     * @param wagonMap          the map of wagon implementations
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders   the change recorders
      * @throws MojoExecutionException when things go wrong
      */
     public UpdatePropertiesMojoBase(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
     }
 
     @Override

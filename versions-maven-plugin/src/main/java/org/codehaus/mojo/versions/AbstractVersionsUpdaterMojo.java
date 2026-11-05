@@ -44,7 +44,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -62,6 +61,7 @@ import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Optional.ofNullable;
@@ -93,7 +93,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected List<MavenProject> reactorProjects;
 
     /**
-     * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
+     * settings.xml's server id for the URL. This is used when the server hosting the rules needs authentication.
      *
      * @since 1.0-alpha-3
      */
@@ -102,7 +102,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
 
     /**
      * URI of a ruleSet file containing the rules that control how to compare
-     * version numbers. The URI could be either a Wagon URI or a classpath URI
+     * version numbers. The URI could be either a URI served by a Maven Resolver transport (e.g. <code>file:</code> or <code>https:</code>) or a classpath URI
      * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
      *
      * @since 1.0-alpha-3
@@ -193,11 +193,11 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected boolean skip;
 
     /**
-     * (injected) map of {@link Wagon} instances per protocol
+     * (injected) provider of the Maven Resolver transporters used to load the rules
      *
      * @since 2.14.0
      */
-    protected final Map<String, Wagon> wagonMap;
+    protected final TransporterProvider transporterProvider;
 
     /**
      * An {@link ArtifactFactory} instance.
@@ -211,7 +211,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      *
      * @param artifactFactory the artifact factory
      * @param repositorySystem the repository system
-     * @param wagonMap map of wagon instances
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders map of change recorders
      * @throws MojoExecutionException when things go wrong
      */
@@ -219,12 +219,12 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected AbstractVersionsUpdaterMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
         this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
-        this.wagonMap = wagonMap;
+        this.transporterProvider = transporterProvider;
         this.changeRecorders = changeRecorders;
     }
 
@@ -251,7 +251,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
         if (helper == null) {
             RuleService ruleService = new RulesServiceBuilder()
                     .withMavenSession(session)
-                    .withWagonMap(wagonMap)
+                    .withTransporterProvider(transporterProvider)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)

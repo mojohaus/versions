@@ -31,7 +31,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.PropertyVersions;
 import org.codehaus.mojo.versions.api.VersionsHelper;
@@ -42,6 +41,7 @@ import org.codehaus.mojo.versions.utils.PropertyComparator;
 import org.codehaus.mojo.versions.xml.PropertyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Generates a report of available updates for properties of a project which are linked to the dependencies and/or
@@ -106,16 +106,16 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
      * @param i18n             {@link I18N} bean instance
      * @param artifactFactory  {@link ArtifactFactory} bean instance
      * @param repositorySystem {@link RepositorySystem} bean instance
-     * @param wagonMap         map of {@link Wagon} instances per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param rendererFactory  {@link ReportRendererFactory} instance
      */
     protected AbstractPropertyUpdatesReport(
             I18N i18n,
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             ReportRendererFactory rendererFactory) {
-        super(i18n, artifactFactory, repositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactFactory, repositorySystem, transporterProvider, rendererFactory);
     }
 
     /**
