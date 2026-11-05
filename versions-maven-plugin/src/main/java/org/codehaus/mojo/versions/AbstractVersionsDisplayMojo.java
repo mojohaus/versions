@@ -32,10 +32,10 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Abstract base class for the Display___ mojos.
@@ -102,7 +102,7 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
      * Creates a new instance.
      * @param artifactFactory a {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
-     * @param wagonMap a map of {@link Wagon} instances per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders a map of change recorders
      * @throws MojoExecutionException thrown if an error occurs
      */
@@ -110,10 +110,10 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
     protected AbstractVersionsDisplayMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
     }
 
     /**

@@ -46,7 +46,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.rtinfo.RuntimeInformation;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
@@ -54,6 +53,7 @@ import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static java.util.Optional.ofNullable;
 
@@ -150,7 +150,7 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @param artifactFactory   an {@link ArtifactFactory} instance
      * @param repositorySystem  a {@link RepositorySystem} instance
      * @param projectBuilder    a {@link ProjectBuilder} instance
-     * @param wagonMap          a map of wagon providers per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param lifecycleExecutor the (injected) instance of {@link LifecycleExecutor}
      * @param modelInterpolator the (injected) instance of {@link ModelInterpolator}
      * @param runtimeInformation the (injected) instance of {@link RuntimeInformation}
@@ -163,13 +163,13 @@ public class DisplayPluginUpdatesMojo extends AbstractVersionsDisplayMojo {
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
             ProjectBuilder projectBuilder,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             LifecycleExecutor lifecycleExecutor,
             ModelInterpolator modelInterpolator,
             RuntimeInformation runtimeInformation,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
         this.projectBuilder = projectBuilder;
         this.lifecycleExecutor = lifecycleExecutor;
         this.modelInterpolator = modelInterpolator;

@@ -42,7 +42,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.artifact.filter.PatternExcludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 import org.apache.maven.shared.artifact.filter.ScopeArtifactFilter;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.api.recording.DependencyChangeRecord;
@@ -52,6 +51,7 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Base class for a mojo that updates dependency versions.
@@ -132,7 +132,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * The reactor projects for the current build.
      * @param artifactFactory {@link ArtifactFactory} bean instance
      * @param repositorySystem {@link RepositorySystem} bean instance
-     * @param wagonMap a map of {@link Wagon} instances per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders a map of change recorders
      * @throws MojoExecutionException thrown if an error occurs
      */
@@ -140,10 +140,10 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
     protected AbstractVersionsDependencyUpdaterMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
     }
 
     /**

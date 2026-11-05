@@ -26,14 +26,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
@@ -43,6 +41,7 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Generates a report on available updates for parent artifacts
@@ -67,7 +66,7 @@ public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesMod
      * @param i18n an {@link I18N} instance
      * @param artifactFactory a {@link ArtifactFactory} instance
      * @param repositorySystem a {@link RepositorySystem} instance
-     * @param wagonMap a map of wagon implementations
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param rendererFactory a {@link ReportRendererFactory} instance
      */
     @Inject
@@ -75,9 +74,9 @@ public class ParentUpdatesReport extends AbstractVersionsReport<ParentUpdatesMod
             I18N i18n,
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             ReportRendererFactory rendererFactory) {
-        super(i18n, artifactFactory, repositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactFactory, repositorySystem, transporterProvider, rendererFactory);
     }
 
     /**

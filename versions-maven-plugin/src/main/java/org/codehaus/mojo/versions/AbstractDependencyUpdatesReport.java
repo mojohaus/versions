@@ -35,7 +35,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.MavenReportException;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
 import org.codehaus.mojo.versions.reporting.ReportRendererFactory;
@@ -46,6 +45,7 @@ import org.codehaus.mojo.versions.utils.MavenProjectUtils;
 import org.codehaus.mojo.versions.xml.DependencyUpdatesXmlReportRenderer;
 import org.codehaus.plexus.i18n.I18N;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static java.util.Collections.emptyMap;
 import static org.codehaus.mojo.versions.utils.MiscUtils.filter;
@@ -118,16 +118,16 @@ public abstract class AbstractDependencyUpdatesReport extends AbstractVersionsRe
      * @param i18n             {@link I18N} bean instance
      * @param artifactFactory  {@link ArtifactFactory} bean instance
      * @param repositorySystem {@link RepositorySystem} bean instance
-     * @param wagonMap         map of {@link Wagon} instances per protocol
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param rendererFactory  {@link ReportRendererFactory} instance
      */
     protected AbstractDependencyUpdatesReport(
             I18N i18n,
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             ReportRendererFactory rendererFactory) {
-        super(i18n, artifactFactory, repositorySystem, wagonMap, rendererFactory);
+        super(i18n, artifactFactory, repositorySystem, transporterProvider, rendererFactory);
     }
 
     /**

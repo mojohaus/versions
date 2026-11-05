@@ -19,10 +19,6 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.io.File;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,16 +40,9 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
-import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
+import org.codehaus.mojo.versions.utils.FileTransporterProvider;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.repository.RemoteRepository;
@@ -69,18 +58,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -307,27 +291,6 @@ class DefaultVersionsHelperTest {
         return createHelper(mock(RepositorySystem.class));
     }
 
-    @Deprecated
-    private static Wagon mockFileWagon(URI rulesUri)
-            throws AuthenticationException, ConnectionException, AuthorizationException, TransferFailedException,
-                    ResourceDoesNotExistException {
-        Wagon fileWagon = mock(Wagon.class);
-        doNothing()
-                .when(fileWagon)
-                .connect(
-                        any(org.apache.maven.wagon.repository.Repository.class),
-                        any(AuthenticationInfo.class),
-                        any(ProxyInfo.class));
-        doAnswer(i -> {
-                    File tempFile = i.getArgument(1);
-                    Files.copy(Paths.get(rulesUri), tempFile.toPath(), REPLACE_EXISTING);
-                    return null;
-                })
-                .when(fileWagon)
-                .get(anyString(), any(File.class));
-        return fileWagon;
-    }
-
     private DefaultVersionsHelper createHelper(RepositorySystem repositorySystem) throws Exception {
         final String resourcePath = "/" + getClass().getPackage().getName().replace('.', '/') + "/rules.xml";
         final String rulesUri =
@@ -341,7 +304,7 @@ class DefaultVersionsHelperTest {
                 .withMavenSession(mavenSession)
                 .withRuleService(new RulesServiceBuilder()
                         .withMavenSession(mavenSession)
-                        .withWagonMap(singletonMap("file", mockFileWagon(new URI(rulesUri))))
+                        .withTransporterProvider(new FileTransporterProvider())
                         .withServerId("")
                         .withRulesUri(rulesUri)
                         .withMavenSession(mavenSession)

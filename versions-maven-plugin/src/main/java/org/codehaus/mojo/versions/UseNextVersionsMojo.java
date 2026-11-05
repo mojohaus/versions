@@ -28,10 +28,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.rtinfo.RuntimeInformation;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Replaces any version with the latest version.
@@ -110,7 +110,7 @@ public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
      * @param repositorySystem the repository system
      * @param projectBuilder   the project builder
      * @param runtimeInformation the runtime information
-     * @param wagonMap         the map of wagon implementations
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders  the change recorders
      * @throws MojoExecutionException when things go wrong
      */
@@ -120,10 +120,10 @@ public class UseNextVersionsMojo extends UseLatestVersionsMojoBase {
             RepositorySystem repositorySystem,
             ProjectBuilder projectBuilder,
             RuntimeInformation runtimeInformation,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, projectBuilder, runtimeInformation, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, projectBuilder, runtimeInformation, transporterProvider, changeRecorders);
     }
 
     @Override

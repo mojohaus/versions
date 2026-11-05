@@ -18,7 +18,6 @@ package org.codehaus.mojo.versions.enforcer;
  * under the License.
  */
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -32,6 +31,7 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.MockUtils;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +45,7 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerMana
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,7 +84,7 @@ class MaxDependencyUpdatesTest {
                 artifactFactory,
                 artifactHandlerManager,
                 repositorySystem,
-                Collections.emptyMap(),
+                mock(TransporterProvider.class),
                 mavenSession,
                 mojoExecution);
         maxDependencyUpdates.setLog(enforcerLogger);

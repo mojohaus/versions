@@ -35,7 +35,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.Segment;
 import org.codehaus.mojo.versions.api.VersionRetrievalException;
@@ -47,6 +46,7 @@ import org.codehaus.mojo.versions.utils.ArtifactVersionService;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.mojo.versions.utils.SegmentUtils;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -149,7 +149,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      *
      * @param artifactFactory   the artifact factory
      * @param repositorySystem  the repository system
-     * @param wagonMap          the wagon map
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders   the change recorders
      * @throws MojoExecutionException if any
      */
@@ -157,10 +157,10 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
     public DisplayParentUpdatesMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
     }
 
     @Override

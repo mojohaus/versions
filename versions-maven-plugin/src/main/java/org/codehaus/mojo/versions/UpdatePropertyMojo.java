@@ -29,13 +29,13 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.Property;
 import org.codehaus.mojo.versions.api.VersionsHelper;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 /**
  * Sets a property to the latest version in a given range of associated artifacts.
@@ -101,7 +101,7 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
      *
      * @param artifactFactory  the artifact factory
      * @param repositorySystem the repository system
-     * @param wagonMap         the wagon map
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param changeRecorders  the change recorders
      * @throws MojoExecutionException if any
      */
@@ -109,10 +109,10 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
     public UpdatePropertyMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, transporterProvider, changeRecorders);
     }
 
     @Override

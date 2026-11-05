@@ -23,7 +23,6 @@ import javax.inject.Named;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,7 +39,6 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.DefaultVersionsHelper;
 import org.codehaus.mojo.versions.api.PomHelper;
@@ -54,6 +52,7 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.DependencyComparator;
 import org.codehaus.mojo.versions.utils.VersionsExpressionEvaluator;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -236,7 +235,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
     protected List<String> pluginManagementDependencyExcludes = emptyList();
 
     /**
-     * settings.xml's server id for the URL. This is used when wagon needs extra authentication information.
+     * settings.xml's server id for the URL. This is used when the server hosting the rules needs authentication.
      *
      * @since 2.14.0
      */
@@ -244,7 +243,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
 
     /**
      * URI of a ruleSet file containing the rules that control how to compare
-     * version numbers. The URI could be either a Wagon URI or a classpath URI
+     * version numbers. The URI could be either a URI served by a Maven Resolver transport (e.g. <code>file:</code> or <code>https:</code>) or a classpath URI
      * (e.g. <code>classpath:///package/sub/package/rules.xml</code>).
      *
      * @since 2.14.0
@@ -273,7 +272,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
 
     private final RepositorySystem repositorySystem;
 
-    private final Map<String, Wagon> wagonMap;
+    private final TransporterProvider transporterProvider;
 
     private final MavenSession mavenSession;
 
@@ -286,7 +285,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
      * @param artifactFactory artifact factory
      * @param artifactHandlerManager artifact handler manager
      * @param repositorySystem repository system
-     * @param wagonMap map of Wagon implementations
+     * @param transporterProvider the transporter provider used to load {@code rulesUri}
      * @param mavenSession current Maven session
      * @param mojoExecution mojo execution context
      */
@@ -296,14 +295,14 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
             ArtifactFactory artifactFactory,
             ArtifactHandlerManager artifactHandlerManager,
             RepositorySystem repositorySystem,
-            Map<String, Wagon> wagonMap,
+            TransporterProvider transporterProvider,
             MavenSession mavenSession,
             MojoExecution mojoExecution) {
         this.project = project;
         this.artifactFactory = artifactFactory;
         this.artifactHandlerManager = artifactHandlerManager;
         this.repositorySystem = repositorySystem;
-        this.wagonMap = wagonMap;
+        this.transporterProvider = transporterProvider;
         this.mavenSession = mavenSession;
         this.mojoExecution = mojoExecution;
     }
@@ -322,7 +321,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
         try {
             Log log = new PluginLogWrapper(getLog());
             RuleService ruleService = new RulesServiceBuilder()
-                    .withWagonMap(wagonMap)
+                    .withTransporterProvider(transporterProvider)
                     .withServerId(serverId)
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)
