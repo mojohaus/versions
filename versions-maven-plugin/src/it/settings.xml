@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
+  <servers>
+    <server>
+      <id>it-rules-server</id>
+      <username>it-user</username>
+      <password>it-secret</password>
+    </server>
+    <server>
+      <id>it-rules-server-wrong-password</id>
+      <username>it-user</username>
+      <password>not-the-secret</password>
+    </server>
+  </servers>
   <mirrors>
     <mirror>
       <id>mrm-maven-plugin</id>
