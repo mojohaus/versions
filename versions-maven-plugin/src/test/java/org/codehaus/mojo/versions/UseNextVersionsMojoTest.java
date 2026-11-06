@@ -61,6 +61,8 @@ public class UseNextVersionsMojoTest extends UseLatestVersionsMojoTestBase {
                     }
                 }),
                 null,
+                null,
+                null,
                 changeRecorder.asTestMap()) {
             {
                 setVariableValueToObject(this, "processDependencyManagement", false);

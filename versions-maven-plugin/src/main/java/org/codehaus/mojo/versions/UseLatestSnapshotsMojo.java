@@ -28,6 +28,8 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.rtinfo.RuntimeInformation;
 import org.apache.maven.wagon.Wagon;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -93,6 +95,18 @@ public class UseLatestSnapshotsMojo extends UseLatestVersionsMojoBase {
     @Parameter(property = "processParent", defaultValue = "false")
     private boolean processParent = false;
 
+    /**
+     * Whether to update the versions of plugins declared in the build, plugin management and reporting sections,
+     * including those of profiles. Only plugins with a version of their own in this pom are updated; a version held
+     * in a property is left to {@code update-properties}. A plugin version that requires a newer Maven than the
+     * project's minimum, taken from the Enforcer {@code requireMavenVersion} rule or {@code prerequisites}, is
+     * skipped; without either, the running Maven version is the limit.
+     *
+     * @since 2.25.0
+     */
+    @Parameter(property = "processPlugins", defaultValue = "false")
+    private boolean processPlugins;
+
     // ------------------------------ METHODS --------------------------
 
     /**
@@ -100,6 +114,8 @@ public class UseLatestSnapshotsMojo extends UseLatestVersionsMojoBase {
      *
      * @param artifactFactory  the artifact factory
      * @param repositorySystem the repository system
+     * @param projectBuilder   the project builder
+     * @param runtimeInformation the runtime information
      * @param wagonMap         the map of wagon implementations
      * @param changeRecorders  the change recorders
      * @throws MojoExecutionException when things go wrong
@@ -108,10 +124,12 @@ public class UseLatestSnapshotsMojo extends UseLatestVersionsMojoBase {
     public UseLatestSnapshotsMojo(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
+            ProjectBuilder projectBuilder,
+            RuntimeInformation runtimeInformation,
             Map<String, Wagon> wagonMap,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, wagonMap, changeRecorders);
+        super(artifactFactory, repositorySystem, projectBuilder, runtimeInformation, wagonMap, changeRecorders);
     }
 
     @Override
@@ -127,6 +145,11 @@ public class UseLatestSnapshotsMojo extends UseLatestVersionsMojoBase {
     @Override
     public boolean getProcessParent() {
         return processParent;
+    }
+
+    @Override
+    protected boolean getProcessPlugins() {
+        return processPlugins;
     }
 
     @Override

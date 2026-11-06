@@ -435,6 +435,18 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
     }
 
     /**
+     * Returns the includes and excludes as one filter for plugin artifacts. The scope is left out: plugins have none.
+     *
+     * @return the filter for plugin artifacts
+     */
+    ArtifactFilter includedPluginArtifacts() {
+        ArtifactFilter includesFilter = getIncludesArtifactFilter();
+        ArtifactFilter excludesFilter = getExcludesArtifactFilter();
+        return artifact -> (includesFilter == null || includesFilter.include(artifact))
+                && (excludesFilter == null || excludesFilter.include(artifact));
+    }
+
+    /**
      * Indicates whether any includes were specified via the 'includes' or 'includesList' options.
      *
      * @return true if includes were specified, false otherwise.
