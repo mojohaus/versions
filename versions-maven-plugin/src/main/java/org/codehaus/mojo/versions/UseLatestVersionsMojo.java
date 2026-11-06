@@ -160,7 +160,13 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
             TransporterProvider transporterProvider,
             Map<String, ChangeRecorder> changeRecorders)
             throws MojoExecutionException {
-        super(artifactFactory, repositorySystem, projectBuilder, runtimeInformation, transporterProvider, changeRecorders);
+        super(
+                artifactFactory,
+                repositorySystem,
+                projectBuilder,
+                runtimeInformation,
+                transporterProvider,
+                changeRecorders);
     }
 
     @Override
