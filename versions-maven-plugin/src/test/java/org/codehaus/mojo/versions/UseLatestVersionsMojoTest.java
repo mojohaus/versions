@@ -19,6 +19,7 @@ import javax.xml.stream.XMLStreamException;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.model.DependencyManagement;
@@ -35,6 +36,7 @@ import static java.util.Collections.emptyList;
 import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
 import static org.apache.maven.artifact.Artifact.SCOPE_COMPILE;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockMavenSession;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
@@ -303,5 +305,11 @@ public class UseLatestVersionsMojoTest extends UseLatestVersionsMojoTestBase {
                         .contains(new DefaultDependencyVersionChange(
                                 "default-group", "pre-release-artifact", "default", "1.0.0", "1.2.0-beta1")),
                 () -> String.valueOf(changeRecorder.getChanges()));
+    }
+
+    @Test
+    void usesTheConfiguredNumberOfThreads() throws Exception {
+        setVariableValueToObject(mojo, "numThreads", 2);
+        assertEquals(2, ((ThreadPoolExecutor) mojo.executor()).getMaximumPoolSize());
     }
 }

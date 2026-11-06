@@ -122,7 +122,15 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      */
     protected abstract Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream);
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+    // created on first use: numThreads is injected after the constructor has run
+    private ExecutorService executor;
+
+    synchronized ExecutorService executor() {
+        if (executor == null) {
+            executor = Executors.newFixedThreadPool(numThreads);
+        }
+        return executor;
+    }
 
     /**
      * Creates a new instance
@@ -318,7 +326,7 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
                                 }
                             }
                         },
-                        executor))
+                        executor()))
                 .toArray(CompletableFuture[]::new));
     }
 }
