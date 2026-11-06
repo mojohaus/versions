@@ -99,7 +99,7 @@ public class UseNextSnapshotsMojo extends UseLatestVersionsMojoBase {
      * including those of profiles. Only plugins with a version of their own in this pom are updated; a version held
      * in a property is left to {@code update-properties}. A plugin version that requires a newer Maven than the
      * project's minimum, taken from the Enforcer {@code requireMavenVersion} rule or {@code prerequisites}, is
-     * skipped; without either, the running Maven version is the limit.
+     * skipped; without either, the limit is the oldest Maven this goal runs on.
      *
      * @since 2.25.0
      */

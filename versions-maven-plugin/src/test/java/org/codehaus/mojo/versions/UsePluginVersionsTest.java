@@ -88,7 +88,7 @@ class UsePluginVersionsTest {
 
     @Test
     @InjectMojo(goal = "use-latest-releases", pom = "no-floor/pom.xml")
-    void usesTheRunningMavenWithoutAMinimum(AbstractVersionsUpdaterMojo mojo) throws Exception {
+    void usesTheGoalsOwnMinimumWithoutAProjectMinimum(AbstractVersionsUpdaterMojo mojo) throws Exception {
         assertTextContains(run(mojo), "<version>3.1</version>");
     }
 
