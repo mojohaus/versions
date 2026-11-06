@@ -139,5 +139,31 @@ While this example will only process the `project/dependencies` section of your 
 mvn versions:use-next-releases -DprocessDependencyManagement=false
 ```
 
+#set( $h2 = '##' )
+$h2 Updating plugin versions
 
+The same goals update plugin versions when you set `processPlugins`. This is off by default.
 
+```sh
+mvn versions:use-latest-releases -DprocessPlugins=true
+```
+
+The goal updates plugins that have a version of their own in the pom, in `build/plugins`,
+`build/pluginManagement` and `reporting`, including those in profiles. It leaves alone:
+
+* Plugins without a version, which take theirs from a parent or from Maven itself. To list them, see
+  [Checking for new plugin updates](./display-plugin-updates.html).
+* Plugins whose version is held in a property. Use [update-properties](./update-properties.html) for
+  those.
+
+A plugin version that requires a newer Maven than your project does is skipped. The goal takes the
+project's minimum Maven from the `requireMavenVersion` rule of the Maven Enforcer Plugin, or from
+`prerequisites`. If the project declares neither, the goal uses the version of Maven that runs it.
+
+`includes` and `excludes` apply to plugins as well, with the type `maven-plugin`. Without any `includes`,
+`processPlugins` updates every plugin with a version. To update only some plugins, name them:
+
+```sh
+mvn versions:use-latest-releases -DprocessPlugins=true -DprocessDependencies=false \
+  -DprocessDependencyManagement=false -Dincludes=org.apache.maven.plugins:*
+```

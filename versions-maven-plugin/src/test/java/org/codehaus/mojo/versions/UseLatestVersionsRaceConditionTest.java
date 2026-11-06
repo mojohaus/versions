@@ -99,6 +99,8 @@ public class UseLatestVersionsRaceConditionTest {
         return new UseLatestVersionsMojo(
                 artifactFactory,
                 MockUtils.mockAetherRepositorySystem(),
+                null,
+                null,
                 Collections.singletonMap("proto", testWagon),
                 changeRecorder.asTestMap()) {
             {

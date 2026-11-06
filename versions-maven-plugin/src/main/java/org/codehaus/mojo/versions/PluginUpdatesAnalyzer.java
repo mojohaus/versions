@@ -20,10 +20,10 @@ package org.codehaus.mojo.versions;
  */
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
@@ -50,6 +50,7 @@ import org.codehaus.mojo.versions.utils.DependencyBuilder;
 /**
  * Analyzes plugins in one project and repository context. Create a fresh instance for each
  * project/execution: prerequisite caches must never leak across repository configurations.
+ * The caches may be shared by the threads of one execution.
  */
 final class PluginUpdatesAnalyzer {
     private final ArtifactFactory artifactFactory;
@@ -62,9 +63,9 @@ final class PluginUpdatesAnalyzer {
     private final ArtifactVersion minimumMaven;
     private final boolean allowSnapshots;
     // Optional.empty means a resolved POM without prerequisites; missing POMs are cached separately.
-    private final Map<String, Optional<ArtifactVersion>> prerequisites = new HashMap<>();
-    private final Map<String, Exception> failures = new HashMap<>();
-    private final Map<String, ArtifactVersions> versions = new HashMap<>();
+    private final Map<String, Optional<ArtifactVersion>> prerequisites = new ConcurrentHashMap<>();
+    private final Map<String, Exception> failures = new ConcurrentHashMap<>();
+    private final Map<String, ArtifactVersions> versions = new ConcurrentHashMap<>();
 
     @SuppressWarnings("checkstyle:ParameterNumber")
     PluginUpdatesAnalyzer(
@@ -164,6 +165,20 @@ final class PluginUpdatesAnalyzer {
                         Arrays.stream(all.getAllUpdates(allowSnapshots)).collect(Collectors.toList())),
                 helper.lookupDependenciesUpdates(plugin.getDependencies().stream(), false, allowSnapshots),
                 allowSnapshots);
+    }
+
+    /**
+     * Returns the Maven version a plugin version declares in its {@code prerequisites}.
+     *
+     * @param plugin the plugin
+     * @param version the plugin version to inspect
+     * @return the required Maven version, empty if the plugin POM declares none
+     * @throws ArtifactResolutionException if the plugin POM cannot be resolved
+     * @throws ProjectBuildingException if the plugin POM cannot be built
+     */
+    Optional<ArtifactVersion> requiredMaven(Plugin plugin, String version)
+            throws MojoExecutionException, ArtifactResolutionException, ProjectBuildingException {
+        return Optional.ofNullable(prerequisite(plugin, version));
     }
 
     private ArtifactVersion prerequisite(Plugin plugin, String version)
