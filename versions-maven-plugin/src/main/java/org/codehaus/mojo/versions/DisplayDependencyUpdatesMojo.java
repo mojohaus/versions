@@ -427,6 +427,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                 .withRulesUri(rulesUri)
                 .withRuleSet(ruleSet)
                 .withIgnoredVersions(ignoredVersions)
+                .withDependabotConfig(dependabotConfig)
+                .withDependabotTargetBranch(dependabotTargetBranch)
                 .withLog(getLog())
                 .build();
         Optional<Segment> unchangedSegment = SegmentUtils.determineUnchangedSegment(
