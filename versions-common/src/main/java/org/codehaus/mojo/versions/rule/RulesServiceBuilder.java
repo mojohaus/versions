@@ -4,13 +4,18 @@ import javax.xml.stream.XMLStreamException;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.maven.execution.MavenSession;
@@ -58,6 +63,38 @@ public class RulesServiceBuilder {
     private MavenSession mavenSession;
 
     private TransporterProvider transporterProvider;
+
+    private String dependabotConfig;
+
+    private String dependabotTargetBranch;
+
+    /**
+     * Configure a Dependabot configuration file whose {@code ignore} entries are added to the resulting rules.
+     *
+     * A relative path is resolved against the multi-module project directory (the reactor root), not the
+     * current module.
+     *
+     * @param dependabotConfig path of the Dependabot configuration file, or {@code null} for none
+     * @return this builder
+     * @since 2.25.0
+     */
+    public RulesServiceBuilder withDependabotConfig(String dependabotConfig) {
+        this.dependabotConfig = dependabotConfig;
+        return this;
+    }
+
+    /**
+     * Configure the {@code target-branch} whose Dependabot entries apply. When {@code null}, the branch checked
+     * out in the git working tree holding the Dependabot configuration file is used.
+     *
+     * @param dependabotTargetBranch the branch name, or {@code null} to detect it
+     * @return this builder
+     * @since 2.25.0
+     */
+    public RulesServiceBuilder withDependabotTargetBranch(String dependabotTargetBranch) {
+        this.dependabotTargetBranch = dependabotTargetBranch;
+        return this;
+    }
 
     /**
      * Configure an additional collection of ignored versions to be merged into the resulting rules.
@@ -162,6 +199,14 @@ public class RulesServiceBuilder {
         }
         if (ignoredVersions != null && !ignoredVersions.isEmpty()) {
             ruleSet = enrichRuleSet(ignoredVersions, ruleSet);
+        }
+        if (!isBlank(dependabotConfig)) {
+            Path config = resolveAgainstReactorRoot(dependabotConfig);
+            if (!Files.isRegularFile(config)) {
+                throw new MojoExecutionException("Dependabot configuration " + config + " does not exist");
+            }
+            String branch = dependabotTargetBranch != null ? dependabotTargetBranch : detectBranch(config);
+            return new RuleService(log, ruleSet, DependabotRules.read(config, branch, log));
         }
         return new RuleService(log, ruleSet);
     }
@@ -272,6 +317,29 @@ public class RulesServiceBuilder {
         ofNullable(repositorySession.getAuthenticationSelector().getAuthentication(prototype))
                 .ifPresent(builder::setAuthentication);
         return builder.build();
+    }
+
+    private Path reactorRoot() {
+        File root = mavenSession.getRequest().getMultiModuleProjectDirectory();
+        return root != null ? root.toPath() : Paths.get(mavenSession.getExecutionRootDirectory());
+    }
+
+    private Path resolveAgainstReactorRoot(String path) {
+        Path p = Paths.get(path);
+        return p.isAbsolute() ? p : reactorRoot().resolve(p).normalize();
+    }
+
+    /**
+     * The branch of the tree being built, so that a configuration exported from the default branch
+     * to a temporary file still selects the entries of the branch checked out; then the branch of
+     * the tree holding the file.
+     */
+    private String detectBranch(Path config) {
+        Optional<String> branch = DependabotRules.currentBranch(reactorRoot());
+        if (!branch.isPresent()) {
+            branch = DependabotRules.currentBranch(config.getParent());
+        }
+        return branch.orElse(null);
     }
 
     /**

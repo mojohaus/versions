@@ -160,6 +160,44 @@ Examples:
 - `.+-SNAPSHOT`
 - `(.+-SNAPSHOT|.+-M\d),.+-(alpha|beta).+,3.0.0`
 
+$h3 Using the Dependabot configuration
+
+If the project already tells Dependabot which versions to skip, the plugin can apply the same `ignore`
+entries, so that a manual update run and Dependabot stay in step:
+
+```
+mvn versions:use-latest-releases -Dversions.dependabotConfig=.github/dependabot.yml
+```
+
+A relative path is resolved against the multi-module project directory. The plugin reads the
+`package-ecosystem: maven` entries whose `target-branch` is the branch checked out in that file's git
+working tree, or the branch given with `-Dversions.dependabotTargetBranch`. If no entry names the branch,
+the entries without a `target-branch` apply.
+
+Dependabot reads its configuration from the default branch only, so on a maintenance branch the file may
+be missing. Export it from the default branch and name the maintenance branch explicitly:
+
+```
+git show origin/master:.github/dependabot.yml > /tmp/dependabot.yml
+mvn versions:display-dependency-updates -Dversions.dependabotConfig=/tmp/dependabot.yml \
+    -Dversions.dependabotTargetBranch=maven-3.10.x
+```
+
+As in Dependabot, `dependency-name` is matched case-insensitively against the whole
+`groupId:artifactId`, and `*` matches any characters, including `:`. Every matching item applies, on top
+of the best-fitting rule from `ruleSet` or `rulesUri` and of `maven.version.ignore`:
+
+| Dependabot `versions` item | Ignored versions |
+|----------------------------|------------------|
+| `[1.3.0,)` | the Maven range, plus the pre-releases of its lower bound such as `1.3.0-beta1` |
+| `>= 5.0.0`, `>= 1.0, < 2.0` | the equivalent Maven range |
+| `1.2.+` | `[1.2,1.3)` |
+| `1.2.3` | that version |
+| no `versions` and no `update-types` | every version |
+
+`update-types` is skipped with a warning: it depends on the version in use, which a static rule cannot
+express. An item that sets `versions` as well still applies its `versions`.
+
 $h3 Ignoring certain versions
 
 It is possible to ignore versions on a global and on a per-rule basis.

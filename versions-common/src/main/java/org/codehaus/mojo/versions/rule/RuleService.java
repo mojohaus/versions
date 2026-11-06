@@ -1,6 +1,7 @@
 package org.codehaus.mojo.versions.rule;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,8 @@ public class RuleService {
 
     private final RuleSet ruleSet;
 
+    private final List<DependabotRules.Ignore> dependabotIgnores;
+
     /**
      * Creates a new {@code RuleService}.
      *
@@ -38,8 +41,22 @@ public class RuleService {
      * @param ruleSet the rules to apply; may be {@code null}
      */
     public RuleService(Log log, RuleSet ruleSet) {
+        this(log, ruleSet, Collections.emptyList());
+    }
+
+    /**
+     * Creates a new {@code RuleService} that also applies Dependabot ignore items. Unlike rules, of
+     * which only the best fit applies to an artifact, every matching item applies.
+     *
+     * @param log the Maven log to use; may be {@code null}
+     * @param ruleSet the rules to apply; may be {@code null}
+     * @param dependabotIgnores the Dependabot ignore items to apply in addition to the rules
+     * @since 2.25.0
+     */
+    public RuleService(Log log, RuleSet ruleSet, List<DependabotRules.Ignore> dependabotIgnores) {
         this.log = log;
         this.ruleSet = ruleSet;
+        this.dependabotIgnores = dependabotIgnores;
     }
 
     /**
@@ -112,12 +129,16 @@ public class RuleService {
      */
     public List<IgnoreVersion> getIgnoredVersions(String groupId, String artifactId) {
         Rule bestFitRule = getBestFitRule(groupId, artifactId);
-        return Stream.concat(
+        return Stream.of(
                         ruleSet.getIgnoreVersions().stream(),
                         Optional.ofNullable(bestFitRule)
                                 .map(Rule::getIgnoreVersions)
                                 .map(Collection::stream)
-                                .orElse(Stream.empty()))
+                                .orElse(Stream.empty()),
+                        dependabotIgnores.stream()
+                                .filter(ignore -> ignore.matches(groupId, artifactId))
+                                .flatMap(ignore -> ignore.getIgnoreVersions().stream()))
+                .flatMap(stream -> stream)
                 .filter(v -> {
                     if (!IgnoreVersionHelper.isValidType(v)) {
                         log.warn("The type attribute '" + v.getType() + "' for global ignoreVersion["
@@ -137,23 +158,7 @@ public class RuleService {
      * @return list of ignored versions (never {@code null})
      */
     public List<IgnoreVersion> getIgnoredVersions(Artifact artifact) {
-        Rule bestFitRule = getBestFitRule(artifact.getGroupId(), artifact.getArtifactId());
-        return Stream.concat(
-                        ruleSet.getIgnoreVersions().stream(),
-                        Optional.ofNullable(bestFitRule)
-                                .map(Rule::getIgnoreVersions)
-                                .map(Collection::stream)
-                                .orElse(Stream.empty()))
-                .filter(v -> {
-                    if (!IgnoreVersionHelper.isValidType(v)) {
-                        log.warn("The type attribute '" + v.getType() + "' for global ignoreVersion["
-                                + v + "] is not valid. Please use one of '" + IgnoreVersionHelper.VALID_TYPES
-                                + "'.");
-                        return false;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
+        return getIgnoredVersions(artifact.getGroupId(), artifact.getArtifactId());
     }
 
     /**

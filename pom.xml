@@ -130,6 +130,7 @@
 
     <mockitoVersion>4.11.0</mockitoVersion>
     <woodstoxVersion>7.3.0</woodstoxVersion>
+    <snakeyamlVersion>2.7</snakeyamlVersion>
     <stax2ApiVersion>4.3.2</stax2ApiVersion>
     <mavenSharedUtilsVersion>3.5.0</mavenSharedUtilsVersion>
 
@@ -198,6 +199,11 @@
         <groupId>com.fasterxml.woodstox</groupId>
         <artifactId>woodstox-core</artifactId>
         <version>${woodstoxVersion}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyamlVersion}</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.woodstox</groupId>
