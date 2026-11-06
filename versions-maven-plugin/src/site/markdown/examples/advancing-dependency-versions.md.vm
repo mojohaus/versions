@@ -158,7 +158,7 @@ The goal updates plugins that have a version of their own in the pom, in `build/
 
 A plugin version that requires a newer Maven than your project does is skipped. The goal takes the
 project's minimum Maven from the `requireMavenVersion` rule of the Maven Enforcer Plugin, or from
-`prerequisites`. If the project declares neither, the goal uses the version of Maven that runs it.
+`prerequisites`. If the project declares neither, the goal uses the oldest Maven it runs on itself, 3.9.0.
 
 `includes` and `excludes` apply to plugins as well, with the type `maven-plugin`. Without any `includes`,
 `processPlugins` updates every plugin with a version. To update only some plugins, name them:

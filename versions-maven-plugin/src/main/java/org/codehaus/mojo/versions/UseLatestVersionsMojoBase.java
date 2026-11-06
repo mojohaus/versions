@@ -46,8 +46,11 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.Reporting;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.descriptor.MojoDescriptor;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
@@ -146,6 +149,9 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
         }
         return executor;
     }
+
+    // the prerequisite of this plugin, for when its descriptor is not available
+    private static final String DEFAULT_MINIMUM_MAVEN = "3.9.0";
 
     private final ProjectBuilder projectBuilder;
 
@@ -476,12 +482,25 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
         ArtifactVersion maven = analyzer.getMinimumMaven();
         String source = "the project requires Maven " + maven;
         if (maven == null) {
-            maven = runningMaven;
-            source = "the project declares no minimum Maven version and this build runs on Maven " + maven;
+            // not the running Maven: run on Maven 4, the goal would move plugins to versions that need Maven 4
+            maven = ArtifactVersionService.getArtifactVersion(ownMinimumMaven());
+            source = "the project declares no minimum Maven version, so the minimum of this goal, " + maven
+                    + ", applies";
             getLog().info("Plugin updates are limited to versions that run on Maven " + maven
-                    + ", the running version: the project declares no minimum Maven version");
+                    + ": the project declares no minimum Maven version");
         }
         return new PluginCeiling(analyzer, maven, source);
+    }
+
+    /**
+     * @return the oldest Maven this plugin runs on, from its descriptor
+     */
+    private String ownMinimumMaven() {
+        return Optional.ofNullable(mojoExecution)
+                .map(MojoExecution::getMojoDescriptor)
+                .map(MojoDescriptor::getPluginDescriptor)
+                .map(PluginDescriptor::getRequiredMavenVersion)
+                .orElse(DEFAULT_MINIMUM_MAVEN);
     }
 
     /**
