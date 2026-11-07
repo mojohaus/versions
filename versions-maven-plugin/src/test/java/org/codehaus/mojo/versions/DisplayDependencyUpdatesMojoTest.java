@@ -16,17 +16,24 @@ package org.codehaus.mojo.versions;
  */
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.sun.net.httpserver.HttpServer;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
@@ -43,6 +50,12 @@ import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.CloseableTempFile;
 import org.codehaus.mojo.versions.utils.DependencyBuilder;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.VersionRangeRequest;
+import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.Version;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -61,7 +74,9 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
@@ -229,6 +244,149 @@ public class DisplayDependencyUpdatesMojoTest {
 
             assertTextContains(output, "1.1.0");
             assertTextNotContains(output, "2.0.0");
+        }
+    }
+
+    @Test
+    public void testMinDaysOldExcludesRecentDependencyUpdate() throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            DateTimeFormatter httpDate = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH)
+                    .withZone(ZoneOffset.UTC);
+            String oldDate = httpDate.format(Instant.now().minus(30, ChronoUnit.DAYS));
+            String recentDate = httpDate.format(Instant.now().minus(1, ChronoUnit.DAYS));
+
+            InputLocation fakeLocation = new InputLocation(-1, -1, new InputSource());
+            Dependency defaultDependency = DependencyBuilder.newBuilder()
+                    .withGroupId("default-group")
+                    .withArtifactId("default-dependency")
+                    .withVersion("1.0.0")
+                    .withLocation(DependencyBuilder.Location.ARTIFACT_ID.toString(), fakeLocation)
+                    .withLocation(DependencyBuilder.Location.VERSION.toString(), fakeLocation)
+                    .build();
+            Dependency acceptedDependency = DependencyBuilder.newBuilder()
+                    .withGroupId("default-group")
+                    .withArtifactId("accepted-dependency")
+                    .withVersion("1.0.0")
+                    .withLocation(DependencyBuilder.Location.ARTIFACT_ID.toString(), fakeLocation)
+                    .withLocation(DependencyBuilder.Location.VERSION.toString(), fakeLocation)
+                    .build();
+            MavenProject testProject =
+                    new MavenProject(new Model() {
+                        {
+                            setGroupId("default-group");
+                            setArtifactId("default-artifact");
+                            setVersion("1.0.0-SNAPSHOT");
+                            setDependencies(Arrays.asList(defaultDependency, acceptedDependency));
+                        }
+                    }) {
+                        {
+                            setOriginalModel(getModel());
+                        }
+                    };
+
+            HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
+            server.createContext(
+                    "/old/default-group/default-dependency/1.1.0/default-dependency-1.1.0.pom", exchange -> {
+                        exchange.getResponseHeaders().add("Last-Modified", oldDate);
+                        exchange.sendResponseHeaders(200, -1);
+                        exchange.close();
+                    });
+            server.createContext(
+                    "/recent/default-group/default-dependency/4.5.6.Final/default-dependency-4.5.6.Final.pom",
+                    exchange -> {
+                        exchange.getResponseHeaders().add("Last-Modified", recentDate);
+                        exchange.sendResponseHeaders(200, -1);
+                        exchange.close();
+                    });
+            server.createContext(
+                    "/recent-accepted/default-group/accepted-dependency/1.2.3/accepted-dependency-1.2.3.pom",
+                    exchange -> {
+                        exchange.getResponseHeaders().add("Last-Modified", recentDate);
+                        exchange.sendResponseHeaders(200, -1);
+                        exchange.close();
+                    });
+            server.start();
+            try {
+                HashMap<String, TestVersionScenario[]> scenariosByArtifact = new HashMap<>();
+                scenariosByArtifact.put("default-dependency", new TestVersionScenario[] {
+                    new TestVersionScenario("1.1.0", "old", "/old"), //
+                    new TestVersionScenario("4.5.6.Final", "recent", "/recent")
+                });
+                scenariosByArtifact.put("accepted-dependency", new TestVersionScenario[] {
+                    new TestVersionScenario("1.2.3", "recent-accepted", "/recent-accepted")
+                });
+
+                RepositorySystem repositorySystem = mock(RepositorySystem.class);
+                when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
+                        .then(invocation -> {
+                            VersionRangeRequest request = invocation.getArgument(1);
+                            String artifactId = request.getArtifact().getArtifactId();
+                            TestVersionScenario[] scenarios = scenariosByArtifact.get(artifactId);
+                            if (scenarios == null) {
+                                throw new IllegalArgumentException("Unexpected artifact: " + artifactId);
+                            }
+                            return createVersionRangeResult(request, server, "1.0.0", scenarios);
+                        });
+
+                new DisplayDependencyUpdatesMojo(artifactFactory, repositorySystem, null, null) {
+                    {
+                        setProject(testProject);
+                        processDependencies = true;
+                        processDependencyManagement = false;
+                        dependencyIncludes = singletonList(WildcardMatcher.WILDCARD);
+                        dependencyExcludes = emptyList();
+                        outputFile = tempFile.getPath().toFile();
+                        outputLineWidth = 100;
+                        setPluginContext(new HashMap<>());
+                        minDaysOld = 7;
+                        minDaysOldIgnore = "default-group:accepted-dependency";
+                        session = mockMavenSession();
+                        mojoExecution = mock(MojoExecution.class);
+                    }
+                }.execute();
+
+                String output = String.join("\n", Files.readAllLines(tempFile.getPath(), UTF_8));
+                assertTextContains(output, "default-dependency", "1.1.0");
+                assertTextNotContains(output, "4.5.6.Final");
+                assertTextContains(output, "accepted-dependency", "1.2.3");
+            } finally {
+                server.stop(0);
+            }
+        }
+    }
+
+    private static VersionRangeResult createVersionRangeResult(
+            VersionRangeRequest request, HttpServer server, String currentVersion, TestVersionScenario[] scenarios)
+            throws Exception {
+        VersionRangeResult result = new VersionRangeResult(request).addVersion(parseVersion(currentVersion));
+        int port = server.getAddress().getPort();
+        for (TestVersionScenario scenario : scenarios) {
+            Version version = parseVersion(scenario.version);
+            result.addVersion(version)
+                    .setRepository(
+                            version,
+                            new RemoteRepository.Builder(
+                                            scenario.repositoryId,
+                                            "default",
+                                            "http://127.0.0.1:" + port + scenario.repositoryPath)
+                                    .build());
+        }
+        return result;
+    }
+
+    private static Version parseVersion(String version) throws Exception {
+        return new GenericVersionScheme().parseVersion(version);
+    }
+
+    private static final class TestVersionScenario {
+        private final String version;
+        private final String repositoryId;
+        private final String repositoryPath;
+
+        private TestVersionScenario(String version, String repositoryId, String repositoryPath) {
+            this.version = version;
+            this.repositoryId = repositoryId;
+            this.repositoryPath = repositoryPath;
         }
     }
 
@@ -757,8 +915,8 @@ public class DisplayDependencyUpdatesMojoTest {
     private static final String DEPENDENCIES_HEADER = "The following dependencies in Dependencies have newer versions:";
 
     /**
-     * Runs the goal against {@link #createProject()}, a single dependency on version 1.0.0, with the given
-     * versions available and the default output line width, and returns the lines of the output file.
+     * Runs the goal against {@link #createProject()}, a single dependency on version 1.0.0, with the given versions
+     * available and the default output line width, and returns the lines of the output file.
      */
     private List<String> runWithVersions(String[] availableVersions, Consumer<DisplayDependencyUpdatesMojo> configure)
             throws Exception {
