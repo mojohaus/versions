@@ -52,6 +52,25 @@ Since version 2.19.0, `versions-maven-plugin` only uses the Maven version number
 The `versions-maven-plugin` will assume that all version numbers follow the `maven` scheme unless you tell
 it otherwise.
 
+Pre-release versions
+--------------------
+
+Alpha, beta, milestone, release candidate, preview and early-access versions, such as `4.0.0-beta-4`,
+`2.0.0-M1` or `3.34.0.CR1`, are not offered by default. A version is a pre-release when its Maven canonical form
+holds one of the qualifiers `alpha`, `beta`, `milestone` or `rc` (which also cover `a1`, `b1`, `M1` and `CR1`), or
+`preview`, `ea` or `pre`.
+
+When the current version is itself a pre-release or a snapshot, the pre-releases of its own release line are still
+offered: from `4.0.0-beta-3` the plugin offers `4.0.0-beta-4` and `4.0.0`, but not `4.1.0-M1` or `5.0.0-alpha1`.
+
+To offer every pre-release, set `allowPreReleases`:
+
+```
+mvn versions:display-dependency-updates -DallowPreReleases=true
+```
+
+Snapshots are governed separately by `allowSnapshots`, and the ignored versions described below apply on top.
+
 rules.xml
 ---------
 

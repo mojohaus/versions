@@ -84,6 +84,8 @@ public abstract class UpdatePropertiesMojoTestBase {
         setVariableValueToObject(mojo, "repositorySystem", repositorySystem);
         setVariableValueToObject(mojo, "generateBackupPoms", false);
         setVariableValueToObject(mojo, "changeRecorderFormat", "none");
+        // the mock repository serves pre-releases only, apart from the current version
+        setVariableValueToObject(mojo, "allowPreReleases", true);
         changeRecorder = new TestChangeRecorder();
         setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
 

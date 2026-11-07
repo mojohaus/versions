@@ -97,6 +97,18 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
     protected boolean allowSnapshots;
 
     /**
+     * Whether to offer pre-release versions: alpha, beta, milestone, release candidate, preview and early-access
+     * versions, such as {@code 4.0.0-beta-4} or {@code 3.34.0.CR1}. When {@code false}, a pre-release is still
+     * offered if the current version is itself a pre-release or a snapshot of the same release line, so
+     * {@code 4.0.0-beta-3} is offered {@code 4.0.0-beta-4} but not {@code 4.1.0-M1}. Snapshots are governed by
+     * {@code allowSnapshots}, and {@code ignoredVersions} and rules still apply on top.
+     *
+     * @since 2.25.0 (2.20.0 for {@code use-latest-versions})
+     */
+    @Parameter(property = "allowPreReleases", defaultValue = "false")
+    protected boolean allowPreReleases;
+
+    /**
      * Our versions helper.
      */
     private VersionsHelper helper;
@@ -248,6 +260,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
                     .withMavenSession(analysisSession)
                     .withPomHelper(pomHelper)
                     .withRuleService(ruleService)
+                    .withAllowPreReleases(allowPreReleases)
                     .build();
         } catch (MojoExecutionException e) {
             throw new MavenReportException(e.getMessage(), e);

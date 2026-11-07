@@ -91,6 +91,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
         if (result.artifact.getVersion() != null && !versionFilter.test(result.artifact.getVersion())) {
             result.setCurrentVersion((ArtifactVersion) null);
         }
+        result.setAllowPreReleases(isAllowPreReleases());
         return result;
     }
 
@@ -105,6 +106,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
         versions = other.versions;
         setCurrentVersion(other.getCurrentVersion());
         setCurrentVersionRange(other.getCurrentVersionRange());
+        setAllowPreReleases(other.isAllowPreReleases());
     }
 
     @Override
@@ -219,11 +221,10 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
     }
 
     public ArtifactVersion[] getVersions(boolean includeSnapshots) {
-        return includeSnapshots
-                ? versions.toArray(new ArtifactVersion[0])
-                : versions.stream()
-                        .filter(v -> !ArtifactUtils.isSnapshot(v.toString()))
-                        .toArray(ArtifactVersion[]::new);
+        return versions.stream()
+                .filter(v -> includeSnapshots || !ArtifactUtils.isSnapshot(v.toString()))
+                .filter(this::isAdmittedByPreReleasePolicy)
+                .toArray(ArtifactVersion[]::new);
     }
 
     /**
@@ -237,11 +238,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
      *         if {@code includeSnapshots} is {@code false}, returns {@code true} if there are no releases.
      */
     public boolean isEmpty(boolean includeSnapshots) {
-        return includeSnapshots
-                ? versions.isEmpty()
-                // the below means: the only versions that could be present in the collection
-                // are snapshots
-                : versions.stream().map(Object::toString).allMatch(ArtifactUtils::isSnapshot);
+        return getVersions(includeSnapshots).length == 0;
     }
 
     /**

@@ -22,16 +22,20 @@ package org.codehaus.mojo.versions.api;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.codehaus.mojo.versions.ordering.BoundArtifactVersion;
@@ -54,13 +58,23 @@ import static org.codehaus.mojo.versions.api.Segment.SUBINCREMENTAL;
  */
 public abstract class AbstractVersionDetails implements VersionDetails {
 
-    private static final Pattern PREVIEW_PATTERN =
-            Pattern.compile("(?i)(?:.*[-.](alpha|a|beta|b|milestone|m|preview|rc)"
-                    + "[-.]?(\\d{0,2}[a-z]?|\\d{6}\\.\\d{4})|\\d{8}(?:\\.?\\d{6})?)$");
+    /**
+     * Qualifiers marking a pre-release: the ones Maven itself orders before a release ({@code alpha}, {@code beta},
+     * {@code milestone} and {@code rc}, which also cover {@code a}, {@code b}, {@code m} and {@code cr} when
+     * followed by a number), plus common ones Maven does not know.
+     */
+    private static final Set<String> PRE_RELEASE_QUALIFIERS =
+            new HashSet<>(Arrays.asList("alpha", "beta", "milestone", "rc", "preview", "ea", "pre"));
+
+    private static final Pattern CANONICAL_ITEM = Pattern.compile("[.-]");
+
+    private static final Pattern RELEASE_LINE = Pattern.compile("^\\d+(?:[.-]\\d+)*");
 
     /**
-     * Checks if the given version string represents a pre-release version.
-     * Pre-release versions include alpha, beta, milestone, preview, and release candidate versions.
+     * Checks if the given version string represents a pre-release version: an alpha, beta, milestone, preview,
+     * early-access or release candidate version. A snapshot is not a pre-release.
+     * The version is classified by the qualifiers of its Maven canonical form, so {@code 3.34.0.CR1} and
+     * {@code 4.0.0-beta-4} are pre-releases, while {@code 1.0.0}, {@code 2.0.0.Final} and {@code 20240303} are not.
      *
      * @param version the version string to check
      * @return true if the version is a pre-release version, false otherwise
@@ -68,8 +82,27 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      * @since 2.20.0
      */
     public static boolean isPreReleaseVersion(String version) {
-        return version != null && PREVIEW_PATTERN.matcher(version).matches();
+        if (version == null || version.isEmpty()) {
+            return false;
+        }
+        return Arrays.stream(CANONICAL_ITEM.split(new ComparableVersion(version).getCanonical()))
+                .anyMatch(PRE_RELEASE_QUALIFIERS::contains);
     }
+
+    /**
+     * Returns the numeric release line of a version, as its leading numeric items in Maven canonical form:
+     * {@code 4} for {@code 4.0.0-beta-3}, {@code 4.1} for {@code 4.1.0-M1}.
+     */
+    private static String releaseLine(String version) {
+        Matcher matcher = RELEASE_LINE.matcher(new ComparableVersion(version).getCanonical());
+        return matcher.find() ? matcher.group() : "";
+    }
+
+    /**
+     * Whether pre-release versions are offered; when {@code false}, a pre-release is only offered when the current
+     * version is itself a pre-release or snapshot of the same release line.
+     */
+    private boolean allowPreReleases = true;
 
     /**
      * Current version of the dependency artifact.
@@ -191,6 +224,47 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     @Override
     public final void setCurrentVersion(ArtifactVersion currentVersion) {
         this.currentVersion = currentVersion;
+    }
+
+    /**
+     * Sets whether pre-release versions are offered. When {@code false}, alpha, beta, milestone, release candidate,
+     * preview and early-access versions are left out, except those of the current version's release line when the
+     * current version is itself a pre-release or snapshot. Snapshots are governed separately.
+     *
+     * @param allowPreReleases whether pre-release versions are offered
+     * @since 2.25.0
+     */
+    public void setAllowPreReleases(boolean allowPreReleases) {
+        this.allowPreReleases = allowPreReleases;
+    }
+
+    /**
+     * Whether pre-release versions are offered.
+     *
+     * @return whether pre-release versions are offered
+     * @since 2.25.0
+     */
+    public boolean isAllowPreReleases() {
+        return allowPreReleases;
+    }
+
+    /**
+     * Tells whether a candidate version passes the pre-release policy set with {@link #setAllowPreReleases(boolean)}.
+     *
+     * @param candidate the candidate version
+     * @return {@code true} if the candidate may be offered
+     * @since 2.25.0
+     */
+    protected boolean isAdmittedByPreReleasePolicy(ArtifactVersion candidate) {
+        if (allowPreReleases || !isPreReleaseVersion(candidate.toString())) {
+            return true;
+        }
+        if (currentVersion == null) {
+            return false;
+        }
+        String current = currentVersion.toString();
+        return (isPreReleaseVersion(current) || ArtifactUtils.isSnapshot(current))
+                && releaseLine(current).equals(releaseLine(candidate.toString()));
     }
 
     @Override
@@ -453,7 +527,7 @@ public abstract class AbstractVersionDetails implements VersionDetails {
             boolean needOneMore = false;
             for (Iterator<ArtifactVersion> it = versions.descendingIterator(); it.hasNext(); ) {
                 ArtifactVersion version = it.next();
-                boolean isPreview = PREVIEW_PATTERN.matcher(version.toString()).matches();
+                boolean isPreview = isPreReleaseVersion(version.toString());
 
                 // encountered a version in same Major.Minor version, remove it.
                 if (version.getMajorVersion() == major && version.getMinorVersion() == minor) {

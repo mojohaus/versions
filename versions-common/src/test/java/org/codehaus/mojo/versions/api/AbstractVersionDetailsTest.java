@@ -178,14 +178,12 @@ class AbstractVersionDetailsTest {
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha1"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-alpha12"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-ALPHA"));
-        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-a"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-a1"));
 
         // Beta versions
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-beta"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-beta1"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-BETA"));
-        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-b"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-b1"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("2.0.0-beta"));
 
@@ -195,7 +193,6 @@ class AbstractVersionDetailsTest {
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("7.0.0-M3"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-milestone"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-milestone1"));
-        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-m"));
 
         // Release candidate versions
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-rc"));
@@ -206,6 +203,30 @@ class AbstractVersionDetailsTest {
         // Preview versions
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-preview"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0.0-PREVIEW"));
+
+        // Release candidates spelled CR, as in 3.34.0.CR1
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("3.34.0.CR1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("2.0.0-cr1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("5.0.0.Beta1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("1.0-alpha-100"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("4.0.0-beta-4"));
+
+        // Qualifiers Maven does not know, but which mark a pre-release
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("7.0.0-preview.1"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("18-ea"));
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("2.0.0-pre"));
+
+        // A bare a, b or m is not alpha, beta or milestone to Maven, which orders it after the release
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("1.0.0-a"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("1.0.0-b"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("1.0.0-m"));
+
+        // Releases, snapshots and date-like versions are not pre-releases
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("3.1.0.Final"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("1.0.0-GA"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("20240303"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("1.0.0-SNAPSHOT"));
+        assertEquals(false, AbstractVersionDetails.isPreReleaseVersion("1.0-alphabet"));
 
         // Null should return false
         assertEquals(false, AbstractVersionDetails.isPreReleaseVersion(null));
