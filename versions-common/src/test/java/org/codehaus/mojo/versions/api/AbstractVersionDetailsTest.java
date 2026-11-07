@@ -27,7 +27,9 @@ import static java.util.Optional.of;
 import static org.codehaus.mojo.versions.api.Segment.MAJOR;
 import static org.codehaus.mojo.versions.utils.ArtifactVersionUtils.version;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link AbstractVersionDetails}
@@ -163,6 +165,23 @@ class AbstractVersionDetailsTest {
     void testGetSelectedRestrictionForNoVersion() throws InvalidVersionSpecificationException {
         instance.setCurrentVersionRange(VersionRange.createFromVersionSpec("[,0]"));
         assertThrows(NullPointerException.class, () -> instance.getSelectedRestriction(null));
+    }
+
+    /**
+     * Maven 3 and Maven 4 write the canonical form differently; the classification must not depend on which
+     * Maven runs the plugin.
+     */
+    @Test
+    void testIsPreReleaseCanonicalOfMaven3AndMaven4() {
+        assertTrue(AbstractVersionDetails.isPreReleaseCanonical("3-milestone-2"));
+        assertTrue(AbstractVersionDetails.isPreReleaseCanonical("3-milestone2"));
+        assertTrue(AbstractVersionDetails.isPreReleaseCanonical("4-beta-1"));
+        assertTrue(AbstractVersionDetails.isPreReleaseCanonical("4-beta1"));
+        assertTrue(AbstractVersionDetails.isPreReleaseCanonical("3.34-rc1"));
+        assertTrue(AbstractVersionDetails.isPreReleaseCanonical("7-preview.1"));
+        assertFalse(AbstractVersionDetails.isPreReleaseCanonical("3.32.3"));
+        assertFalse(AbstractVersionDetails.isPreReleaseCanonical("1-snapshot"));
+        assertFalse(AbstractVersionDetails.isPreReleaseCanonical("1-alphabet"));
     }
 
     @Test

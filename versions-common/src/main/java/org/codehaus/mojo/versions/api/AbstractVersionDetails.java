@@ -66,7 +66,11 @@ public abstract class AbstractVersionDetails implements VersionDetails {
     private static final Set<String> PRE_RELEASE_QUALIFIERS =
             new HashSet<>(Arrays.asList("alpha", "beta", "milestone", "rc", "preview", "ea", "pre"));
 
-    private static final Pattern CANONICAL_ITEM = Pattern.compile("[.-]");
+    /**
+     * Splits a canonical version into its items. Maven 3 writes {@code 3-milestone-2} and Maven 4 writes
+     * {@code 3-milestone2}, so items are also split where letters and digits meet.
+     */
+    private static final Pattern CANONICAL_ITEM = Pattern.compile("[.-]|(?<=\\p{Alpha})(?=\\d)|(?<=\\d)(?=\\p{Alpha})");
 
     private static final Pattern RELEASE_LINE = Pattern.compile("^\\d+(?:[.-]\\d+)*");
 
@@ -85,8 +89,15 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         if (version == null || version.isEmpty()) {
             return false;
         }
-        return Arrays.stream(CANONICAL_ITEM.split(new ComparableVersion(version).getCanonical()))
-                .anyMatch(PRE_RELEASE_QUALIFIERS::contains);
+        return isPreReleaseCanonical(new ComparableVersion(version).getCanonical());
+    }
+
+    /**
+     * Tells whether a canonical version, as {@link ComparableVersion#getCanonical()} writes it, holds a pre-release
+     * qualifier.
+     */
+    static boolean isPreReleaseCanonical(String canonical) {
+        return Arrays.stream(CANONICAL_ITEM.split(canonical)).anyMatch(PRE_RELEASE_QUALIFIERS::contains);
     }
 
     /**
