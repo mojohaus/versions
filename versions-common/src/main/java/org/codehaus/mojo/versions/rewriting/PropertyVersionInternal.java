@@ -23,7 +23,7 @@ import javax.xml.stream.XMLStreamException;
  * This is an internal implemenation class used by {@link org.codehaus.mojo.versions.api.PomHelper}.
  * It should not be used directly by client code.
  *
- * @since 2.23.1
+ * @since 2.25.0
  */
 public class PropertyVersionInternal {
 

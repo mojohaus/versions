@@ -22,11 +22,14 @@ package org.codehaus.mojo.versions.rewriting;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.codehaus.stax2.XMLStreamReader2;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -68,6 +71,15 @@ class MutableXMLStreamReaderTest {
                     reader.getSource().toLowerCase().contains("encoding=\"" + value + "\"".toLowerCase()),
                     () -> reader.getSource());
             assertTextContains(reader.getSource(), "ąęóśłźćńĄŻĘĆ");
+        }
+    }
+
+    @Test
+    void testIndentationSkipsBlankLines() throws XMLStreamException, IOException, TransformerException {
+        String pom = "<?xml version=\"1.0\"?>\n<project>\n\n    <modelVersion>4.0.0</modelVersion>\n</project>\n";
+        try (MutableXMLStreamReader reader =
+                new MutableXMLStreamReader(new ByteArrayInputStream(pom.getBytes(StandardCharsets.UTF_8)), PATH)) {
+            assertEquals("    ", reader.getIndentation());
         }
     }
 
