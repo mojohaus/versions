@@ -185,6 +185,32 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected Set<String> ignoredVersions;
 
     /**
+     * <p>A Dependabot configuration file whose {@code ignore} entries are applied as version rules, on top of
+     * {@link #ruleSet}, {@link #rulesUri} and {@link #ignoredVersions}.</p>
+     *
+     * <p>Only the {@code package-ecosystem: maven} entries for {@link #dependabotTargetBranch} are read. Each
+     * {@code versions} item may be a Maven version range, a comparator requirement such as {@code ">= 5.0.0"},
+     * or a single version. Items that only use {@code update-types} are skipped with a warning.
+     * A relative path is resolved against the multi-module project directory.</p>
+     *
+     * <p>Example: {@code -Dversions.dependabotConfig=.github/dependabot.yml}</p>
+     *
+     * @since 2.25.0
+     */
+    @Parameter(property = "versions.dependabotConfig")
+    protected String dependabotConfig;
+
+    /**
+     * <p>The {@code target-branch} whose entries in {@link #dependabotConfig} apply. Defaults to the branch
+     * checked out in the git working tree holding that file; the entries without a {@code target-branch} are
+     * used when no entry names the branch.</p>
+     *
+     * @since 2.25.0
+     */
+    @Parameter(property = "versions.dependabotTargetBranch")
+    protected String dependabotTargetBranch;
+
+    /**
      * If true, the plugin execution will be skipped.
      *
      * @since 2.21.0
@@ -256,6 +282,8 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
                     .withRulesUri(rulesUri)
                     .withRuleSet(ruleSet)
                     .withIgnoredVersions(ignoredVersions)
+                    .withDependabotConfig(dependabotConfig)
+                    .withDependabotTargetBranch(dependabotTargetBranch)
                     .withLog(getLog())
                     .build();
             PomHelper pomHelper =
