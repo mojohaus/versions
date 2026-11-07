@@ -46,7 +46,7 @@ import static java.util.Optional.ofNullable;
  */
 public class MutableXMLStreamReader extends StreamReader2Delegate implements AutoCloseable {
     private static final XMLInputFactory FACTORY = XMLInputFactory2.newInstance();
-    private static final Pattern INDENTATION_PATTERN = Pattern.compile("^(\\s+)<", Pattern.MULTILINE);
+    private static final Pattern INDENTATION_PATTERN = Pattern.compile("^([ \\t]+)<", Pattern.MULTILINE);
 
     private StringBuilder source;
 

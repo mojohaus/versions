@@ -100,7 +100,7 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
     /**
      * Whether to insert a new version property or just replace an existing one.
      *
-     * @since 2.23.1
+     * @since 2.25.0
      */
     @Parameter(property = "insert", defaultValue = "false")
     private boolean insert;
