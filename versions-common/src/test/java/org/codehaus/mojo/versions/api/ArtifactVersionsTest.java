@@ -397,7 +397,7 @@ class ArtifactVersionsTest {
     }
 
     @Test
-    void testLowerBoundPreservesQualifierForMajorSegment() throws InvalidSegmentException {
+    void testLowerBoundForMajorSegmentAdmitsPreReleases() throws InvalidSegmentException {
         ArtifactVersions instance = new ArtifactVersions(
                 new DefaultArtifact("default-group", "dummy-api", "1.0.0-SNAPSHOT", "foo", "bar", "jar", null),
                 Arrays.asList(versions("1.0.0-SNAPSHOT")));
@@ -405,7 +405,6 @@ class ArtifactVersionsTest {
         Optional<String> lowerBound =
                 instance.getLowerBound(ArtifactVersionService.getArtifactVersion("1.0.0-SNAPSHOT"), of(MAJOR));
 
-        assertTrue(lowerBound.isPresent(), "Lower bound must be present");
-        assertFalse(lowerBound.get().endsWith("-0"), "Lower bound should preserve qualifier, not replace with -0");
+        assertEquals(Optional.of("1.0.0-alpha"), lowerBound);
     }
 }

@@ -392,10 +392,11 @@ public abstract class AbstractVersionDetails implements VersionDetails {
             newVersion.append(".").append(unchangedSegment.get().value() >= 2 ? version.getIncrementalVersion() : 0);
         }
         if (segmentCount > 2) {
+            // "alpha" is the lowest qualifier, so the bound admits the pre-releases of the version
             if (version.getQualifier() != null) {
-                newVersion.append("-").append(unchangedSegment.get().value() >= 3 ? version.getQualifier() : "A0");
+                newVersion.append("-").append(unchangedSegment.get().value() >= 3 ? version.getQualifier() : "alpha");
             } else {
-                newVersion.append("-").append(unchangedSegment.get().value() >= 3 ? version.getBuildNumber() : "A0");
+                newVersion.append("-").append(unchangedSegment.get().value() >= 3 ? version.getBuildNumber() : "alpha");
             }
         }
         return of(newVersion.toString());
