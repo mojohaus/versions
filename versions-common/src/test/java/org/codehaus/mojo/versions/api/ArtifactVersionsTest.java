@@ -407,4 +407,61 @@ class ArtifactVersionsTest {
 
         assertEquals(Optional.of("1.0.0-alpha"), lowerBound);
     }
+
+    private static ArtifactVersions withoutPreReleases(String current, String... available) {
+        ArtifactVersions instance = new ArtifactVersions(
+                new DefaultArtifact("default-group", "dummy-api", current, "foo", "bar", "jar", null),
+                Arrays.asList(versions(available)));
+        instance.setAllowPreReleases(false);
+        return instance;
+    }
+
+    @Test
+    void testPreReleasesLeftOutForStableCurrentVersion() throws InvalidSegmentException {
+        ArtifactVersions instance = withoutPreReleases("3.32.2", "3.32.2", "3.32.3", "3.34.0.CR1", "4.0.0-beta-4");
+
+        assertArrayEquals(
+                new ArtifactVersion[] {version("3.32.3")},
+                instance.getNewerVersions("3.32.2", of(MAJOR), false, false));
+    }
+
+    @Test
+    void testPreReleasesOfTheCurrentLineKeptForPreReleaseCurrentVersion() throws InvalidSegmentException {
+        ArtifactVersions instance = withoutPreReleases(
+                "4.0.0-beta-3",
+                "4.0.0-beta-3",
+                "4.0.0-beta-4",
+                "4.0.0-rc-1",
+                "4.0.0",
+                "4.0.1",
+                "4.1.0-M1",
+                "5.0.0-alpha1");
+
+        assertArrayEquals(
+                new ArtifactVersion[] {
+                    version("4.0.0-beta-4"), version("4.0.0-rc-1"), version("4.0.0"), version("4.0.1")
+                },
+                instance.getNewerVersions("4.0.0-beta-3", of(MAJOR), false, false));
+    }
+
+    @Test
+    void testPreReleasesOfTheCurrentLineKeptForSnapshotCurrentVersion() throws InvalidSegmentException {
+        ArtifactVersions instance =
+                withoutPreReleases("1.0.0-SNAPSHOT", "1.0.0-SNAPSHOT", "1.0.0-RC1", "1.0.0-beta", "1.0.0", "1.1.0-M1");
+
+        assertArrayEquals(
+                new ArtifactVersion[] {version("1.0.0-beta"), version("1.0.0-RC1"), version("1.0.0")},
+                instance.getNewerVersions("1.0.0-SNAPSHOT", of(MAJOR), false, true));
+    }
+
+    @Test
+    void testPreReleasePolicySurvivesCopyAndFilter() {
+        ArtifactVersions instance = withoutPreReleases("1.0.0", "1.0.0", "1.1.0-M1", "1.1.0");
+
+        assertFalse(new ArtifactVersions(instance).isAllowPreReleases());
+        assertFalse(instance.filter(v -> true).isAllowPreReleases());
+        assertArrayEquals(
+                new ArtifactVersion[] {version("1.0.0"), version("1.1.0")},
+                instance.filter(v -> true).getVersions(false));
+    }
 }

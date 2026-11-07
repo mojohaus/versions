@@ -142,6 +142,7 @@ public class PropertyVersions extends AbstractVersionDetails {
     public ArtifactVersion[] getVersions(boolean includeSnapshots) {
         return resolvedVersions.stream()
                 .filter(v -> includeSnapshots || !ArtifactUtils.isSnapshot(v.toString()))
+                .filter(this::isAdmittedByPreReleasePolicy)
                 .toArray(ArtifactVersion[]::new);
     }
 

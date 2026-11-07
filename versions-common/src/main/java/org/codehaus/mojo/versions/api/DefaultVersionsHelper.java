@@ -112,6 +112,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
     private final PomHelper pomHelper;
 
+    private boolean allowPreReleases = true;
+
     /**
      * Private constructor used by the builder
      */
@@ -196,7 +198,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                             .collect(Collectors.toList()),
                     "lookupArtifactVersions");
 
-            return new ArtifactVersions(
+            ArtifactVersions result = new ArtifactVersions(
                     artifact,
                     repositorySystem
                             .resolveVersionRange(mavenSession.getRepositorySession(), versionRangeRequest)
@@ -217,6 +219,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
                             }))
                             .map(v -> ArtifactVersionService.getArtifactVersion(v.toString()))
                             .collect(Collectors.toList()));
+            result.setAllowPreReleases(allowPreReleases);
+            return result;
         } catch (VersionRangeResolutionException e) {
             throw new VersionRetrievalException(e.getMessage(), artifact, e);
         } catch (RuntimeException e) {
@@ -326,9 +330,11 @@ public class DefaultVersionsHelper implements VersionsHelper {
             throws VersionRetrievalException {
         ArtifactVersions allVersions = lookupArtifactVersions(
                 artifactFactory.createArtifact(dependency), null, usePluginRepositories, useProjectRepositories);
-        return new ArtifactVersions(
+        ArtifactVersions result = new ArtifactVersions(
                 allVersions.getArtifact(),
                 Arrays.stream(allVersions.getAllUpdates(allowSnapshots)).collect(Collectors.toList()));
+        result.setAllowPreReleases(allowPreReleases);
+        return result;
     }
 
     @Override
@@ -535,7 +541,9 @@ public class DefaultVersionsHelper implements VersionsHelper {
                     .map(p -> executor.submit(p.getValue()::build))
                     .collect(Collectors.toList());
             for (int i = 0; i < futures.size(); i++) {
-                propertyVersions.put(prepared.get(i).getKey(), futures.get(i).get());
+                PropertyVersions versions = futures.get(i).get();
+                versions.setAllowPreReleases(allowPreReleases);
+                propertyVersions.put(prepared.get(i).getKey(), versions);
             }
             return propertyVersions;
         } catch (ExecutionException e) {
@@ -566,6 +574,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
         private ArtifactFactory artifactFactory;
 
         private PomHelper pomHelper;
+
+        private boolean allowPreReleases = true;
 
         /**
          * Creates a new instance
@@ -633,14 +643,29 @@ public class DefaultVersionsHelper implements VersionsHelper {
         }
 
         /**
+         * Sets whether the version details the helper returns offer pre-release versions; {@code true} by default.
+         *
+         * @param allowPreReleases whether pre-release versions are offered
+         * @return {@link Builder} instance
+         * @see AbstractVersionDetails#setAllowPreReleases(boolean)
+         * @since 2.25.0
+         */
+        public Builder withAllowPreReleases(boolean allowPreReleases) {
+            this.allowPreReleases = allowPreReleases;
+            return this;
+        }
+
+        /**
          * Builds the constructed {@linkplain DefaultVersionsHelper} object
          *
          * @return constructed {@linkplain DefaultVersionsHelper}
          * @throws MojoExecutionException should the constructor with the RuleSet retrieval doesn't succeed
          */
         public DefaultVersionsHelper build() throws MojoExecutionException {
-            return new DefaultVersionsHelper(
+            DefaultVersionsHelper helper = new DefaultVersionsHelper(
                     pomHelper, artifactFactory, repositorySystem, mavenSession, ruleService, log);
+            helper.allowPreReleases = allowPreReleases;
+            return helper;
         }
     }
 }

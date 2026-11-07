@@ -29,7 +29,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.rtinfo.RuntimeInformation;
-import org.codehaus.mojo.versions.api.AbstractVersionDetails;
 import org.codehaus.mojo.versions.api.recording.ChangeRecorder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.eclipse.aether.RepositorySystem;
@@ -87,15 +86,6 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
      */
     @Parameter(property = "allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
-
-    /**
-     * Whether to allow pre-release versions (alpha, beta, milestone, rc) when searching
-     * for the latest version of an artifact.
-     *
-     * @since 2.20.0
-     */
-    @Parameter(property = "allowPreReleases", defaultValue = "false")
-    protected boolean allowPreReleases = false;
 
     /**
      * Whether to process the dependencies section of the project.
@@ -216,9 +206,7 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
 
     @Override
     protected boolean artifactVersionsFilter(ArtifactVersion ver) {
-        if (!allowPreReleases) {
-            return !AbstractVersionDetails.isPreReleaseVersion(ver.toString());
-        }
+        // pre-releases are left out by the version details themselves, see allowPreReleases
         return true;
     }
 

@@ -9,5 +9,7 @@ assert output.contains('All plugins with a version specified are using the lates
 assert output =~ /\Qmaven-deploy-plugin\E\s*\.*\s*\Q2.3 -> 2.4\E/
 assert output =~ /\Qmaven-deploy-plugin\E\s*\.*\s*\Q2.3 -> 2.8.1\E/
 assert output =~ /\Qmaven-deploy-plugin\E\s*\.*\s*\Q2.3 -> 2.8.2\E/
-assert output =~ /\Qmaven-deploy-plugin\E\s*\.*\s*\Q2.3 -> 3.0.0-M2\E/
 assert output =~ /\Qmaven-deploy-plugin\E\s*\.*\s*\Q2.3 -> 3.1.1\E/
+
+// pre-releases such as 3.0.0-M2 are not offered by default
+assert !(output =~ /\Qmaven-deploy-plugin\E\s*\.*\s*\Q2.3 -> 3.0.0-M\E/)

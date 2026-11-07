@@ -143,6 +143,11 @@ public class DependencyUpdatesReportTest {
             return this;
         }
 
+        public TestDependencyUpdatesReport withAllowPreReleases(boolean allowPreReleases) {
+            this.allowPreReleases = allowPreReleases;
+            return this;
+        }
+
         public TestDependencyUpdatesReport withAllowSnapshots(boolean allowSnapshots) {
             this.allowSnapshots = allowSnapshots;
             return this;
@@ -319,6 +324,7 @@ public class DependencyUpdatesReportTest {
         SinkFactory sinkFactory = new Xhtml5SinkFactory();
         new TestDependencyUpdatesReport()
                 .withOnlyUpgradable(true)
+                .withAllowPreReleases(true)
                 .withDependencies(dependencyOf("test-artifact"))
                 .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
                     {
@@ -330,6 +336,28 @@ public class DependencyUpdatesReportTest {
         String output = os.toString().replaceAll("\n", "").replaceAll("\r", "");
         assertTextMatches(output, ".*<td>report.overview.numNewerMajorAvailable</td>\\s*<td>1</td>.*");
         assertTextMatches(output, ".*<td>report.overview.numUpToDate</td>\\s*<td>0</td>.*");
+    }
+
+    /**
+     * A pre-release is not reported as an update by default.
+     */
+    @Test
+    public void testPreReleaseNotReportedByDefault() throws IOException, MavenReportException, IllegalAccessException {
+        OutputStream os = new ByteArrayOutputStream();
+        SinkFactory sinkFactory = new Xhtml5SinkFactory();
+        new TestDependencyUpdatesReport()
+                .withOnlyUpgradable(false)
+                .withDependencies(dependencyOf("test-artifact"))
+                .withAetherRepositorySystem(mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                    {
+                        put("test-artifact", new String[] {"1.0.0", "2.0.0-M1"});
+                    }
+                }))
+                .generate(sinkFactory.createSink(os), sinkFactory, Locale.getDefault());
+
+        String output = os.toString().replaceAll("\n", "").replaceAll("\r", "");
+        assertTextMatches(output, ".*<td>report.overview.numNewerMajorAvailable</td>\\s*<td>0</td>.*");
+        assertTextMatches(output, ".*<td>report.overview.numUpToDate</td>\\s*<td>1</td>.*");
     }
 
     @Test

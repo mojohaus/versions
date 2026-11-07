@@ -250,6 +250,7 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
 
             SortedMap<Dependency, ArtifactVersions> versionMap =
                     resolverAdapter.resolveDependencyVersions(dependencies, true, true);
+            versionMap.values().forEach(versions -> versions.setAllowPreReleases(allowPreReleases));
             if (!allowSnapshots) {
                 versionMap = versionMap.entrySet().stream()
                         .collect(Collectors.toMap(

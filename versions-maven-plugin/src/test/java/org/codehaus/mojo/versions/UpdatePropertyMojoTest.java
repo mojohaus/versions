@@ -49,6 +49,22 @@ public class UpdatePropertyMojoTest extends UpdatePropertiesMojoTestBase {
                 () -> String.valueOf(changeRecorder.getChanges()));
     }
 
+    /**
+     * The repository has nothing newer than {@code 1.0.0} but pre-releases, so by default nothing changes.
+     */
+    @Test
+    public void testPreReleasesLeftOutByDefault() throws Exception {
+        Files.copy(
+                Paths.get("src/test/resources/org/codehaus/mojo/update-properties/issue-454-pom.xml"),
+                Paths.get(pomDir.toString(), "pom.xml"),
+                REPLACE_EXISTING);
+        UpdatePropertyMojo mojo = setUpMojo("update-property");
+        mojo.property = "artifact-version";
+        mojo.allowPreReleases = false;
+        mojo.execute();
+        assertEquals(emptyList(), changeRecorder.getChanges());
+    }
+
     @Test
     public void testAllowMinorUpdates() throws Exception {
         Files.copy(
