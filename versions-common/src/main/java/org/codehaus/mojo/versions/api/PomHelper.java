@@ -869,6 +869,10 @@ public class PomHelper {
             }
         }
 
+        // Only the properties the project itself uses are evaluated here; a property used only by a module is
+        // evaluated in that module, under the module's rules
+        propertiesMap.values().removeIf(versions -> !versions.isAssociated());
+
         // A property inherited by a module is also used by the module's own dependencies and plugins
         for (MavenProject reactorProject : reactorProjects) {
             if (reactorProject.getFile() != null && isDescendantOf(reactorProject, project)) {

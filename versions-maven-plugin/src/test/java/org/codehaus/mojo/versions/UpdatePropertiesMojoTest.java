@@ -116,6 +116,26 @@ public class UpdatePropertiesMojoTest extends UpdatePropertiesMojoTestBase {
         assertEquals(emptyList(), changeRecorder.getChanges());
     }
 
+    /**
+     * A property defined in the reactor parent and used only by a module is evaluated in the module, with the
+     * module's rules; running in the parent must not update it with the parent's rules.
+     */
+    @Test
+    public void testIssue1464() throws Exception {
+        Path baseDir = pomDir.resolve("issue-1464");
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/update-properties/issue-1464"), baseDir);
+        UpdatePropertiesMojo mojo = mojos.lookupInReactor("update-properties", baseDir, ".", "module");
+        setVariableValueToObject(mojo, "repositorySystem", repositorySystem);
+        setVariableValueToObject(mojo, "generateBackupPoms", false);
+        setVariableValueToObject(mojo, "changeRecorderFormat", "none");
+        changeRecorder = new TestChangeRecorder();
+        setVariableValueToObject(mojo, "changeRecorders", changeRecorder.asTestMap());
+        mojo.execute();
+        assertEquals(emptyList(), changeRecorder.getChanges());
+        assertTrue(new String(Files.readAllBytes(baseDir.resolve("pom.xml")), StandardCharsets.UTF_8)
+                .contains("<module.version>1.0.0</module.version>"));
+    }
+
     @Test
     public void testIssue1199() throws Exception {
         Path baseDir = pomDir.resolve("issue-1199");
