@@ -221,10 +221,23 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
     }
 
     public ArtifactVersion[] getVersions(boolean includeSnapshots) {
-        return versions.stream()
-                .filter(v -> includeSnapshots || !ArtifactUtils.isSnapshot(v.toString()))
-                .filter(this::isAdmittedByPreReleasePolicy)
-                .toArray(ArtifactVersion[]::new);
+        return versions.stream().filter(isAdmitted(includeSnapshots)).toArray(ArtifactVersion[]::new);
+    }
+
+    /**
+     * All versions, snapshots and pre-releases included, regardless of the pre-release policy. A property's
+     * associated artifacts are collected this way, because the policy applies to the property as a whole, against
+     * the property's current version, and not to each associated artifact.
+     *
+     * @return every known version of the artifact
+     * @since 2.25.0
+     */
+    public ArtifactVersion[] getAllVersions() {
+        return versions.toArray(new ArtifactVersion[0]);
+    }
+
+    private Predicate<ArtifactVersion> isAdmitted(boolean includeSnapshots) {
+        return v -> (includeSnapshots || !ArtifactUtils.isSnapshot(v.toString())) && isAdmittedByPreReleasePolicy(v);
     }
 
     /**
@@ -238,7 +251,7 @@ public class ArtifactVersions extends AbstractVersionDetails implements Comparab
      *         if {@code includeSnapshots} is {@code false}, returns {@code true} if there are no releases.
      */
     public boolean isEmpty(boolean includeSnapshots) {
-        return getVersions(includeSnapshots).length == 0;
+        return versions.stream().noneMatch(isAdmitted(includeSnapshots));
     }
 
     /**

@@ -130,7 +130,9 @@ public abstract class UseLatestVersionsMojoBase extends AbstractVersionsDependen
      * @param ver the artifact version to check
      * @return {@code true} if the artifact version should be considered, {@code false} otherwise
      */
-    protected abstract boolean artifactVersionsFilter(ArtifactVersion ver);
+    protected boolean artifactVersionsFilter(ArtifactVersion ver) {
+        return true;
+    }
 
     /**
      * Produces a version from a stream of artifact versions.

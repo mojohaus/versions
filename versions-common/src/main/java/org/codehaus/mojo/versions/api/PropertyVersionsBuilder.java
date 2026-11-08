@@ -203,16 +203,6 @@ public class PropertyVersionsBuilder {
         return this;
     }
 
-    /**
-     * All versions of an associated artifact, snapshots and pre-releases included: the pre-release policy applies to
-     * the property as a whole, against the property's current version, not to each associated artifact.
-     */
-    private static ArtifactVersion[] allVersions(ArtifactVersions artifactVersions) {
-        ArtifactVersions unfiltered = new ArtifactVersions(artifactVersions);
-        unfiltered.setAllowPreReleases(true);
-        return unfiltered.getVersions(true);
-    }
-
     private SortedSet<ArtifactVersion> resolveAssociatedVersions(
             ResolverAdapter resolverAdapter, Set<ArtifactAssociation> associations) throws VersionRetrievalException {
         SortedSet<ArtifactVersion> result = new TreeSet<>();
@@ -221,7 +211,7 @@ public class PropertyVersionsBuilder {
                     association.getArtifact(),
                     association.isUsePluginRepositories(),
                     !association.isUsePluginRepositories());
-            List<ArtifactVersion> associatedVersions = Arrays.asList(allVersions(artifactVersions));
+            List<ArtifactVersion> associatedVersions = Arrays.asList(artifactVersions.getAllVersions());
             if (result.isEmpty()) {
                 result.addAll(associatedVersions);
             } else {
@@ -240,7 +230,7 @@ public class PropertyVersionsBuilder {
                     association.getArtifact(),
                     association.isUsePluginRepositories(),
                     !association.isUsePluginRepositories());
-            List<ArtifactVersion> associatedVersions = Arrays.asList(allVersions(artifactVersions));
+            List<ArtifactVersion> associatedVersions = Arrays.asList(artifactVersions.getAllVersions());
             if (result.isEmpty()) {
                 result.addAll(associatedVersions);
             } else {
