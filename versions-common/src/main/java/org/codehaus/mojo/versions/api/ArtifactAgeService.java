@@ -19,17 +19,14 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,266 +34,215 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.plugin.logging.Log;
+import org.codehaus.mojo.versions.filtering.WildcardMatcher;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.repository.ArtifactRepository;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeResult;
 import org.eclipse.aether.version.Version;
 
+import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
-import static org.codehaus.mojo.versions.api.internal.AgeFilteringUtils.toRemoteRepository;
 
 /**
- * Service that resolves the publication date for artifact versions by probing the version POM in the repository that
- * supplied the version and reading its {@code Last-Modified} timestamp.
+ * Applies the {@code minimumReleaseAge} filter: a version newer than the one in use is offered as an update only once
+ * it has been published for at least the configured number of days.
  *
- * <p>Results are cached in memory so that each {@code groupId:artifactId:version}
- * triplet is only resolved once per build.
+ * <p>The publication date of a version is the modification time of its POM as the Maven Resolver delivers it. The
+ * Resolver's HTTP transports stamp a downloaded file with the repository's {@code Last-Modified} header, so the lookup
+ * goes through the session's transport and picks up its proxy, mirror and {@code serverId} authentication settings.
+ * A POM that did not come from an HTTP repository, for example one copied into the local repository by
+ * {@code mvn install}, carries the time it was written and is therefore treated as published then.</p>
  *
- * @since 2.24.0
+ * <p>Dates are looked up only for versions newer than the current version of the artifact, and are cached for the
+ * lifetime of this instance. A version whose date cannot be determined is offered, and a warning says so, so that the
+ * filter is never switched off unnoticed.</p>
+ *
+ * @since 2.25.0
  */
 public class ArtifactAgeService {
 
-    private static final DateTimeFormatter HTTP_DATE_FORMATTER = DateTimeFormatter.ofPattern(
-                    "EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH)
-            .withZone(ZoneOffset.UTC);
+    private final RepositorySystem repositorySystem;
+
+    private final RepositorySystemSession session;
 
     private final Log log;
 
+    private final int minimumReleaseAge;
+
+    private final List<WildcardMatcher[]> excludes;
+
     /**
-     * Cache: "groupId:artifactId:version" → publication Instant (or null if unavailable).
+     * Cache of repository id, URL and coordinates to the publication instant, or empty if it is unknown.
      */
     private final Map<String, Optional<Instant>> cache = new ConcurrentHashMap<>();
 
     /**
      * Creates a new instance.
      *
-     * @param log Maven build log
+     * @param repositorySystem  the repository system used to fetch the POMs
+     * @param session           the repository session, carrying the proxy, mirror and authentication settings
+     * @param log               Maven build log
+     * @param minimumReleaseAge the minimum age in days; {@code 0} or less disables the filter
+     * @param excludes          {@code groupId:artifactId} patterns of artifacts exempt from the filter; may be
+     *                          {@code null}. {@code *} matches any run of characters; a missing {@code artifactId}
+     *                          matches every artifact of the group
      */
-    public ArtifactAgeService(Log log) {
+    public ArtifactAgeService(
+            RepositorySystem repositorySystem,
+            RepositorySystemSession session,
+            Log log,
+            int minimumReleaseAge,
+            Collection<String> excludes) {
+        this.repositorySystem = Objects.requireNonNull(repositorySystem);
+        this.session = session;
         this.log = Objects.requireNonNull(log);
+        this.minimumReleaseAge = minimumReleaseAge;
+        this.excludes = parseExcludes(excludes);
+    }
+
+    private static List<WildcardMatcher[]> parseExcludes(Collection<String> patterns) {
+        if (patterns == null) {
+            return Collections.emptyList();
+        }
+        List<WildcardMatcher[]> result = new ArrayList<>();
+        for (String pattern : patterns) {
+            if (pattern == null || pattern.trim().isEmpty()) {
+                continue;
+            }
+            String[] split = pattern.trim().split(":");
+            result.add(new WildcardMatcher[] {
+                WildcardMatcher.parse(split[0]),
+                WildcardMatcher.parse(split.length >= 2 ? split[1] : WildcardMatcher.WILDCARD)
+            });
+        }
+        return result;
     }
 
     /**
-     * Filters the given version stream to keep only versions older than the requested minimum age.
+     * Returns whether the filter is switched on.
      *
-     * <p>For each version, this method resolves the repository that provided it and
-     * inspects the corresponding version POM to determine its publication timestamp. Versions whose publication date is
-     * not known are retained, so that the build continues without silently excluding candidates.</p>
+     * @return {@code true} if {@code minimumReleaseAge} is positive
+     */
+    public boolean isEnabled() {
+        return minimumReleaseAge > 0;
+    }
+
+    /**
+     * Returns whether the artifact is exempt from the filter.
      *
-     * @param artifact           the artifact whose versions are being filtered
-     * @param minDaysOld         the minimum age in days; if the value is {@code <= 0}, no filtering is applied
-     * @param minDaysOldIgnore   optional regex pattern used to ignore specific artifacts from age filtering
-     * @param versions           the candidate versions to evaluate
-     * @param versionRangeResult the range result used to obtain the repository for each version
-     * @return a filtered stream containing only versions at least {@code minDaysOld} days old, or the original stream
-     * when {@code minDaysOld <= 0}. Except if {@code minDaysOldIgnore} is set and the artifact matches the pattern,
-     * in which case the original stream is returned.
+     * @param artifact the artifact
+     * @return {@code true} if its {@code groupId:artifactId} matches one of the exemption patterns
+     */
+    public boolean isExcluded(Artifact artifact) {
+        return excludes.stream()
+                .anyMatch(matchers ->
+                        matchers[0].test(artifact.getGroupId()) && matchers[1].test(artifact.getArtifactId()));
+    }
+
+    /**
+     * Drops the versions that are newer than the current version of the artifact and younger than the minimum age.
+     * The current version and older ones pass without a lookup.
+     *
+     * @param artifact           the artifact whose versions are being filtered; its version is the current one
+     * @param versions           the candidate versions
+     * @param versionRangeResult the range result, which names the repository each version came from
+     * @return the versions that remain
      */
     public Stream<Version> filterVersionsByAge(
-            Artifact artifact,
-            int minDaysOld,
-            String minDaysOldIgnore,
-            Stream<Version> versions,
-            VersionRangeResult versionRangeResult) {
-        if (minDaysOld > 0) {
-            versions = versions.filter((Version version) -> skipAgeFiltering(artifact, minDaysOldIgnore)
-                    || isOldEnough(
-                            artifact.getGroupId(),
-                            artifact.getArtifactId(),
-                            version.toString(),
-                            minDaysOld,
-                            toRemoteRepository(versionRangeResult.getRepository(version))));
+            Artifact artifact, Stream<Version> versions, VersionRangeResult versionRangeResult) {
+        if (!isEnabled() || isExcluded(artifact)) {
+            return versions;
         }
-        return versions;
+        ComparableVersion current = currentVersion(artifact);
+        return versions.filter(
+                version -> current != null && new ComparableVersion(version.toString()).compareTo(current) <= 0
+                        || isOldEnough(artifact, version.toString(), versionRangeResult.getRepository(version)));
+    }
+
+    private static ComparableVersion currentVersion(Artifact artifact) {
+        String version = artifact.getVersion();
+        if (version == null || version.isEmpty() || version.startsWith("[") || version.startsWith("(")) {
+            return null;
+        }
+        return new ComparableVersion(version);
+    }
+
+    private boolean isOldEnough(Artifact artifact, String version, ArtifactRepository repository) {
+        Optional<Instant> publicationDate = getPublicationDate(
+                artifact.getGroupId(),
+                artifact.getArtifactId(),
+                version,
+                repository instanceof RemoteRepository ? (RemoteRepository) repository : null);
+        if (!publicationDate.isPresent()) {
+            return true;
+        }
+        Instant threshold = Instant.now().minus(minimumReleaseAge, ChronoUnit.DAYS);
+        boolean oldEnough = !publicationDate.get().isAfter(threshold);
+        if (!oldEnough && log.isDebugEnabled()) {
+            log.debug(String.format(
+                    "Skipping %s:%s:%s: published %s, %d day(s) ago, less than the minimumReleaseAge of %d",
+                    artifact.getGroupId(),
+                    artifact.getArtifactId(),
+                    version,
+                    publicationDate.get(),
+                    Duration.between(publicationDate.get(), Instant.now()).toDays(),
+                    minimumReleaseAge));
+        }
+        return oldEnough;
     }
 
     /**
-     * Determines whether age filtering should be skipped for the given artifact.
-     *
-     * <p>The ignore pattern is matched against the artifact coordinates in the form
-     * {@code groupId:artifactId}. If the pattern is empty or {@code null}, no artifact is exempted.</p>
-     *
-     * @param artifact the artifact being evaluated
-     * @param minDaysOldIgnore optional regex pattern used to ignore specific artifacts from age filtering
-     * @return {@code true} if the artifact matches the ignore pattern; otherwise {@code false}
-     */
-    private static boolean skipAgeFiltering(Artifact artifact, String minDaysOldIgnore) {
-        if (minDaysOldIgnore == null || minDaysOldIgnore.isEmpty()) {
-            return false;
-        }
-        String artifactCoordinates = artifact.getGroupId() + ":" + artifact.getArtifactId();
-        return artifactCoordinates.matches(minDaysOldIgnore);
-    }
-
-    /**
-     * Returns the publication {@link Instant} for the given artifact version, or {@link Optional#empty()} if it cannot
-     * be determined.
+     * Returns the publication instant of a version, or empty, with a warning logged once, if it cannot be determined.
      *
      * @param groupId    artifact groupId
      * @param artifactId artifact artifactId
-     * @param version    the exact version string to look up
-     * @param repository the remote repository that supplied the version
-     * @return an {@link Optional} containing the publication {@link Instant}, or empty
+     * @param version    the exact version
+     * @param repository the remote repository the version was found in; {@code null} if it is not a remote one
+     * @return the publication instant, or empty
      */
     Optional<Instant> getPublicationDate(
             String groupId, String artifactId, String version, RemoteRepository repository) {
-
-        String cacheKey = repository == null
-                ? groupId + ":" + artifactId + ":" + version + ":null"
-                : repository.getId() + ":" + repository.getUrl() + ":" + groupId + ":" + artifactId + ":" + version;
-        return cache.computeIfAbsent(cacheKey, k -> resolvePublicationDate(groupId, artifactId, version, repository));
+        String key = (repository == null ? "" : repository.getId() + ":" + repository.getUrl() + ":") + groupId + ":"
+                + artifactId + ":" + version;
+        return cache.computeIfAbsent(key, k -> resolvePublicationDate(groupId, artifactId, version, repository));
     }
-
-    /**
-     * Determines whether a version is old enough, i.e. its publication date is at least {@code minDaysOld} days in the
-     * past relative to now.
-     *
-     * <p>If the publication date cannot be determined (e.g. for local / file repos or
-     * repositories that do not expose {@code Last-Modified}), the version is <em>included</em> (returns {@code true})
-     * so that the build is not silently broken.
-     *
-     * @param groupId    artifact groupId
-     * @param artifactId artifact artifactId
-     * @param version    the exact version string
-     * @param minDaysOld minimum age in days
-     * @param repository the remote repository that supplied the version
-     * @return {@code true} if the version is old enough or the date is unavailable
-     */
-    boolean isOldEnough(
-            String groupId, String artifactId, String version, int minDaysOld, RemoteRepository repository) {
-
-        Optional<Instant> publicationDate = getPublicationDate(groupId, artifactId, version, repository);
-        if (!publicationDate.isPresent()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not determine publication date for " + groupId + ":" + artifactId + ":" + version
-                        + "; including it despite minDaysOld=" + minDaysOld);
-            }
-            return true;
-        }
-        Instant threshold = Instant.now().minus(minDaysOld, ChronoUnit.DAYS);
-        boolean old = publicationDate.get().isBefore(threshold);
-        if (!old && log.isDebugEnabled()) {
-            log.debug(String.format(
-                    "Skipping %s:%s:%s – published %s which is less than %d days ago. It's only %s days old.",
-                    groupId,
-                    artifactId,
-                    version,
-                    publicationDate.get(),
-                    minDaysOld,
-                    Duration.between(publicationDate.get(), Instant.now()).toDays()));
-        }
-        return old;
-    }
-
-    // -------------------------------------------------------------------------
 
     private Optional<Instant> resolvePublicationDate(
             String groupId, String artifactId, String version, RemoteRepository repository) {
+        String gav = groupId + ":" + artifactId + ":" + version;
         if (repository == null) {
-            return empty();
+            return unknown(gav, "it was not found in a remote repository");
         }
-        return probeVersionPomDate(groupId, artifactId, version, repository);
-    }
-
-    /**
-     * Issues an HTTP HEAD request for the POM of the given version in the given repository, returning the
-     * {@code Last-Modified} header as an {@link Instant}. For {@code file://} repositories, falls back to the POM
-     * file's lastModified time.
-     */
-    private Optional<Instant> probeVersionPomDate(
-            String groupId, String artifactId, String version, RemoteRepository repo) {
-
-        String repoUrl = repo.getUrl();
-        if (repoUrl == null) {
-            return empty();
-        }
-
-        // Construct POM path: groupIdPath/artifactId/version/artifactId-version.pom
-        String groupIdPath = groupId.replace('.', '/');
-        String pomPath = groupIdPath + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".pom";
-
-        if (repoUrl.startsWith("file:")) {
-            log.warn(String.format(
-                    "Repository for %s:%s:%s is a file repository; this may be unreliable. Examining: %s.",
-                    groupId, artifactId, version, pomPath));
-            return probeFileRepository(repoUrl, pomPath);
-        }
-
-        return probeHttpRepository(repoUrl, pomPath, groupId, artifactId, version);
-    }
-
-    private Optional<Instant> probeFileRepository(String repoUrl, String pomPath) {
         try {
-            URL pomUrl = new URL(repoUrl.endsWith("/") ? repoUrl + pomPath : repoUrl + "/" + pomPath);
-            java.io.File pomFile = new java.io.File(pomUrl.toURI());
-            if (pomFile.exists()) {
-                return Optional.of(Instant.ofEpochMilli(pomFile.lastModified()));
+            ArtifactResult result = repositorySystem.resolveArtifact(
+                    session,
+                    new ArtifactRequest(
+                            new DefaultArtifact(groupId, artifactId, "", "pom", version),
+                            singletonList(repository),
+                            "minimumReleaseAge"));
+            File pom =
+                    result.getArtifact() == null ? null : result.getArtifact().getFile();
+            long lastModified = pom == null ? 0 : pom.lastModified();
+            if (lastModified <= 0) {
+                return unknown(gav, "its POM has no modification time");
             }
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not probe file repository: " + e.getMessage());
-            }
+            return Optional.of(Instant.ofEpochMilli(lastModified));
+        } catch (ArtifactResolutionException e) {
+            return unknown(gav, "its POM could not be resolved from " + repository.getId() + ": " + e.getMessage());
         }
-        return empty();
     }
 
-    private Optional<Instant> probeHttpRepository(
-            String repoUrl, String pomPath, String groupId, String artifactId, String version) {
-
-        String pomUrlStr = (repoUrl.endsWith("/") ? repoUrl : repoUrl + "/") + pomPath;
-        HttpURLConnection connection = null;
-        try {
-            URL pomUrl = new URL(pomUrlStr);
-            connection = (HttpURLConnection) pomUrl.openConnection();
-            connection.setRequestMethod("HEAD");
-            connection.setConnectTimeout(10_000);
-            connection.setReadTimeout(10_000);
-            connection.setInstanceFollowRedirects(true);
-            // consume minimal response to avoid leaking connections
-            int status = connection.getResponseCode();
-            if (status == HttpURLConnection.HTTP_OK) {
-                String lastModifiedHeader = connection.getHeaderField("Last-Modified");
-                if (lastModifiedHeader != null && !lastModifiedHeader.isEmpty()) {
-                    try {
-                        return Optional.of(Instant.from(HTTP_DATE_FORMATTER.parse(lastModifiedHeader)));
-                    } catch (DateTimeParseException e) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Unparseable Last-Modified header '" + lastModifiedHeader + "' for " + groupId
-                                    + ":" + artifactId + ":" + version + " at " + pomUrlStr);
-                        }
-                    }
-                }
-
-                long lastModified = connection.getLastModified();
-                if (lastModified > 0) {
-                    return Optional.of(Instant.ofEpochMilli(lastModified));
-                }
-                // Some repos don't set Last-Modified; fall through
-                if (log.isDebugEnabled()) {
-                    log.debug("No Last-Modified header for " + groupId + ":" + artifactId + ":" + version + " at "
-                            + pomUrlStr);
-                }
-            } else if (log.isDebugEnabled()) {
-                log.debug("HEAD " + pomUrlStr + " returned HTTP " + status);
-            }
-        } catch (IOException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Could not probe " + pomUrlStr + ": " + e.getMessage());
-            }
-        } finally {
-            if (connection != null) {
-                // read and discard the error stream to allow connection reuse
-                try {
-                    InputStream es = connection.getErrorStream();
-                    if (es != null) {
-                        es.close();
-                    }
-                } catch (IOException ignored) {
-                    // ignored
-                }
-                connection.disconnect();
-            }
-        }
+    private Optional<Instant> unknown(String gav, String reason) {
+        log.warn("Cannot determine the publication date of " + gav + " (" + reason
+                + "); it is offered although minimumReleaseAge=" + minimumReleaseAge + " is set");
         return empty();
     }
 }
