@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.maven.shared.utils.io.IOUtil;
 import org.codehaus.stax2.LocationInfo;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.codehaus.stax2.XMLStreamReader2;
@@ -334,7 +333,10 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
             // offload the entire contents to this.source
             buf.reset();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            IOUtil.copy(buf, baos);
+            byte[] chunk = new byte[4096];
+            for (int n = buf.read(chunk); n != -1; n = buf.read(chunk)) {
+                baos.write(chunk, 0, n);
+            }
             source = new StringBuilder(baos.toString(sourceEncoding.toString()));
         }
     }
