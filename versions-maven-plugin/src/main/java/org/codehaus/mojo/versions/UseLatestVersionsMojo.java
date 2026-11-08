@@ -205,12 +205,6 @@ public class UseLatestVersionsMojo extends UseLatestVersionsMojoBase {
     }
 
     @Override
-    protected boolean artifactVersionsFilter(ArtifactVersion ver) {
-        // pre-releases are left out by the version details themselves, see allowPreReleases
-        return true;
-    }
-
-    @Override
     protected Optional<ArtifactVersion> versionProducer(Stream<ArtifactVersion> stream) {
         return stream.max(Comparator.naturalOrder());
     }

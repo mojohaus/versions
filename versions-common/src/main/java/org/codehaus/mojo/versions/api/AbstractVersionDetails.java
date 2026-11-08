@@ -24,10 +24,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -74,6 +76,11 @@ public abstract class AbstractVersionDetails implements VersionDetails {
 
     private static final Pattern RELEASE_LINE = Pattern.compile("^\\d+(?:[.-]\\d+)*");
 
+    // a build asks these questions for every candidate of every artifact, and the same version strings recur
+    // across artifacts and goals, so the canonical-form parse is done once per distinct version
+    private static final Map<String, Boolean> PRE_RELEASE_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, String> RELEASE_LINE_CACHE = new ConcurrentHashMap<>();
+
     /**
      * Checks if the given version string represents a pre-release version: an alpha, beta, milestone, preview,
      * early-access or release candidate version. A snapshot is not a pre-release.
@@ -89,7 +96,8 @@ public abstract class AbstractVersionDetails implements VersionDetails {
         if (version == null || version.isEmpty()) {
             return false;
         }
-        return isPreReleaseCanonical(new ComparableVersion(version).getCanonical());
+        return PRE_RELEASE_CACHE.computeIfAbsent(
+                version, v -> isPreReleaseCanonical(new ComparableVersion(v).getCanonical()));
     }
 
     /**
@@ -105,8 +113,10 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      * {@code 4} for {@code 4.0.0-beta-3}, {@code 4.1} for {@code 4.1.0-M1}.
      */
     private static String releaseLine(String version) {
-        Matcher matcher = RELEASE_LINE.matcher(new ComparableVersion(version).getCanonical());
-        return matcher.find() ? matcher.group() : "";
+        return RELEASE_LINE_CACHE.computeIfAbsent(version, v -> {
+            Matcher matcher = RELEASE_LINE.matcher(new ComparableVersion(v).getCanonical());
+            return matcher.find() ? matcher.group() : "";
+        });
     }
 
     /**
