@@ -24,6 +24,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,7 +81,6 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
-import org.apache.maven.shared.utils.io.IOUtil;
 import org.codehaus.mojo.versions.rewriting.MutableXMLStreamReader;
 import org.codehaus.mojo.versions.rewriting.PropertyVersionInternal;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
@@ -1475,7 +1475,12 @@ public class PomHelper {
                     .orElse(Charset.defaultCharset());
 
             buffer.reset();
-            return Pair.of(IOUtil.toString(buffer, encoding.toString()), encoding);
+            ByteArrayOutputStream content = new ByteArrayOutputStream();
+            byte[] chunk = new byte[4096];
+            for (int n = buffer.read(chunk); n != -1; n = buffer.read(chunk)) {
+                content.write(chunk, 0, n);
+            }
+            return Pair.of(content.toString(encoding.toString()), encoding);
         }
     }
 
