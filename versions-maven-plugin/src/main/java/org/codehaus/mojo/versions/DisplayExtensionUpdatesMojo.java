@@ -20,6 +20,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -202,7 +203,12 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
         DependencyFilter includeFilter = DependencyFilter.parseFrom(extensionIncludes);
         DependencyFilter excludeFilter = DependencyFilter.parseFrom(extensionExcludes);
         ResolverAdapter resolverAdapter = new DefaultResolverAdapter(
-                artifactFactory, repositorySystem, getLog(), session, minDaysOld, minDaysOldIgnore);
+                artifactFactory,
+                repositorySystem,
+                getLog(),
+                session,
+                minimumReleaseAge,
+                minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes));
         RuleService ruleService = new RulesServiceBuilder()
                 .withMavenSession(session)
                 .withTransporterProvider(transporterProvider)

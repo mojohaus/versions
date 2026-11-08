@@ -76,7 +76,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.apache.maven.RepositoryUtils.toArtifact;
-import static org.codehaus.mojo.versions.api.internal.AgeFilteringUtils.getArtifactAgeService;
 
 /**
  * Helper class that provides common functionality required by both the mojos and the reports.
@@ -116,23 +115,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
     private boolean allowPreReleases = true;
 
-    /**
-     * Minimum age in days a version must have before it is considered as an update candidate. {@code 0} (the default)
-     * disables the filter and all versions are considered.
-     *
-     * @since 2.24.0
-     */
-    private final int minDaysOld;
-
-    /**
-     * Every Maven artifact which matches this Regular Expression will be ignored for the minDaysOld filter.
-     *
-     * <p>It's intended to be used for artifacts which sources you absolutely trust.
-     * It matches against {@code groupId:artifactId} of the artifact.</p>
-     *
-     * @since 2.24.0
-     */
-    private final String minDaysOldIgnore;
+    private final ArtifactAgeService artifactAgeService;
 
     /**
      * Private constructor used by the builder
@@ -146,16 +129,20 @@ public class DefaultVersionsHelper implements VersionsHelper {
             MavenSession mavenSession,
             RuleService ruleService,
             Log log,
-            int minDaysOld,
-            String minDaysOldIgnore) {
+            int minimumReleaseAge,
+            Collection<String> minimumReleaseAgeExcludes) {
         this.pomHelper = requireNonNull(pomHelper);
         this.artifactFactory = requireNonNull(artifactFactory);
         this.repositorySystem = requireNonNull(repositorySystem);
         this.mavenSession = requireNonNull(mavenSession);
         this.ruleService = requireNonNull(ruleService);
         this.log = requireNonNull(log);
-        this.minDaysOld = minDaysOld;
-        this.minDaysOldIgnore = minDaysOldIgnore;
+        this.artifactAgeService = new ArtifactAgeService(
+                repositorySystem,
+                mavenSession.getRepositorySession(),
+                log,
+                minimumReleaseAge,
+                minimumReleaseAgeExcludes);
 
         this.remoteProjectRepositories = of(mavenSession)
                 .map(MavenSession::getCurrentProject)
@@ -244,8 +231,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
                         return false;
                     }));
 
-            versions = getArtifactAgeService(log)
-                    .filterVersionsByAge(artifact, minDaysOld, minDaysOldIgnore, versions, versionRangeResult);
+            versions = artifactAgeService.filterVersionsByAge(artifact, versions, versionRangeResult);
 
             ArtifactVersions result = new ArtifactVersions(
                     artifact,
@@ -609,9 +595,9 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
         private boolean allowPreReleases = true;
 
-        private int minDaysOld = 0;
+        private int minimumReleaseAge = 0;
 
-        private String minDaysOldIgnore;
+        private Collection<String> minimumReleaseAgeExcludes;
 
         /**
          * Creates a new instance
@@ -692,31 +678,30 @@ public class DefaultVersionsHelper implements VersionsHelper {
         }
 
         /**
-         * Sets the minimum age (in days) that a version must have before it is considered as an update candidate.
-         * Versions whose publication date is less than {@code minDaysOld} days ago are excluded from the result. A
-         * value of {@code 0} (the default) disables the filter.
+         * Sets the minimum age (in days) that a version newer than the current one must have before it is offered as an
+         * update. Versions published more recently are left out of the result. {@code 0}, the default, disables the
+         * filter.
          *
-         * @param minDaysOld minimum age in days; must be &ge; 0
+         * @param minimumReleaseAge minimum age in days; must be &ge; 0
          * @return {@link Builder} instance
+         * @since 2.25.0
          */
-        public Builder withMinDaysOld(int minDaysOld) {
-            this.minDaysOld = minDaysOld;
+        public Builder withMinimumReleaseAge(int minimumReleaseAge) {
+            this.minimumReleaseAge = minimumReleaseAge;
             return this;
         }
 
         /**
-         * Sets the regular expression for artifacts to ignore when applying the minimum-age filter.
+         * Sets the {@code groupId:artifactId} patterns of the artifacts exempt from the minimum release age.
          *
-         * <p>Artifacts matching this pattern are excluded from the age-based filtering, even if
-         * their version is newer than the configured {@code minDaysOld} threshold.<br>
-         * It matches against <code>groupId:artifactId</code> of the artifact.</p>
-         *
-         * @param minDaysOldIgnore regular expression for ignored artifacts; may be {@code null}
+         * @param minimumReleaseAgeExcludes the patterns, in which {@code *} matches any run of characters; may be
+         *                                  {@code null}
          * @return {@link Builder} instance
-         * @since 2.24.0
+         * @see ArtifactAgeService
+         * @since 2.25.0
          */
-        public Builder withMinDaysOldIgnore(String minDaysOldIgnore) {
-            this.minDaysOldIgnore = minDaysOldIgnore;
+        public Builder withMinimumReleaseAgeExcludes(Collection<String> minimumReleaseAgeExcludes) {
+            this.minimumReleaseAgeExcludes = minimumReleaseAgeExcludes;
             return this;
         }
 
@@ -734,8 +719,8 @@ public class DefaultVersionsHelper implements VersionsHelper {
                     mavenSession,
                     ruleService,
                     log,
-                    minDaysOld,
-                    minDaysOldIgnore);
+                    minimumReleaseAge,
+                    minimumReleaseAgeExcludes);
             helper.allowPreReleases = allowPreReleases;
             return helper;
         }

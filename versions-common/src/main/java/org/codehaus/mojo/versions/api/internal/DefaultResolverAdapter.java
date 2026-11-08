@@ -25,6 +25,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.mojo.versions.api.ArtifactAgeService;
 import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PluginUpdatesDetails;
 import org.codehaus.mojo.versions.api.ResolverAdapter;
@@ -45,7 +46,6 @@ import org.eclipse.aether.version.Version;
 
 import static java.util.Optional.of;
 import static org.apache.maven.RepositoryUtils.toArtifact;
-import static org.codehaus.mojo.versions.api.internal.AgeFilteringUtils.getArtifactAgeService;
 
 public class DefaultResolverAdapter implements ResolverAdapter {
 
@@ -59,8 +59,7 @@ public class DefaultResolverAdapter implements ResolverAdapter {
 
     private final MavenSession mavenSession;
 
-    private final int minDaysOld;
-    private final String minDaysOldIgnore;
+    private final ArtifactAgeService artifactAgeService;
 
     private final List<RemoteRepository> remotePluginRepositories;
 
@@ -71,14 +70,18 @@ public class DefaultResolverAdapter implements ResolverAdapter {
             RepositorySystem repositorySystem,
             Log log,
             MavenSession mavenSession,
-            int minDaysOld,
-            String minDaysOldIgnore) {
+            int minimumReleaseAge,
+            Collection<String> minimumReleaseAgeExcludes) {
         this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
         this.log = log;
         this.mavenSession = mavenSession;
-        this.minDaysOld = minDaysOld;
-        this.minDaysOldIgnore = minDaysOldIgnore;
+        this.artifactAgeService = new ArtifactAgeService(
+                repositorySystem,
+                mavenSession.getRepositorySession(),
+                log,
+                minimumReleaseAge,
+                minimumReleaseAgeExcludes);
 
         this.remoteProjectRepositories = of(mavenSession)
                 .map(MavenSession::getCurrentProject)
@@ -154,8 +157,7 @@ public class DefaultResolverAdapter implements ResolverAdapter {
                     repositorySystem.resolveVersionRange(mavenSession.getRepositorySession(), versionRangeRequest);
 
             Stream<org.eclipse.aether.version.Version> versions = versionRangeResult.getVersions().stream();
-            versions = getArtifactAgeService(log)
-                    .filterVersionsByAge(artifact, minDaysOld, minDaysOldIgnore, versions, versionRangeResult);
+            versions = artifactAgeService.filterVersionsByAge(artifact, versions, versionRangeResult);
 
             return new ArtifactVersions(
                     artifact,

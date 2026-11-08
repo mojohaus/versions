@@ -19,7 +19,10 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
-import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -30,7 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -44,7 +46,6 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.mojo.versions.api.internal.AgeFilteringUtils;
 import org.codehaus.mojo.versions.rule.RulesServiceBuilder;
 import org.codehaus.mojo.versions.utils.ArtifactFactory;
 import org.codehaus.mojo.versions.utils.FileTransporterProvider;
@@ -52,6 +53,8 @@ import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 import org.eclipse.aether.resolution.VersionRangeResult;
@@ -60,6 +63,7 @@ import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.Version;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -366,21 +370,37 @@ class DefaultVersionsHelperTest {
     }
 
     @Test
-    void testMinDaysOldFilterExcludesRecentVersions() throws Exception {
+    void testMinimumReleaseAgeLeavesOutRecentVersionsNewerThanTheCurrentOne(@TempDir Path tempDir) throws Exception {
         when(artifact.getGroupId()).thenReturn("com.example");
         when(artifact.getArtifactId()).thenReturn("my-artifact");
+        when(artifact.getVersion()).thenReturn("1.0.0");
         when(artifact.getType()).thenReturn("jar");
         when(artifact.getArtifactHandler()).thenReturn(new DefaultArtifactHandler("default"));
 
-        RemoteRepository recentRepo = new RemoteRepository.Builder("recent", "default", "file:///recent").build();
-        RemoteRepository oldRepo = new RemoteRepository.Builder("old", "default", "file:///old").build();
-
+        RemoteRepository repository = new RemoteRepository.Builder("repo", "default", "https://repo.invalid/").build();
         when(repositorySystem.resolveVersionRange(any(), any(VersionRangeRequest.class)))
                 .then(i -> new VersionRangeResult(i.getArgument(1))
+                        .addVersion(parseVersion("0.9.0"))
                         .addVersion(parseVersion("1.0.0"))
+                        .addVersion(parseVersion("1.1.0"))
                         .addVersion(parseVersion("2.0.0"))
-                        .setRepository(parseVersion("1.0.0"), oldRepo)
-                        .setRepository(parseVersion("2.0.0"), recentRepo));
+                        .setRepository(parseVersion("0.9.0"), repository)
+                        .setRepository(parseVersion("1.0.0"), repository)
+                        .setRepository(parseVersion("1.1.0"), repository)
+                        .setRepository(parseVersion("2.0.0"), repository));
+        List<String> looked = new ArrayList<>();
+        when(repositorySystem.resolveArtifact(any(), any(ArtifactRequest.class)))
+                .then(i -> {
+                    ArtifactRequest request = i.getArgument(1);
+                    String version = request.getArtifact().getVersion();
+                    looked.add(version);
+                    Path pom = tempDir.resolve(version + ".pom");
+                    Files.write(pom, "<project/>".getBytes(StandardCharsets.UTF_8));
+                    Files.setLastModifiedTime(
+                            pom, FileTime.from(Instant.now().minus("1.1.0".equals(version) ? 10 : 2, ChronoUnit.DAYS)));
+                    return new ArtifactResult(request)
+                            .setArtifact(request.getArtifact().setFile(pom.toFile()));
+                });
 
         DefaultVersionsHelper helper = new DefaultVersionsHelper.Builder()
                 .withArtifactFactory(artifactFactory)
@@ -392,44 +412,17 @@ class DefaultVersionsHelperTest {
                         .withMavenSession(mavenSession)
                         .withLog(log)
                         .build())
-                .withMinDaysOld(7)
+                .withMinimumReleaseAge(7)
                 .build();
 
-        // Mock ArtifactAgeService via ThreadLocal in AgeFilteringUtils
-        AgeFilteringUtils.clearCache();
-        Field ageServiceThreadLocalField = AgeFilteringUtils.class.getDeclaredField("AGE_SERVICE_CACHE");
-        ageServiceThreadLocalField.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        ThreadLocal<ArtifactAgeService> threadLocal =
-                (ThreadLocal<ArtifactAgeService>) ageServiceThreadLocalField.get(null);
-        threadLocal.set(new ArtifactAgeService(log) {
-            @Override
-            Optional<Instant> getPublicationDate(
-                    String groupId, String artifactId, String version, RemoteRepository repository) {
-                switch (version) {
-                    case "1.0.0":
-                        // 10 days old
-                        return Optional.of(Instant.now().minus(10, ChronoUnit.DAYS));
-                    case "2.0.0":
-                        // 2 days old
-                        return Optional.of(Instant.now().minus(2, ChronoUnit.DAYS));
-                    default:
-                        throw new IllegalArgumentException("Unknown version: " + version);
-                }
-            }
-        });
+        ArtifactVersions versions = helper.lookupArtifactVersions(artifact, null, true, false);
 
-        try {
-            ArtifactVersions versions = helper.lookupArtifactVersions(artifact, null, true, false);
-
-            List<String> versionStrings = Arrays.stream(versions.getVersions(true))
-                    .map(ArtifactVersion::toString)
-                    .collect(Collectors.toList());
-            assertTrue(versionStrings.contains("1.0.0"));
-            assertEquals(1, versionStrings.size());
-        } finally {
-            AgeFilteringUtils.clearCache();
-        }
+        assertEquals(
+                Arrays.asList("0.9.0", "1.0.0", "1.1.0"),
+                Arrays.stream(versions.getVersions(true))
+                        .map(ArtifactVersion::toString)
+                        .collect(Collectors.toList()));
+        assertEquals(Arrays.asList("1.1.0", "2.0.0"), looked);
     }
 
     private static Version parseVersion(String version) {

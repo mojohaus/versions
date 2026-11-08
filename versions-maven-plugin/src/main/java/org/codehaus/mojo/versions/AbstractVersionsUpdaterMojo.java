@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -231,29 +232,28 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
     protected boolean skip;
 
     /**
-     * Minimum number of days a new release must be available before it is considered as an update candidate.
-     * This allows you to ignore very recent releases that may not yet be stable or have undetected supply-chain
-     * attacks.<br>
-     * For example, {@code <minDaysOld>7</minDaysOld>} will only suggest updates that have been
-     * published for at least 7 days.
-     * A value of {@code 0} (the default) disables this filter and all versions are considered.
+     * Minimum number of days a release must have been published before it is offered as an update. This keeps a very
+     * recent release, which may be faulty or compromised, out of the update candidates; Renovate calls the same idea
+     * {@code minimumReleaseAge}, and Dependabot calls it {@code cooldown}.<br>
+     * A version older than or equal to the current one is not affected. The publication date is read through Maven's
+     * own transport, so the proxy, mirror and server settings apply. If the date cannot be determined, the version is
+     * offered and a warning says so. {@code 0}, the default, switches the filter off.
      *
-     * @since 2.24.0
+     * @since 2.25.0
      */
-    @Parameter(property = "versions.minDaysOld", defaultValue = "0")
-    protected int minDaysOld = 0;
+    @Parameter(property = "versions.minimumReleaseAge", defaultValue = "0")
+    protected int minimumReleaseAge = 0;
 
     /**
-     * The regular expression for artifacts to ignore when applying the minimum-age filter.
+     * {@code groupId:artifactId} patterns of the artifacts that are exempt from {@link #minimumReleaseAge}, for
+     * artifacts whose sources you trust. {@code *} matches any run of characters, and an {@code artifactId} may be
+     * left out to match the whole group, for example {@code com.example:*} or {@code com.example}.<br>
+     * On the command line, separate the patterns with commas.
      *
-     * <p>Artifacts matching this pattern are excluded from the age-based filtering, even if
-     * their version is newer than the configured {@code minDaysOld} threshold.<br>
-     * It matches against <code>groupId:artifactId</code> of the artifact.</p>
-     *
-     * @since 2.24.0
+     * @since 2.25.0
      */
-    @Parameter(property = "versions.minDaysOldIgnore")
-    protected String minDaysOldIgnore;
+    @Parameter(property = "versions.minimumReleaseAgeExcludes")
+    protected String[] minimumReleaseAgeExcludes;
 
     /**
      * (injected) provider of the Maven Resolver transporters used to load the rules
@@ -333,8 +333,9 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
                     .withPomHelper(pomHelper)
                     .withRuleService(ruleService)
                     .withAllowPreReleases(allowPreReleases)
-                    .withMinDaysOld(minDaysOld)
-                    .withMinDaysOldIgnore(minDaysOldIgnore)
+                    .withMinimumReleaseAge(minimumReleaseAge)
+                    .withMinimumReleaseAgeExcludes(
+                            minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes))
                     .build();
         }
         return helper;
