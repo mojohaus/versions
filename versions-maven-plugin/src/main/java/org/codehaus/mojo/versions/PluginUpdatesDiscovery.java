@@ -324,7 +324,7 @@ final class PluginUpdatesDiscovery {
                 .flatMap(b -> ofNullable(b.getPlugins())
                         .map(plugins -> plugins.stream()
                                 .filter(plugin -> plugin.getVersion() != null)
-                                .filter(plugin -> !onlyIncludeInherited || getPluginInherited(plugin))
+                                .filter(plugin -> !onlyIncludeInherited || plugin.isInherited())
                                 .collect(toMap(Plugin::getKey, Plugin::getVersion))))
                 .orElse(emptyMap());
     }
@@ -336,14 +336,6 @@ final class PluginUpdatesDiscovery {
                         .map(profile -> getPluginsFromBuild(profile.getBuild(), onlyIncludeInherited))
                         .forEach(buildPlugins::putAll));
         return buildPlugins;
-    }
-
-    private static boolean getPluginInherited(Object plugin) {
-        return "true"
-                .equalsIgnoreCase(
-                        plugin instanceof ReportPlugin
-                                ? ((ReportPlugin) plugin).getInherited()
-                                : ((Plugin) plugin).getInherited());
     }
 
     private Stream<Plugin> getBoundPlugins(MavenProject project) {
@@ -565,7 +557,7 @@ final class PluginUpdatesDiscovery {
                                         .reduce(Stream::concat))
                                 .orElse(Stream.empty()))
                 .filter(p -> p.getVersion() != null)
-                .filter(p -> !onlyIncludeInherited || getPluginInherited(p))
+                .filter(p -> !onlyIncludeInherited || p.isInherited())
                 .collect(toMap(ReportPlugin::getKey, ReportPlugin::getVersion));
     }
 
