@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.filtering.WildcardMatcher;
@@ -63,7 +64,8 @@ import static java.util.Optional.empty;
  *
  * <p>Dates are looked up only for versions newer than the current version of the artifact, and are cached for the
  * lifetime of this instance. A version whose date cannot be determined is offered, and a warning says so, so that the
- * filter is never switched off unnoticed.</p>
+ * filter is never switched off unnoticed. Snapshots pass without a lookup: they are not releases, and whether they are
+ * offered is up to {@code allowSnapshots}.</p>
  *
  * @since 2.25.0
  */
@@ -149,7 +151,7 @@ public class ArtifactAgeService {
 
     /**
      * Drops the versions that are newer than the current version of the artifact and younger than the minimum age.
-     * The current version and older ones pass without a lookup.
+     * The current version, older ones and snapshots pass without a lookup.
      *
      * @param artifact           the artifact whose versions are being filtered; its version is the current one
      * @param versions           the candidate versions
@@ -162,9 +164,9 @@ public class ArtifactAgeService {
             return versions;
         }
         ComparableVersion current = currentVersion(artifact);
-        return versions.filter(
-                version -> current != null && new ComparableVersion(version.toString()).compareTo(current) <= 0
-                        || isOldEnough(artifact, version.toString(), versionRangeResult.getRepository(version)));
+        return versions.filter(version -> ArtifactUtils.isSnapshot(version.toString())
+                || current != null && new ComparableVersion(version.toString()).compareTo(current) <= 0
+                || isOldEnough(artifact, version.toString(), versionRangeResult.getRepository(version)));
     }
 
     private static ComparableVersion currentVersion(Artifact artifact) {
