@@ -233,6 +233,8 @@ class AbstractVersionDetailsTest {
         // Qualifiers Maven does not know, but which mark a pre-release
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("7.0.0-preview.1"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("18-ea"));
+        // the JDK and OpenJFX early-access form; the canonical form keeps the plus sign: 28-ea+-12
+        assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("28-ea+12"));
         assertEquals(true, AbstractVersionDetails.isPreReleaseVersion("2.0.0-pre"));
 
         // A bare a, b or m is not alpha, beta or milestone to Maven, which orders it after the release

@@ -208,7 +208,8 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                 getLog(),
                 session,
                 minimumReleaseAge,
-                minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes));
+                minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes),
+                allowPreReleases);
         RuleService ruleService = new RulesServiceBuilder()
                 .withMavenSession(session)
                 .withTransporterProvider(transporterProvider)
@@ -256,7 +257,6 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
 
             SortedMap<Dependency, ArtifactVersions> versionMap =
                     resolverAdapter.resolveDependencyVersions(dependencies, true, true);
-            versionMap.values().forEach(versions -> versions.setAllowPreReleases(allowPreReleases));
             if (!allowSnapshots) {
                 versionMap = versionMap.entrySet().stream()
                         .collect(Collectors.toMap(

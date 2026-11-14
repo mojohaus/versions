@@ -70,9 +70,11 @@ public abstract class AbstractVersionDetails implements VersionDetails {
 
     /**
      * Splits a canonical version into its items. Maven 3 writes {@code 3-milestone-2} and Maven 4 writes
-     * {@code 3-milestone2}, so items are also split where letters and digits meet.
+     * {@code 3-milestone2}, so items are also split where letters and digits meet. Maven keeps a plus sign inside an
+     * item ({@code 28-ea+12} becomes {@code 28-ea+-12}), so it splits items as well.
      */
-    private static final Pattern CANONICAL_ITEM = Pattern.compile("[.-]|(?<=\\p{Alpha})(?=\\d)|(?<=\\d)(?=\\p{Alpha})");
+    private static final Pattern CANONICAL_ITEM =
+            Pattern.compile("[.+-]|(?<=\\p{Alpha})(?=\\d)|(?<=\\d)(?=\\p{Alpha})");
 
     private static final Pattern RELEASE_LINE = Pattern.compile("^\\d+(?:[.-]\\d+)*");
 
