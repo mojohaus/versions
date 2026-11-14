@@ -134,6 +134,34 @@ class MaxDependencyUpdatesTest {
         assertDoesNotThrow(() -> maxDependencyUpdates.execute());
     }
 
+    private void artifactAWithPreReleaseUpdate() {
+        when(project.getDependencies())
+                .thenReturn(singletonList(DependencyBuilder.newBuilder()
+                        .withGroupId("group")
+                        .withArtifactId("artifactA")
+                        .withVersion("1.0.0")
+                        .build()));
+
+        MockUtils.prepareAetherRepositorySystemMockForVersionRange(
+                repositorySystem, singletonMap("artifactA", new String[] {"1.0.0", "2.0.0-beta-1", "2.0.0-rc-1"}));
+    }
+
+    @Test
+    void testPreReleasesNotCountedByDefault() {
+        artifactAWithPreReleaseUpdate();
+
+        assertDoesNotThrow(() -> maxDependencyUpdates.execute());
+    }
+
+    @Test
+    void testPreReleasesCountedWithAllowPreReleases() {
+        artifactAWithPreReleaseUpdate();
+
+        maxDependencyUpdates.allowPreReleases = true;
+        Exception e = assertThrows(EnforcerRuleException.class, () -> maxDependencyUpdates.execute());
+        assertTextContains(e.getMessage(), "More than 0 upgradable artifacts detected");
+    }
+
     @Test
     void testRulePassesByMaxUpdatesNotExceededDependencyIncludes() {
 
