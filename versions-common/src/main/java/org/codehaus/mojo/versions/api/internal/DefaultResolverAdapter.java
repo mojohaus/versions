@@ -65,6 +65,18 @@ public class DefaultResolverAdapter implements ResolverAdapter {
 
     private final List<RemoteRepository> remoteProjectRepositories;
 
+    private final boolean allowPreReleases;
+
+    /**
+     * Creates an adapter whose {@link ArtifactVersions} offer pre-release versions.
+     *
+     * @param artifactFactory artifact factory
+     * @param repositorySystem repository system
+     * @param log logger
+     * @param mavenSession Maven session
+     * @param minimumReleaseAge minimum age, in days, of a version to be offered
+     * @param minimumReleaseAgeExcludes artifacts exempt from {@code minimumReleaseAge}
+     */
     public DefaultResolverAdapter(
             ArtifactFactory artifactFactory,
             RepositorySystem repositorySystem,
@@ -72,6 +84,31 @@ public class DefaultResolverAdapter implements ResolverAdapter {
             MavenSession mavenSession,
             int minimumReleaseAge,
             Collection<String> minimumReleaseAgeExcludes) {
+        this(artifactFactory, repositorySystem, log, mavenSession, minimumReleaseAge, minimumReleaseAgeExcludes, true);
+    }
+
+    /**
+     * Creates an adapter whose {@link ArtifactVersions} apply the given pre-release policy.
+     *
+     * @param artifactFactory artifact factory
+     * @param repositorySystem repository system
+     * @param log logger
+     * @param mavenSession Maven session
+     * @param minimumReleaseAge minimum age, in days, of a version to be offered
+     * @param minimumReleaseAgeExcludes artifacts exempt from {@code minimumReleaseAge}
+     * @param allowPreReleases whether pre-release versions are offered
+     * @see ArtifactVersions#setAllowPreReleases(boolean)
+     * @since 2.25.2
+     */
+    public DefaultResolverAdapter(
+            ArtifactFactory artifactFactory,
+            RepositorySystem repositorySystem,
+            Log log,
+            MavenSession mavenSession,
+            int minimumReleaseAge,
+            Collection<String> minimumReleaseAgeExcludes,
+            boolean allowPreReleases) {
+        this.allowPreReleases = allowPreReleases;
         this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
         this.log = log;
@@ -159,10 +196,12 @@ public class DefaultResolverAdapter implements ResolverAdapter {
             Stream<org.eclipse.aether.version.Version> versions = versionRangeResult.getVersions().stream();
             versions = artifactAgeService.filterVersionsByAge(artifact, versions, versionRangeResult);
 
-            return new ArtifactVersions(
+            ArtifactVersions result = new ArtifactVersions(
                     artifact,
                     versions.map((Version version) -> ArtifactVersionService.getArtifactVersion(version.toString()))
                             .collect(Collectors.toList()));
+            result.setAllowPreReleases(allowPreReleases);
+            return result;
         } catch (VersionRangeResolutionException e) {
             throw new VersionRetrievalException(e.getMessage(), artifact, e);
         } catch (RuntimeException e) {

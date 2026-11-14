@@ -425,7 +425,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
                 getLog(),
                 session,
                 minimumReleaseAge,
-                minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes));
+                minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes),
+                allowPreReleases);
         RuleService ruleService = new RulesServiceBuilder()
                 .withMavenSession(session)
                 .withTransporterProvider(transporterProvider)

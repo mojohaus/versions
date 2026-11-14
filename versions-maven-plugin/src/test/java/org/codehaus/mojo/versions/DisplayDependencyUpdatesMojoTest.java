@@ -548,6 +548,74 @@ public class DisplayDependencyUpdatesMojoTest {
         }
     }
 
+    private String displayUpdates(String current, boolean preReleases, boolean newestPerSegment) throws Exception {
+        try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
+            new DisplayDependencyUpdatesMojo(
+                    artifactFactory,
+                    mockAetherRepositorySystem(new HashMap<String, String[]>() {
+                        {
+                            put("default-dependency", new String[] {
+                                "1.0.0",
+                                "1.1.0",
+                                "1.2.0-beta4",
+                                "2.0.0-alpha-2",
+                                "2.0.0-beta-1",
+                                "2.0.0-rc-7",
+                                "3-ea+12"
+                            });
+                        }
+                    }),
+                    null,
+                    null) {
+                {
+                    setProject(createProject());
+                    getProject().getDependencies().get(0).setVersion(current);
+                    processDependencies = true;
+                    processDependencyManagement = false;
+                    dependencyIncludes = singletonList(WildcardMatcher.WILDCARD);
+                    dependencyExcludes = emptyList();
+                    allowPreReleases = preReleases;
+                    showNewestPerSegment = newestPerSegment;
+                    outputFile = tempFile.getPath().toFile();
+                    setPluginContext(new HashMap<>());
+
+                    session = mockMavenSession();
+                    mojoExecution = mock(MojoExecution.class);
+                }
+            }.execute();
+            return String.join("", Files.readAllLines(tempFile.getPath()));
+        }
+    }
+
+    @Test
+    public void testPreReleasesLeftOutByDefault() throws Exception {
+        String output = displayUpdates("1.0.0", false, false);
+
+        assertTextContains(output, "1.1.0");
+        assertTextNotContains(output, "1.2.0-beta4", "2.0.0-alpha-2", "2.0.0-beta-1", "2.0.0-rc-7", "3-ea+12");
+    }
+
+    @Test
+    public void testPreReleasesLeftOutByDefaultWithNewestPerSegment() throws Exception {
+        String output = displayUpdates("1.0.0", false, true);
+
+        assertTextContains(output, "1.1.0");
+        assertTextNotContains(output, "1.2.0-beta4", "2.0.0-alpha-2", "2.0.0-beta-1", "2.0.0-rc-7", "3-ea+12");
+    }
+
+    @Test
+    public void testPreReleasesOfferedWithAllowPreReleases() throws Exception {
+        assertTextContains(displayUpdates("1.0.0", true, false), "3-ea+12");
+    }
+
+    @Test
+    public void testPreReleaseOfTheCurrentReleaseLineOffered() throws Exception {
+        String output = displayUpdates("2.0.0-beta-1", false, false);
+
+        assertTextContains(output, "2.0.0-rc-7");
+        assertTextNotContains(output, "3-ea+12");
+    }
+
     private void testAllowUpdatesFromLesserSegments(String availableVersion) throws Exception {
         try (CloseableTempFile tempFile = new CloseableTempFile("display-dependency-updates")) {
             new DisplayDependencyUpdatesMojo(
