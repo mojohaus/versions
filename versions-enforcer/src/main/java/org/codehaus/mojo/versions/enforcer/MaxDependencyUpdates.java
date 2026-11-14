@@ -268,6 +268,15 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
      */
     protected boolean allowSnapshots;
 
+    /**
+     * Whether pre-release versions (alpha, beta, milestone, release candidate, preview and early-access) should be
+     * counted as updates. When {@code false}, a pre-release counts only when the current version is a pre-release or
+     * snapshot of the same release line. Default is {@code false}.
+     *
+     * @since 2.25.2
+     */
+    protected boolean allowPreReleases;
+
     private final MavenProject project;
 
     private final RepositorySystem repositorySystem;
@@ -338,6 +347,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
                     .withMavenSession(mavenSession)
                     .withPomHelper(pomHelper)
                     .withRuleService(ruleService)
+                    .withAllowPreReleases(allowPreReleases)
                     .build();
         } catch (MojoExecutionException e) {
             throw new EnforcerRuleError("Cannot resolve dependency", e);
