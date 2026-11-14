@@ -157,6 +157,18 @@ class ArtifactAgeServiceTest {
     }
 
     @Test
+    void passesSnapshotsWithoutALookup() throws Exception {
+        pomsPublished("1.1.0", "30");
+
+        assertEquals(
+                Arrays.asList("1.0.0", "1.1.0", "1.2.0-SNAPSHOT"),
+                filter(service(7), artifact("g", "a", "1.0.0"), "1.0.0", "1.1.0", "1.2.0-SNAPSHOT"));
+
+        verify(repositorySystem, times(1)).resolveArtifact(any(), any(ArtifactRequest.class));
+        verify(log, never()).warn(any(CharSequence.class));
+    }
+
+    @Test
     void checksEveryVersionWhenTheCurrentVersionIsARange() throws Exception {
         pomsPublished("1.0.0", "1", "2.0.0", "1");
 
