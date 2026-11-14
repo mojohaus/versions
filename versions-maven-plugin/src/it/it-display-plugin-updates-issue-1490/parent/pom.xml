@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>localhost</groupId>
+  <artifactId>it-display-plugin-updates-issue-1490-parent</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+
+  <profiles>
+    <profile>
+      <id>one</id>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>localhost</groupId>
+            <artifactId>dummy-maven-plugin</artifactId>
+            <version>1.0</version>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+    <profile>
+      <id>two</id>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>localhost</groupId>
+            <artifactId>dummy-maven-plugin</artifactId>
+            <version>1.0</version>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
+
+</project>

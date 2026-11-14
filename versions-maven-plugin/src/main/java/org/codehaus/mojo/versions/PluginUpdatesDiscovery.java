@@ -325,7 +325,7 @@ final class PluginUpdatesDiscovery {
                         .map(plugins -> plugins.stream()
                                 .filter(plugin -> plugin.getVersion() != null)
                                 .filter(plugin -> !onlyIncludeInherited || plugin.isInherited())
-                                .collect(toMap(Plugin::getKey, Plugin::getVersion))))
+                                .collect(toMap(Plugin::getKey, Plugin::getVersion, (first, last) -> last))))
                 .orElse(emptyMap());
     }
 
@@ -558,7 +558,8 @@ final class PluginUpdatesDiscovery {
                                 .orElse(Stream.empty()))
                 .filter(p -> p.getVersion() != null)
                 .filter(p -> !onlyIncludeInherited || p.isInherited())
-                .collect(toMap(ReportPlugin::getKey, ReportPlugin::getVersion));
+                // a plugin may be declared in several profiles; the last declaration wins, as in getBuildPlugins
+                .collect(toMap(ReportPlugin::getKey, ReportPlugin::getVersion, (first, last) -> last));
     }
 
     private static Stream<Plugin> getPluginManagementPlugins(BuildBase buildBase) {
