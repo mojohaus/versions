@@ -347,13 +347,13 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
-        <version>4.1.0</version>
+        <version>4.2.0</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-xml</artifactId>
         <!-- To keep Maven 3.x compatibility - use only 3.x versions -->
-        <version>3.1.0</version>
+        <version>3.1.1</version>
       </dependency>
 
       <!-- manage transitive dependencies due to security patches -->
@@ -375,7 +375,7 @@
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-archiver</artifactId>
-        <version>4.15.0</version>
+        <version>4.16.0</version>
       </dependency>
       <dependency>
         <groupId>javax.inject</groupId>
