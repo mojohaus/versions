@@ -42,6 +42,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 import org.eclipse.aether.version.Version;
 
 import static java.util.Optional.of;
@@ -108,6 +109,44 @@ public class DefaultResolverAdapter implements ResolverAdapter {
             int minimumReleaseAge,
             Collection<String> minimumReleaseAgeExcludes,
             boolean allowPreReleases) {
+        this(
+                artifactFactory,
+                repositorySystem,
+                log,
+                mavenSession,
+                minimumReleaseAge,
+                minimumReleaseAgeExcludes,
+                allowPreReleases,
+                null);
+    }
+
+    /**
+     * Creates an adapter whose {@link ArtifactVersions} apply the given pre-release policy, and whose minimum release
+     * age filter can read the publication date of a version through the transport.
+     *
+     * @param artifactFactory artifact factory
+     * @param repositorySystem repository system
+     * @param log logger
+     * @param mavenSession Maven session
+     * @param minimumReleaseAge minimum age, in days, of a version to be offered
+     * @param minimumReleaseAgeExcludes artifacts exempt from {@code minimumReleaseAge}
+     * @param allowPreReleases whether pre-release versions are offered
+     * @param transporterProvider provider of the transporters used to read the publication date of a version where
+     *                            the local repository does not hold it; may be {@code null}
+     * @see ArtifactAgeService
+     * @since 2.25.3
+     */
+    // The parameters mirror the other constructors, plus one
+    @SuppressWarnings("checkstyle:parameternumber")
+    public DefaultResolverAdapter(
+            ArtifactFactory artifactFactory,
+            RepositorySystem repositorySystem,
+            Log log,
+            MavenSession mavenSession,
+            int minimumReleaseAge,
+            Collection<String> minimumReleaseAgeExcludes,
+            boolean allowPreReleases,
+            TransporterProvider transporterProvider) {
         this.allowPreReleases = allowPreReleases;
         this.artifactFactory = artifactFactory;
         this.repositorySystem = repositorySystem;
@@ -118,7 +157,8 @@ public class DefaultResolverAdapter implements ResolverAdapter {
                 mavenSession.getRepositorySession(),
                 log,
                 minimumReleaseAge,
-                minimumReleaseAgeExcludes);
+                minimumReleaseAgeExcludes,
+                transporterProvider);
 
         this.remoteProjectRepositories = of(mavenSession)
                 .map(MavenSession::getCurrentProject)

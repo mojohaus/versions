@@ -19,6 +19,7 @@ package org.codehaus.mojo.versions.api;
  * under the License.
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -45,6 +46,10 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.spi.connector.transport.GetTask;
+import org.eclipse.aether.spi.connector.transport.Transporter;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
+import org.eclipse.aether.transfer.NoTransporterException;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +63,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -74,6 +82,10 @@ class ArtifactAgeServiceTest {
     private final RepositorySystem repositorySystem = mock(RepositorySystem.class);
 
     private final RepositorySystemSession session = mock(RepositorySystemSession.class);
+
+    private final TransporterProvider transporterProvider = mock(TransporterProvider.class);
+
+    private final Transporter transporter = mock(Transporter.class);
 
     @TempDir
     Path tempDir;
@@ -94,6 +106,30 @@ class ArtifactAgeServiceTest {
 
     private ArtifactAgeService service(int minimumReleaseAge, String... excludes) {
         return new ArtifactAgeService(repositorySystem, session, log, minimumReleaseAge, Arrays.asList(excludes));
+    }
+
+    private ArtifactAgeService serviceWithTransport(int minimumReleaseAge) throws Exception {
+        when(transporterProvider.newTransporter(any(), any())).thenReturn(transporter);
+        return new ArtifactAgeService(
+                repositorySystem, session, log, minimumReleaseAge, Collections.emptyList(), transporterProvider);
+    }
+
+    /**
+     * Makes the transport write the POM it is asked for and set its time to ageInDays ago, as the HTTP transports do
+     * with the Last-Modified header; with {@code null} it sets no time.
+     */
+    private void transportSetsTime(Long ageInDays) throws Exception {
+        doAnswer(invocation -> {
+                    File pom = invocation.<GetTask>getArgument(0).getDataFile();
+                    Files.write(pom.toPath(), "<project/>".getBytes(StandardCharsets.UTF_8));
+                    if (ageInDays != null) {
+                        assertTrue(pom.setLastModified(
+                                Instant.now().minus(ageInDays, ChronoUnit.DAYS).toEpochMilli()));
+                    }
+                    return null;
+                })
+                .when(transporter)
+                .get(any(GetTask.class));
     }
 
     /** Makes every POM resolve to a file written ageInDays ago, by version. */
@@ -249,6 +285,106 @@ class ArtifactAgeServiceTest {
 
         verify(repositorySystem, times(1)).resolveArtifact(any(), any(ArtifactRequest.class));
         verify(log, never()).warn(anyString());
+    }
+
+    @Test
+    void readsTheDateThroughTheTransportWhenTheLocalRepositoryShowsTheVersionTooYoung() throws Exception {
+        // the local repository holds the time of the download, as on Windows with Maven 3.9.x
+        pomsPublished("2.0", "0");
+        transportSetsTime(12L);
+
+        assertEquals(
+                Arrays.asList("1.0", "2.0"),
+                filter(serviceWithTransport(7), artifact("org.example", "lib", "1.0"), "1.0", "2.0"));
+
+        ArgumentCaptor<GetTask> task = ArgumentCaptor.forClass(GetTask.class);
+        verify(transporterProvider).newTransporter(same(session), same(REPOSITORY));
+        verify(transporter).get(task.capture());
+        assertEquals(
+                "org/example/lib/2.0/lib-2.0.pom", task.getValue().getLocation().toString());
+        assertFalse(task.getValue().getDataFile().exists(), "the temporary POM is deleted");
+        verify(transporter).close();
+        verify(log, never()).warn(anyString());
+    }
+
+    @Test
+    void leavesOutAVersionThatTheTransportConfirmsToBeTooYoung() throws Exception {
+        pomsPublished("2.0", "0");
+        transportSetsTime(3L);
+
+        assertEquals(
+                Collections.singletonList("1.0"),
+                filter(serviceWithTransport(7), artifact("g", "a", "1.0"), "1.0", "2.0"));
+        verify(log, never()).warn(anyString());
+    }
+
+    @Test
+    void doesNotAskTheTransportWhenTheLocalRepositoryShowsTheVersionOldEnough() throws Exception {
+        pomsPublished("2.0", "30");
+
+        assertEquals(
+                Arrays.asList("1.0", "2.0"), filter(serviceWithTransport(7), artifact("g", "a", "1.0"), "1.0", "2.0"));
+        verify(transporterProvider, never()).newTransporter(any(), any());
+    }
+
+    @Test
+    void keepsTheLocalDateAndWarnsOncePerRepositoryWhenTheTransportSetsNoTime() throws Exception {
+        // as the Wagon transport does, or a repository that sends no Last-Modified header
+        pomsPublished("2.0", "0", "3.0", "0");
+        transportSetsTime(null);
+
+        assertEquals(
+                Collections.singletonList("1.0"),
+                filter(serviceWithTransport(7), artifact("g", "a", "1.0"), "1.0", "2.0", "3.0"));
+        verify(transporter, times(2)).get(any(GetTask.class));
+        verify(log, times(1)).warn(contains("from repo: the transport set no modification time"));
+    }
+
+    @Test
+    void keepsTheLocalDateWhenThePomCannotBeFetchedThroughTheTransport() throws Exception {
+        pomsPublished("2.0", "0");
+        doThrow(new IOException("connection reset")).when(transporter).get(any(GetTask.class));
+
+        assertEquals(
+                Collections.singletonList("1.0"),
+                filter(serviceWithTransport(7), artifact("g", "a", "1.0"), "1.0", "2.0"));
+        verify(transporter).close();
+        verify(log, never()).warn(anyString());
+    }
+
+    @Test
+    void keepsTheLocalDateWhenNoTransporterIsAvailable() throws Exception {
+        pomsPublished("2.0", "0");
+        ArtifactAgeService service = serviceWithTransport(7);
+        when(transporterProvider.newTransporter(any(), any())).thenThrow(new NoTransporterException(REPOSITORY));
+
+        assertEquals(Collections.singletonList("1.0"), filter(service, artifact("g", "a", "1.0"), "1.0", "2.0"));
+        verify(log, never()).warn(anyString());
+    }
+
+    @Test
+    void doesNotAskTheTransportWhenOffline() throws Exception {
+        pomsPublished("2.0", "0");
+        when(session.isOffline()).thenReturn(true);
+
+        assertEquals(
+                Collections.singletonList("1.0"),
+                filter(serviceWithTransport(7), artifact("g", "a", "1.0"), "1.0", "2.0"));
+        verify(transporterProvider, never()).newTransporter(any(), any());
+    }
+
+    @Test
+    void doesNotAskTheTransportForABlockedRepository() throws Exception {
+        pomsPublished("2.0", "0");
+        RemoteRepository blocked =
+                new RemoteRepository.Builder(REPOSITORY).setBlocked(true).build();
+
+        Instant date = serviceWithTransport(7)
+                .getPublicationDate("g", "a", "2.0", blocked)
+                .get();
+
+        assertFalse(date.isBefore(Instant.now().minus(1, ChronoUnit.MINUTES)), "the local date is kept");
+        verify(transporterProvider, never()).newTransporter(any(), any());
     }
 
     @Test

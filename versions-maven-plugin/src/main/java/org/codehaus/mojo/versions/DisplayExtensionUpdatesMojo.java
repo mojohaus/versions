@@ -209,7 +209,8 @@ public class DisplayExtensionUpdatesMojo extends AbstractVersionsDisplayMojo {
                 session,
                 minimumReleaseAge,
                 minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes),
-                allowPreReleases);
+                allowPreReleases,
+                transporterProvider);
         RuleService ruleService = new RulesServiceBuilder()
                 .withMavenSession(session)
                 .withTransporterProvider(transporterProvider)
