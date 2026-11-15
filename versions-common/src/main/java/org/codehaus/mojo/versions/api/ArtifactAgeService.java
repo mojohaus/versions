@@ -20,6 +20,11 @@ package org.codehaus.mojo.versions.api;
  */
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -30,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -47,6 +53,9 @@ import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.spi.connector.transport.GetTask;
+import org.eclipse.aether.spi.connector.transport.Transporter;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 import org.eclipse.aether.version.Version;
 
 import static java.util.Collections.singletonList;
@@ -62,6 +71,13 @@ import static java.util.Optional.empty;
  * A POM that did not come from an HTTP repository, for example one copied into the local repository by
  * {@code mvn install}, carries the time it was written and is therefore treated as published then.</p>
  *
+ * <p>The time is read from the POM in the local repository first. The Resolver does not keep the
+ * {@code Last-Modified} time on that file everywhere: on Windows with Maven 3.9.x, and with the Wagon transport, the
+ * file has the time of its download. Such a time is later than the publication date, never earlier, so a version
+ * that it shows to be old enough is accepted. For a version that it shows to be too young, the POM is fetched once
+ * more, through the transport and into a temporary file, which the HTTP transports stamp on every system. If the
+ * transport sets no time there either, the time in the local repository stands and a warning says so.</p>
+ *
  * <p>Dates are looked up only for versions newer than the current version of the artifact, and are cached for the
  * lifetime of this instance. A version whose date cannot be determined is offered, and a warning says so, so that the
  * filter is never switched off unnoticed. Snapshots pass without a lookup: they are not releases, and whether they are
@@ -70,6 +86,11 @@ import static java.util.Optional.empty;
  * @since 2.25.0
  */
 public class ArtifactAgeService {
+
+    /**
+     * File systems store the modification time with a precision of up to two seconds.
+     */
+    private static final long FILE_TIME_PRECISION_MILLIS = 2000;
 
     private final RepositorySystem repositorySystem;
 
@@ -81,13 +102,20 @@ public class ArtifactAgeService {
 
     private final List<WildcardMatcher[]> excludes;
 
+    private final TransporterProvider transporterProvider;
+
     /**
      * Cache of repository id, URL and coordinates to the publication instant, or empty if it is unknown.
      */
     private final Map<String, Optional<Instant>> cache = new ConcurrentHashMap<>();
 
     /**
-     * Creates a new instance.
+     * Ids of the repositories already reported as giving no modification time through the transport.
+     */
+    private final Set<String> repositoriesWithoutModificationTime = ConcurrentHashMap.newKeySet();
+
+    /**
+     * Creates a new instance that reads the publication dates from the local repository only.
      *
      * @param repositorySystem  the repository system used to fetch the POMs
      * @param session           the repository session, carrying the proxy, mirror and authentication settings
@@ -103,11 +131,37 @@ public class ArtifactAgeService {
             Log log,
             int minimumReleaseAge,
             Collection<String> excludes) {
+        this(repositorySystem, session, log, minimumReleaseAge, excludes, null);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param repositorySystem    the repository system used to fetch the POMs
+     * @param session             the repository session, with the proxy, mirror and authentication settings
+     * @param log                 Maven build log
+     * @param minimumReleaseAge   the minimum age in days; {@code 0} or less disables the filter
+     * @param excludes            {@code groupId:artifactId} patterns of artifacts exempt from the filter; may be
+     *                            {@code null}. {@code *} matches any run of characters; a missing {@code artifactId}
+     *                            matches every artifact of the group
+     * @param transporterProvider provider of the transporters used to read the date of a version that the local
+     *                            repository shows to be too young; may be {@code null}, in which case the time in the
+     *                            local repository is final
+     * @since 2.25.3
+     */
+    public ArtifactAgeService(
+            RepositorySystem repositorySystem,
+            RepositorySystemSession session,
+            Log log,
+            int minimumReleaseAge,
+            Collection<String> excludes,
+            TransporterProvider transporterProvider) {
         this.repositorySystem = Objects.requireNonNull(repositorySystem);
         this.session = session;
         this.log = Objects.requireNonNull(log);
         this.minimumReleaseAge = minimumReleaseAge;
         this.excludes = parseExcludes(excludes);
+        this.transporterProvider = transporterProvider;
     }
 
     private static List<WildcardMatcher[]> parseExcludes(Collection<String> patterns) {
@@ -186,8 +240,7 @@ public class ArtifactAgeService {
         if (!publicationDate.isPresent()) {
             return true;
         }
-        Instant threshold = Instant.now().minus(minimumReleaseAge, ChronoUnit.DAYS);
-        boolean oldEnough = !publicationDate.get().isAfter(threshold);
+        boolean oldEnough = isOldEnough(publicationDate.get());
         if (!oldEnough && log.isDebugEnabled()) {
             log.debug(String.format(
                     "Skipping %s:%s:%s: published %s, %d day(s) ago, less than the minimumReleaseAge of %d",
@@ -199,6 +252,10 @@ public class ArtifactAgeService {
                     minimumReleaseAge));
         }
         return oldEnough;
+    }
+
+    private boolean isOldEnough(Instant publicationDate) {
+        return !publicationDate.isAfter(Instant.now().minus(minimumReleaseAge, ChronoUnit.DAYS));
     }
 
     /**
@@ -223,6 +280,20 @@ public class ArtifactAgeService {
         if (repository == null) {
             return unknown(gav, "it was not found in a remote repository");
         }
+        Optional<Instant> localDate = localRepositoryDate(gav, groupId, artifactId, version, repository);
+        if (!localDate.isPresent() || isOldEnough(localDate.get())) {
+            return localDate;
+        }
+        // A time that is too young may be the time of the download instead of the publication date
+        Optional<Instant> transportDate = transportDate(gav, groupId, artifactId, version, repository);
+        return transportDate.isPresent() ? transportDate : localDate;
+    }
+
+    /**
+     * Returns the modification time of the POM that the Resolver resolves into the local repository.
+     */
+    private Optional<Instant> localRepositoryDate(
+            String gav, String groupId, String artifactId, String version, RemoteRepository repository) {
         try {
             ArtifactResult result = repositorySystem.resolveArtifact(
                     session,
@@ -240,6 +311,69 @@ public class ArtifactAgeService {
         } catch (ArtifactResolutionException e) {
             return unknown(gav, "its POM could not be resolved from " + repository.getId() + ": " + e.getMessage());
         }
+    }
+
+    /**
+     * Fetches the POM through the transport into a temporary file and returns the modification time the transport
+     * set on that file, or empty if it set none or the POM could not be fetched. The content is not used, so it is
+     * not validated.
+     */
+    private Optional<Instant> transportDate(
+            String gav, String groupId, String artifactId, String version, RemoteRepository repository) {
+        if (transporterProvider == null
+                || session.isOffline()
+                || repository.isBlocked()
+                || !"default".equals(repository.getContentType())) {
+            return empty();
+        }
+        Transporter transporter = null;
+        Path pom = null;
+        try {
+            transporter = transporterProvider.newTransporter(session, repository);
+            pom = Files.createTempFile("versions-minimumReleaseAge-", ".pom");
+            long start = System.currentTimeMillis();
+            transporter.get(new GetTask(pomLocation(groupId, artifactId, version)).setDataFile(pom.toFile()));
+            long lastModified = pom.toFile().lastModified();
+            // A transport that sets no time leaves the file with the time it was written, which is not before the start
+            if (lastModified > 0 && lastModified < start - FILE_TIME_PRECISION_MILLIS) {
+                return Optional.of(Instant.ofEpochMilli(lastModified));
+            }
+            if (repositoriesWithoutModificationTime.add(repository.getId())) {
+                log.warn("Cannot read the publication date of " + gav + " from " + repository.getId()
+                        + ": the transport set no modification time. The time its POM was downloaded is used for"
+                        + " it and for other versions from this repository, so they can be held back for longer"
+                        + " than minimumReleaseAge=" + minimumReleaseAge);
+            }
+        } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            log.debug("Could not fetch the POM of " + gav + " from " + repository.getId(), e);
+        } finally {
+            if (transporter != null) {
+                transporter.close();
+            }
+            if (pom != null) {
+                try {
+                    Files.deleteIfExists(pom);
+                } catch (IOException e) {
+                    log.debug("Could not delete " + pom, e);
+                }
+            }
+        }
+        return empty();
+    }
+
+    /**
+     * Returns the location of a POM relative to the root of a repository with the {@code default} layout.
+     */
+    private static URI pomLocation(String groupId, String artifactId, String version) throws URISyntaxException {
+        return new URI(
+                null,
+                null,
+                groupId.replace('.', '/') + '/' + artifactId + '/' + version + '/' + artifactId + '-' + version
+                        + ".pom",
+                null);
     }
 
     private Optional<Instant> unknown(String gav, String reason) {

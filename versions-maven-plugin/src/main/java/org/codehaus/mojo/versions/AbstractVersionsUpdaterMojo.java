@@ -336,6 +336,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
                     .withMinimumReleaseAge(minimumReleaseAge)
                     .withMinimumReleaseAgeExcludes(
                             minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes))
+                    .withTransporterProvider(transporterProvider)
                     .build();
         }
         return helper;

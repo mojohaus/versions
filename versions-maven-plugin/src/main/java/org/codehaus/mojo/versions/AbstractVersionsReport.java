@@ -289,6 +289,7 @@ public abstract class AbstractVersionsReport<T> extends AbstractMavenReport {
                     .withMinimumReleaseAge(minimumReleaseAge)
                     .withMinimumReleaseAgeExcludes(
                             minimumReleaseAgeExcludes == null ? null : Arrays.asList(minimumReleaseAgeExcludes))
+                    .withTransporterProvider(transporterProvider)
                     .build();
         } catch (MojoExecutionException e) {
             throw new MavenReportException(e.getMessage(), e);

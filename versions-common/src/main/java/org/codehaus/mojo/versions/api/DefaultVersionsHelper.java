@@ -70,6 +70,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.VersionRangeRequest;
 import org.eclipse.aether.resolution.VersionRangeResolutionException;
 import org.eclipse.aether.resolution.VersionRangeResult;
+import org.eclipse.aether.spi.connector.transport.TransporterProvider;
 import org.eclipse.aether.version.Version;
 
 import static java.util.Objects.requireNonNull;
@@ -130,7 +131,8 @@ public final class DefaultVersionsHelper implements VersionsHelper {
             RuleService ruleService,
             Log log,
             int minimumReleaseAge,
-            Collection<String> minimumReleaseAgeExcludes) {
+            Collection<String> minimumReleaseAgeExcludes,
+            TransporterProvider transporterProvider) {
         this.pomHelper = requireNonNull(pomHelper);
         this.artifactFactory = requireNonNull(artifactFactory);
         this.repositorySystem = requireNonNull(repositorySystem);
@@ -142,7 +144,8 @@ public final class DefaultVersionsHelper implements VersionsHelper {
                 mavenSession.getRepositorySession(),
                 log,
                 minimumReleaseAge,
-                minimumReleaseAgeExcludes);
+                minimumReleaseAgeExcludes,
+                transporterProvider);
 
         this.remoteProjectRepositories = of(mavenSession)
                 .map(MavenSession::getCurrentProject)
@@ -599,6 +602,8 @@ public final class DefaultVersionsHelper implements VersionsHelper {
 
         private Collection<String> minimumReleaseAgeExcludes;
 
+        private TransporterProvider transporterProvider;
+
         /**
          * Creates a new instance
          */
@@ -706,6 +711,21 @@ public final class DefaultVersionsHelper implements VersionsHelper {
         }
 
         /**
+         * Provides the {@link TransporterProvider} that the minimum release age filter uses to read the publication
+         * date of a version where the local repository does not hold it. Without one, the time in the local
+         * repository is final.
+         *
+         * @param transporterProvider {@link TransporterProvider} instance; may be {@code null}
+         * @return {@link Builder} instance
+         * @see ArtifactAgeService
+         * @since 2.25.3
+         */
+        public Builder withTransporterProvider(TransporterProvider transporterProvider) {
+            this.transporterProvider = transporterProvider;
+            return this;
+        }
+
+        /**
          * Builds the constructed {@linkplain DefaultVersionsHelper} object
          *
          * @return constructed {@linkplain DefaultVersionsHelper}
@@ -720,7 +740,8 @@ public final class DefaultVersionsHelper implements VersionsHelper {
                     ruleService,
                     log,
                     minimumReleaseAge,
-                    minimumReleaseAgeExcludes);
+                    minimumReleaseAgeExcludes,
+                    transporterProvider);
             helper.allowPreReleases = allowPreReleases;
             return helper;
         }
