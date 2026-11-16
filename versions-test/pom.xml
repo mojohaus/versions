@@ -86,6 +86,7 @@
   <reporting>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <!-- Pedantic linter due to no generated classes -->
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
