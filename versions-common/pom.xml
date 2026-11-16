@@ -167,6 +167,7 @@
   <reporting>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <!-- Lenient linter due to generated classes -->
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
