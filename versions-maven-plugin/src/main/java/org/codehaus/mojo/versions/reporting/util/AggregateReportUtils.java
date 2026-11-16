@@ -28,7 +28,7 @@ import org.apache.maven.project.MavenProject;
  *
  * @since 2.14.0
  * */
-public class AggregateReportUtils {
+public final class AggregateReportUtils {
 
     private AggregateReportUtils() {
         // utility class

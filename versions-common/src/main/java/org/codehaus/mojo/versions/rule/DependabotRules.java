@@ -332,14 +332,14 @@ public final class DependabotRules {
                         return null;
                     }
                     lower = v;
-                    lowerInclusive = op.equals(">=");
+                    lowerInclusive = ">=".equals(op);
                     break;
                 default:
                     if (upper != null) {
                         return null;
                     }
                     upper = v;
-                    upperInclusive = op.equals("<=");
+                    upperInclusive = "<=".equals(op);
                     break;
             }
         }

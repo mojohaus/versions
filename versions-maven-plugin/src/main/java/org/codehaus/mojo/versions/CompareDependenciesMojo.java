@@ -138,7 +138,7 @@ public class CompareDependenciesMojo extends AbstractVersionsDependencyUpdaterMo
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     /**
      * The (injected) instance of {@link ProjectBuilder}

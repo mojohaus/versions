@@ -93,8 +93,7 @@ public final class DefaultPropertyVersionChange implements PropertyVersionChange
     public int hashCode() {
         int result = property != null ? property.hashCode() : 0;
         result = 7 * result + (oldValue != null ? oldValue.hashCode() : 0);
-        result = 31 * result + (newValue != null ? newValue.hashCode() : 0);
-        return result;
+        return 31 * result + (newValue != null ? newValue.hashCode() : 0);
     }
 
     @Override

@@ -81,7 +81,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @since 1.0-beta-1
      */
     @Parameter(property = "includes")
-    private String includesList = null;
+    private String includesList;
 
     /**
      * A comma separated list of artifact patterns to exclude. Follows the pattern
@@ -92,7 +92,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @since 1.0-beta-1
      */
     @Parameter(property = "excludes")
-    private String excludesList = null;
+    private String excludesList;
 
     /**
      * A list of artifact patterns to include. Follows the pattern "groupId:artifactId:type:classifier:version". This
@@ -101,7 +101,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @since 1.0-beta-1
      */
     @Parameter
-    private String[] includes = null;
+    private String[] includes;
 
     /**
      * A list of artifact patterns to exclude. Follows the pattern "groupId:artifactId:type:classifier:version". This
@@ -110,7 +110,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @since 1.0-beta-1
      */
     @Parameter
-    private String[] excludes = null;
+    private String[] excludes;
 
     /**
      * a scope to use to filter the artifacts matching the asked scope (as well as the ones implied by maven)
@@ -118,7 +118,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @since 2.15
      */
     @Parameter(property = "scope")
-    private String scope = null;
+    private String scope;
 
     /**
      * Whether to skip processing dependencies that are produced as part of the current reactor.
@@ -524,7 +524,7 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
 
                 // recursive call
                 int tmp = nextCommaIndex(includeString.substring(nextStopDelimiterIndex + 1));
-                indexOfComma = (tmp >= 0) ? nextStopDelimiterIndex + 1 + tmp : -1;
+                indexOfComma = tmp >= 0 ? nextStopDelimiterIndex + 1 + tmp : -1;
             }
         }
         return indexOfComma;

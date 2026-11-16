@@ -130,8 +130,7 @@ public final class DefaultDependencyVersionChange implements DependencyVersionCh
         result = 31 * result + (artifactId != null ? artifactId.hashCode() : 0);
         result = 31 * result + (classifier != null ? classifier.hashCode() : 0);
         result = 31 * result + (oldVersion != null ? oldVersion.hashCode() : 0);
-        result = 31 * result + (newVersion != null ? newVersion.hashCode() : 0);
-        return result;
+        return 31 * result + (newVersion != null ? newVersion.hashCode() : 0);
     }
 
     @Override

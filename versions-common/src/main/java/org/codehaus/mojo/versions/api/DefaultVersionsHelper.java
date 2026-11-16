@@ -83,7 +83,7 @@ import static org.apache.maven.RepositoryUtils.toArtifact;
  * @author Stephen Connolly
  * @since 1.0-alpha-3
  */
-public class DefaultVersionsHelper implements VersionsHelper {
+public final class DefaultVersionsHelper implements VersionsHelper {
 
     private static final int LOOKUP_PARALLEL_THREADS = 5;
 
@@ -595,7 +595,7 @@ public class DefaultVersionsHelper implements VersionsHelper {
 
         private boolean allowPreReleases = true;
 
-        private int minimumReleaseAge = 0;
+        private int minimumReleaseAge;
 
         private Collection<String> minimumReleaseAgeExcludes;
 

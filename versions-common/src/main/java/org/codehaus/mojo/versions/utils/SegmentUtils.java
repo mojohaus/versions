@@ -33,7 +33,7 @@ import static org.codehaus.mojo.versions.api.Segment.MINOR;
 /**
  * Utility class for manipulating with {@link Segment} objects
  */
-public class SegmentUtils {
+public final class SegmentUtils {
     private SegmentUtils() {
         // prevent instantiation
     }

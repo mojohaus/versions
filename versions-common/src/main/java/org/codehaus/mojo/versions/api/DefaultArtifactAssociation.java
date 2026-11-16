@@ -95,8 +95,7 @@ final class DefaultArtifactAssociation implements ArtifactAssociation {
     public int hashCode() {
         int result = getArtifact().getGroupId().hashCode();
         result = 31 * result + getArtifact().getArtifactId().hashCode();
-        result = 31 * result + (usePluginRepositories ? 1 : 0);
-        return result;
+        return 31 * result + (usePluginRepositories ? 1 : 0);
     }
 
     public String toString() {

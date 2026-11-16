@@ -25,7 +25,7 @@ public class ArtifactFactoryTest {
                 .thenAnswer(i -> of(i.getArgument(0))
                         .map(type -> new DefaultArtifactHandler(String.valueOf(type)) {
                             {
-                                if (type.equals("maven-plugin")) {
+                                if ("maven-plugin".equals(type)) {
                                     setExtension("jar");
                                 }
                             }

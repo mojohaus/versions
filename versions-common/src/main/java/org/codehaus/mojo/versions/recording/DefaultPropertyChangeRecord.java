@@ -28,7 +28,7 @@ import org.codehaus.mojo.versions.change.DefaultPropertyVersionChange;
  * @author Slawomir Jaranowski
  * @since 2.14.0
  */
-public class DefaultPropertyChangeRecord implements PropertyChangeRecord {
+public final class DefaultPropertyChangeRecord implements PropertyChangeRecord {
     private final PropertyVersionChange versionChange;
 
     private DefaultPropertyChangeRecord(PropertyVersionChange versionChange) {
@@ -51,7 +51,7 @@ public class DefaultPropertyChangeRecord implements PropertyChangeRecord {
     /**
      * Creates a new {@link Builder} instance
      */
-    public static class Builder {
+    public static final class Builder {
         private String property;
         private String oldValue;
         private String newValue;

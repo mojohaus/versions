@@ -24,7 +24,7 @@ import org.apache.maven.model.InputLocation;
 /**
  * Builder class for {@linkplain Dependency}
  */
-public class DependencyBuilder {
+public final class DependencyBuilder {
     /**
      * Enum representing the location of the element in the POM
      */

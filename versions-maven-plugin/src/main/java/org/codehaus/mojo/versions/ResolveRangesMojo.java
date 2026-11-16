@@ -82,7 +82,7 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @since 1.3
      */
     @Parameter(property = "includeProperties")
-    private String includeProperties = null;
+    private String includeProperties;
 
     /**
      * A comma separated list of properties to not update even if they contain version-ranges.
@@ -90,7 +90,7 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @since 1.3
      */
     @Parameter(property = "excludeProperties")
-    private String excludeProperties = null;
+    private String excludeProperties;
 
     /**
      * Whether to allow the major version number to be changed.
@@ -151,7 +151,7 @@ public class ResolveRangesMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     // ------------------------------ FIELDS ------------------------------
 

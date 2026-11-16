@@ -96,7 +96,7 @@ public abstract class AbstractVersionsDisplayMojo extends AbstractVersionsUpdate
             defaultValue = AbstractVersionsDisplayMojo.DEFAULT_OUTPUT_LINE_WIDTH + "")
     protected int outputLineWidth;
 
-    private boolean outputFileError = false;
+    private boolean outputFileError;
 
     /**
      * Creates a new instance.

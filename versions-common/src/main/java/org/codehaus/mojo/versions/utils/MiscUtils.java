@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 /**
  * Miscellaneous utility class.
  */
-public class MiscUtils {
+public final class MiscUtils {
     private MiscUtils() {
         // prevent instantiation
     }

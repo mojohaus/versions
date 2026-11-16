@@ -69,7 +69,7 @@ public class UpdateParentMojo extends UseLatestVersionsMojoBase {
      * @since 1.0-alpha-1
      */
     @Parameter(property = "parentVersion")
-    protected String parentVersion = null;
+    protected String parentVersion;
 
     /**
      * to update parent version by force when it is RELEASE or LATEST
@@ -77,7 +77,7 @@ public class UpdateParentMojo extends UseLatestVersionsMojoBase {
      * @since 2.9
      */
     @Parameter(property = "forceUpdate", defaultValue = "false")
-    protected boolean forceUpdate = false;
+    protected boolean forceUpdate;
 
     /**
      * Skips version resolution, only valid if {@code parentVersion} is set.
@@ -86,7 +86,7 @@ public class UpdateParentMojo extends UseLatestVersionsMojoBase {
      * @since 2.13.0
      */
     @Parameter(property = "skipResolution", defaultValue = "false")
-    protected boolean skipResolution = false;
+    protected boolean skipResolution;
 
     /**
      * <p>Whether to downgrade a snapshot dependency if <code>allowSnapshots</code> is <code>false</code>

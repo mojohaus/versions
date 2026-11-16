@@ -473,33 +473,31 @@ final class PluginUpdatesDiscovery {
 
     private void mergePluginsMap(
             Map<String, Plugin> plugins, Stream<Plugin> pluginsToMerge, Map<String, String> parentDefinitions) {
-        pluginsToMerge.forEach(plugin -> {
-            plugins.compute(plugin.getKey(), (key, existingVal) -> {
-                String versionFromParent = parentDefinitions.get(key);
-                if (plugin.getVersion() == null
-                        && (existingVal == null || existingVal.getVersion() == null)
-                        && versionFromParent != null) {
-                    // if the plugin is not present in plugins or if it is, it doesn't have a version,
-                    // but the parent does have it -> take the version from parent
-                    Plugin parentPlugin = new Plugin();
-                    parentPlugin.setGroupId(plugin.getGroupId());
-                    parentPlugin.setArtifactId(plugin.getArtifactId());
-                    parentPlugin.setVersion(versionFromParent);
-                    return parentPlugin;
-                } else if ((versionFromParent == null || !versionFromParent.equals(plugin.getVersion()))
-                        && (existingVal == null || existingVal.getVersion() == null)) {
-                    // if parent doesn't contain the plugin key or its version differs from plugin version
-                    // and currently stored version is either null or not there
-                    return plugin;
-                }
-                // otherwise, put the new value in the map only if existingVal is null
-                if (!processUnboundPlugins) {
-                    return existingVal != null ? existingVal : plugin;
-                } else {
-                    return plugin.getVersion() != null ? plugin : existingVal;
-                }
-            });
-        });
+        pluginsToMerge.forEach(plugin -> plugins.compute(plugin.getKey(), (key, existingVal) -> {
+            String versionFromParent = parentDefinitions.get(key);
+            if (plugin.getVersion() == null
+                    && (existingVal == null || existingVal.getVersion() == null)
+                    && versionFromParent != null) {
+                // if the plugin is not present in plugins or if it is, it doesn't have a version,
+                // but the parent does have it -> take the version from parent
+                Plugin parentPlugin = new Plugin();
+                parentPlugin.setGroupId(plugin.getGroupId());
+                parentPlugin.setArtifactId(plugin.getArtifactId());
+                parentPlugin.setVersion(versionFromParent);
+                return parentPlugin;
+            } else if ((versionFromParent == null || !versionFromParent.equals(plugin.getVersion()))
+                    && (existingVal == null || existingVal.getVersion() == null)) {
+                // if parent doesn't contain the plugin key or its version differs from plugin version
+                // and currently stored version is either null or not there
+                return plugin;
+            }
+            // otherwise, put the new value in the map only if existingVal is null
+            if (!processUnboundPlugins) {
+                return existingVal != null ? existingVal : plugin;
+            } else {
+                return plugin.getVersion() != null ? plugin : existingVal;
+            }
+        }));
     }
 
     private void debugPluginMap(String description, Map<String, Plugin> plugins) {

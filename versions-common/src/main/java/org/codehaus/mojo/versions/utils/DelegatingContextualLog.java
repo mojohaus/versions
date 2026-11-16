@@ -43,15 +43,15 @@ import org.apache.maven.plugin.logging.Log;
 public class DelegatingContextualLog implements ContextualLog {
     private final Log delegate;
 
-    private String currentContext = null;
+    private String currentContext;
 
-    private boolean currentContextReportedDebug = false;
+    private boolean currentContextReportedDebug;
 
-    private boolean currentContextReportedInfo = false;
+    private boolean currentContextReportedInfo;
 
-    private boolean currentContextReportedWarn = false;
+    private boolean currentContextReportedWarn;
 
-    private boolean currentContextReportedError = false;
+    private boolean currentContextReportedError;
 
     /**
      * Creates a new {@link DelegatingContextualLog} instance.

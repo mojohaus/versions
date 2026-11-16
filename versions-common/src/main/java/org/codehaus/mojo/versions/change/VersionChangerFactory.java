@@ -44,11 +44,11 @@ public class VersionChangerFactory {
         // no-op constructor
     }
 
-    private Model model = null;
+    private Model model;
 
-    private MutableXMLStreamReader pom = null;
+    private MutableXMLStreamReader pom;
 
-    private Log log = null;
+    private Log log;
 
     /**
      * Returns the Maven model currently set on this factory.

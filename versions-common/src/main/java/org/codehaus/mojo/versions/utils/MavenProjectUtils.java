@@ -47,7 +47,7 @@ import static org.codehaus.mojo.versions.utils.DependencyBuilder.Location.VERSIO
 /**
  * Utility methods for extracting dependencies from a {@link org.apache.maven.project.MavenProject}
  */
-public class MavenProjectUtils {
+public final class MavenProjectUtils {
 
     private static final Pattern EXPRESSION = Pattern.compile("\\$\\{([^}]+)}");
 
@@ -148,20 +148,19 @@ public class MavenProjectUtils {
                         + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion()
                         + ":" + dependency.getScope()))
                 .map(
-                        dependency -> { // resolve version from model properties if necessary (e.g.
-                            // "${mycomponent.myversion}"
-                            return dependency.getVersion() != null
-                                    ? interpolateVersion(dependency.getVersion(), project)
-                                            .map(v -> {
-                                                Dependency result = dependency.clone();
-                                                result.setVersion(v);
-                                                return result;
-                                            })
-                                            .orElse(dependency)
-                                    : getVersionFromParent(
-                                                    dependency, project, processDependencyManagementTransitive, log)
-                                            .orElse(dependency);
-                        })
+                        dependency -> // resolve version from model properties if necessary (e.g.
+                                // "${mycomponent.myversion}"
+                                dependency.getVersion() != null
+                                        ? interpolateVersion(dependency.getVersion(), project)
+                                                .map(v -> {
+                                                    Dependency result = dependency.clone();
+                                                    result.setVersion(v);
+                                                    return result;
+                                                })
+                                                .orElse(dependency)
+                                        : getVersionFromParent(
+                                                        dependency, project, processDependencyManagementTransitive, log)
+                                                .orElse(dependency))
                 .collect(() -> new TreeSet<>(DependencyComparator.INSTANCE), Set::add, Set::addAll);
     }
 
