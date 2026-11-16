@@ -29,7 +29,7 @@ import org.codehaus.mojo.versions.change.DefaultDependencyVersionChange;
  * @author Slawomir Jaranowski
  * @since 2.14.0
  */
-public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
+public final class DefaultDependencyChangeRecord implements DependencyChangeRecord {
     private final ChangeKind kind;
     private final DependencyVersionChange versionChange;
 
@@ -59,7 +59,7 @@ public class DefaultDependencyChangeRecord implements DependencyChangeRecord {
     /**
      * A builder object for {@link DependencyChangeRecord} instances
      */
-    public static class Builder {
+    public static final class Builder {
         private ChangeKind kind;
         private String groupId;
         private String artifactId;

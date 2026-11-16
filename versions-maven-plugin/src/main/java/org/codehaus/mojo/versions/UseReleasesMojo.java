@@ -96,7 +96,7 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     @Override
     protected boolean getProcessDependencies() {
@@ -219,12 +219,12 @@ public class UseReleasesMojo extends AbstractVersionsDependencyUpdaterMojo {
     }
 
     private Optional<String> findReleaseVersion(String releaseVersion, ArtifactVersions versions) {
-        return !allowRangeMatching
-                ? versions.containsVersion(releaseVersion) ? Optional.of(releaseVersion) : Optional.empty()
-                : Arrays.stream(versions.getVersions(false))
-                        .sorted((v1, v2) -> -(v1.compareTo(v2)))
+        return allowRangeMatching
+                ? Arrays.stream(versions.getVersions(false))
+                        .sorted((v1, v2) -> -v1.compareTo(v2))
                         .filter(v -> v.toString().startsWith(releaseVersion))
                         .findFirst()
-                        .map(ArtifactVersion::toString);
+                        .map(ArtifactVersion::toString)
+                : versions.containsVersion(releaseVersion) ? Optional.of(releaseVersion) : Optional.empty();
     }
 }

@@ -82,7 +82,7 @@ public class UseReactorMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     @Override
     protected boolean getProcessDependencies() {

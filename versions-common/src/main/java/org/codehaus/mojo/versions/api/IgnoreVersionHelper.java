@@ -32,7 +32,7 @@ import org.eclipse.aether.version.Version;
 /**
  * Helper class for {@link IgnoreVersion}
  */
-public class IgnoreVersionHelper {
+public final class IgnoreVersionHelper {
 
     static class IgnoreVersionException extends RuntimeException {
         IgnoreVersionException(Throwable cause) {

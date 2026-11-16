@@ -14,7 +14,7 @@ import org.apache.maven.model.Dependency;
  * Patterns are of the form {@code groupId:artifactId:version:type:classifier:scope} where
  * individual tokens may use wildcards. Use {@link #parse(String)} to create an instance.
  */
-public class TokenizedMatcher implements Predicate<Dependency> {
+public final class TokenizedMatcher implements Predicate<Dependency> {
     /**
      * The tokens that may be used in a pattern.
      */

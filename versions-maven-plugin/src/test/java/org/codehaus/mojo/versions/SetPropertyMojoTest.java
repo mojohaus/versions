@@ -227,9 +227,8 @@ public class SetPropertyMojoTest {
 
         mojo.execute();
 
-        final Model model = PomHelper.getRawModel(
+        return PomHelper.getRawModel(
                 Paths.get(pomDir.toAbsolutePath().toString(), "pom.xml").toFile());
-        return model;
     }
 
     @Test

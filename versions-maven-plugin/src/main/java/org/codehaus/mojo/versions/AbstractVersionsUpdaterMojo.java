@@ -242,7 +242,7 @@ public abstract class AbstractVersionsUpdaterMojo extends AbstractMojo {
      * @since 2.25.0
      */
     @Parameter(property = "versions.minimumReleaseAge", defaultValue = "0")
-    protected int minimumReleaseAge = 0;
+    protected int minimumReleaseAge;
 
     /**
      * {@code groupId:artifactId} patterns of the artifacts that are exempt from {@link #minimumReleaseAge}, for

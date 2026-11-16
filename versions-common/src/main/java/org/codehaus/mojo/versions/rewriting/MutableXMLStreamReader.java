@@ -152,7 +152,8 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
             throw new IllegalStateException("Attempt at replacement outside of any element");
         }
 
-        int start = getCurrentStartingCharOffset(), end = getCurrentEndingCharOffset();
+        int start = getCurrentStartingCharOffset();
+        int end = getCurrentEndingCharOffset();
         if (source.substring(start, end).equals(replacement)) {
             return;
         }
@@ -211,8 +212,10 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
         validateMarks(mark1, mark2);
         validateMarkOffsets(mark1, mark2);
 
-        MarkInfo startMark = marks.get(mark1), endMark = marks.get(mark2);
-        int start, end;
+        MarkInfo startMark = marks.get(mark1);
+        MarkInfo endMark = marks.get(mark2);
+        int start;
+        int end;
         if (!startMark.equals(endMark)) {
             start = startMark.getEnd();
             end = endMark.getStart();
@@ -249,7 +252,8 @@ public class MutableXMLStreamReader extends StreamReader2Delegate implements Aut
     public void replaceMark(Object mark, String replacement) {
         validateMarks(mark);
 
-        int start = marks.get(mark).getStart(), end = marks.get(mark).getEnd();
+        int start = marks.get(mark).getStart();
+        int end = marks.get(mark).getEnd();
         if (source.substring(start, end).equals(replacement)) {
             return;
         }

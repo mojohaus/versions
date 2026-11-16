@@ -59,7 +59,7 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase {
      * @since 1.0-alpha-1
      */
     @Parameter(property = "includeProperties")
-    private String includeProperties = null;
+    private String includeProperties;
 
     /**
      * A comma separated list of properties to not update.
@@ -67,7 +67,7 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase {
      * @since 1.0-alpha-1
      */
     @Parameter(property = "excludeProperties")
-    private String excludeProperties = null;
+    private String excludeProperties;
 
     /**
      * Whether to process the dependencies section of the project.
@@ -91,7 +91,7 @@ public class UpdatePropertiesMojo extends UpdatePropertiesMojoBase {
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     /**
      * Creates a new instance

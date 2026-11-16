@@ -55,7 +55,7 @@ class MutableXMLStreamReaderTest {
             assertEquals(path, reader.getFileName());
             assertTrue(
                     reader.getSource().toLowerCase().contains("encoding=\"" + value + "\"".toLowerCase()),
-                    () -> reader.getSource());
+                    reader::getSource);
             assertTextContains(reader.getSource(), "ąęóśłźćńĄŻĘĆ");
         }
     }
@@ -69,7 +69,7 @@ class MutableXMLStreamReaderTest {
             assertEquals(path, reader.getFileName());
             assertTrue(
                     reader.getSource().toLowerCase().contains("encoding=\"" + value + "\"".toLowerCase()),
-                    () -> reader.getSource());
+                    reader::getSource);
             assertTextContains(reader.getSource(), "ąęóśłźćńĄŻĘĆ");
         }
     }

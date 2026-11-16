@@ -151,7 +151,7 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     /**
      * Creates a new instance.
@@ -247,7 +247,7 @@ public abstract class UpdatePropertiesMojoBase extends AbstractVersionsDependenc
                                     .build());
 
                     for (final ArtifactAssociation association : version.getAssociations()) {
-                        if ((isIncluded(association.getArtifact()))) {
+                        if (isIncluded(association.getArtifact())) {
                             getChangeRecorder()
                                     .recordChange(DefaultDependencyChangeRecord.builder()
                                             .withKind(DependencyChangeRecord.ChangeKind.PROPERTY)

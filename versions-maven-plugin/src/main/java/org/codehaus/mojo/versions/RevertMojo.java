@@ -95,9 +95,9 @@ public class RevertMojo extends AbstractMojo {
             getLog().info("Skipping execution");
             return;
         }
-        final MavenProject projectToProcess = !processFromLocalAggregationRoot
-                ? PomHelper.getLocalRoot(projectBuilder, session, getLog())
-                : session.getCurrentProject();
+        final MavenProject projectToProcess = processFromLocalAggregationRoot
+                ? session.getCurrentProject()
+                : PomHelper.getLocalRoot(projectBuilder, session, getLog());
 
         // this may be necessary in case of a non-standard pom file name (not pom.xml)
         Path projectFileName = projectToProcess.getFile().toPath().getFileName();

@@ -83,7 +83,7 @@ public class UnlockSnapshotsMojo extends AbstractVersionsDependencyUpdaterMojo {
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     // ------------------------------ METHODS --------------------------
 

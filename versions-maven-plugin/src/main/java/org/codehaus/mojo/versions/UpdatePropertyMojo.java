@@ -51,7 +51,7 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
      * @since 1.3
      */
     @Parameter(property = "property")
-    protected String property = null;
+    protected String property;
 
     /**
      * The new version to set the property to (can be a version range to find a version within).
@@ -70,7 +70,7 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
      * @since 1.3
      */
     @Parameter(property = "newVersion")
-    private String newVersion = null;
+    private String newVersion;
 
     /**
      * Whether to process the dependencies section of the project.
@@ -94,7 +94,7 @@ public class UpdatePropertyMojo extends UpdatePropertiesMojoBase {
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     /**
      * Creates a new instance

@@ -55,17 +55,17 @@ public class UpdateChildModulesMojo extends AbstractVersionsUpdaterMojo {
     /**
      * The groupId that we are updating. Guarded by this.
      */
-    private transient String sourceGroupId = null;
+    private transient String sourceGroupId;
 
     /**
      * The artifactId that we are updating. Guarded by this.
      */
-    private transient String sourceArtifactId = null;
+    private transient String sourceArtifactId;
 
     /**
      * The version that we are updating to. Guarded by this.
      */
-    private transient String sourceVersion = null;
+    private transient String sourceVersion;
 
     /**
      * Whether to allow snapshots when searching for the latest version of an artifact.

@@ -224,7 +224,7 @@ public class RulesServiceBuilder {
      */
     // document the constructor warning in javadoc generation
 
-    private static class RulesUri {
+    private static final class RulesUri {
         String basePath;
         String resource;
 

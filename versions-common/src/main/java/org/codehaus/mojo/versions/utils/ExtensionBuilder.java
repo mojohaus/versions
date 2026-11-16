@@ -31,7 +31,7 @@ import static java.util.Optional.ofNullable;
  * Builder class for {@linkplain Extension}
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class ExtensionBuilder {
+public final class ExtensionBuilder {
     private Optional<String> groupId = empty();
     private Optional<String> artifactId = empty();
     private Optional<String> version = empty();

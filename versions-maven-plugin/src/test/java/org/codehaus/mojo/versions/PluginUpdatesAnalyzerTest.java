@@ -82,7 +82,7 @@ public class PluginUpdatesAnalyzerTest {
                     Artifact artifact = invocation.getArgument(0);
                     MavenProject pluginProject = new MavenProject();
                     Prerequisites prerequisites = new Prerequisites();
-                    prerequisites.setMaven(artifact.getVersion().equals("3.0") ? "4.0" : "3.6.3");
+                    prerequisites.setMaven("3.0".equals(artifact.getVersion()) ? "4.0" : "3.6.3");
                     pluginProject.getModel().setPrerequisites(prerequisites);
                     ProjectBuildingResult result = mock(ProjectBuildingResult.class);
                     when(result.getProject()).thenReturn(pluginProject);
@@ -140,7 +140,7 @@ public class PluginUpdatesAnalyzerTest {
                         "localhost:dummy-maven-plugin:3.0", "unavailable", (Exception) null))
                 .when(builder)
                 .build(
-                        argThat((Artifact a) -> a.getVersion().equals("3.0")),
+                        argThat((Artifact a) -> "3.0".equals(a.getVersion())),
                         eq(true),
                         any(ProjectBuildingRequest.class));
         PluginUpdateAnalysis analysis = analyzer.analyze(plugin(), "1.0");

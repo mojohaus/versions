@@ -54,17 +54,18 @@ import static org.mockito.Mockito.when;
 /**
  * Various mock creating utilities
  */
-public class MockUtils {
+public final class MockUtils {
 
     private MockUtils() {}
 
-    private static final Map<String, String[]> DEFAULT_VERSION_MAP = new HashMap<String, String[]>() {
-        {
-            put("artifactA", new String[] {"1.0.0", "2.0.0"});
-            put("artifactB", new String[] {"1.0.0", "1.1.0"});
-            put("artifactC", new String[] {"1.0.0"});
-        }
-    };
+    private static final Map<String, String[]> DEFAULT_VERSION_MAP;
+
+    static {
+        DEFAULT_VERSION_MAP = new HashMap<String, String[]>();
+        DEFAULT_VERSION_MAP.put("artifactA", new String[] {"1.0.0", "2.0.0"});
+        DEFAULT_VERSION_MAP.put("artifactB", new String[] {"1.0.0", "1.1.0"});
+        DEFAULT_VERSION_MAP.put("artifactC", new String[] {"1.0.0"});
+    }
 
     /**
      * Creates a mocked  {@linkplain org.eclipse.aether.RepositorySystem}, providing the default version set
@@ -178,7 +179,7 @@ public class MockUtils {
         when(artifactHandlerManager.getArtifactHandler(anyString())).thenAnswer(i -> {
             String type = i.getArgument(0);
             DefaultArtifactHandler artifactHandler = new DefaultArtifactHandler(type);
-            if (type.equals("maven-plugin")) {
+            if ("maven-plugin".equals(type)) {
                 artifactHandler.setExtension("jar");
             }
             return artifactHandler;

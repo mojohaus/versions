@@ -418,7 +418,8 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
         logInit();
         validateInput();
 
-        Set<Dependency> dependencyManagement, dependencies;
+        Set<Dependency> dependencyManagement;
+        Set<Dependency> dependencies;
         ResolverAdapter resolverAdapter = new DefaultResolverAdapter(
                 artifactFactory,
                 repositorySystem,

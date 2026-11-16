@@ -32,7 +32,7 @@ import static org.apache.commons.text.CaseUtils.toCamelCase;
 /**
  * Auxiliary test utilities
  */
-public class TestUtils {
+public final class TestUtils {
 
     private TestUtils() {}
 

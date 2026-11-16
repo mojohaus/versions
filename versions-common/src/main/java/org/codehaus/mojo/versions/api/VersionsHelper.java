@@ -293,7 +293,7 @@ public interface VersionsHelper extends ResolverAdapter {
         /**
          * Builder class for {@link VersionPropertiesMapRequest}
          */
-        public static class Builder {
+        public static final class Builder {
             private MavenProject mavenProject;
 
             private List<Property> propertyDefinitions;

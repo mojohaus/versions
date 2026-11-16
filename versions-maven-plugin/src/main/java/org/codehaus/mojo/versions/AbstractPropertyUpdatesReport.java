@@ -66,7 +66,7 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
      * @since 1.0-beta-1
      */
     @Parameter(property = "includeProperties")
-    private String includeProperties = null;
+    private String includeProperties;
 
     /**
      * A comma separated list of properties to not include in the report.
@@ -74,7 +74,7 @@ public abstract class AbstractPropertyUpdatesReport extends AbstractVersionsRepo
      * @since 1.0-beta-1
      */
     @Parameter(property = "excludeProperties")
-    private String excludeProperties = null;
+    private String excludeProperties;
 
     /**
      * Whether properties linking versions should be auto-detected or not.

@@ -83,7 +83,7 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 1.0-alpha-1
      */
     @Parameter(property = "includeProperties")
-    private String includeProperties = null;
+    private String includeProperties;
 
     /**
      * A comma separated list of properties to not update.
@@ -92,7 +92,7 @@ public class DisplayPropertyUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 1.0-alpha-1
      */
     @Parameter(property = "excludeProperties")
-    private String excludeProperties = null;
+    private String excludeProperties;
 
     /**
      * Whether properties linking versions should be auto-detected or not.

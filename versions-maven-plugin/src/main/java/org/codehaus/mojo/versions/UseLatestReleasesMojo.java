@@ -110,7 +110,7 @@ public class UseLatestReleasesMojo extends UseLatestVersionsMojoBase {
      * @since 2.3
      */
     @Parameter(property = "processParent", defaultValue = "false")
-    private boolean processParent = false;
+    private boolean processParent;
 
     /**
      * Whether to update the versions of plugins declared in the build, plugin management and reporting sections,

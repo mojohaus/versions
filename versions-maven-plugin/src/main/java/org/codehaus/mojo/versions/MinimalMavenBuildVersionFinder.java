@@ -24,7 +24,7 @@ import static java.util.Optional.ofNullable;
  *
  * @see <a href="https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html">Require Maven Version Rule</a>
  */
-class MinimalMavenBuildVersionFinder {
+final class MinimalMavenBuildVersionFinder {
 
     private MinimalMavenBuildVersionFinder() {
         // not supposed to be created, static methods only

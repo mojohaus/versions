@@ -132,12 +132,12 @@ public abstract class AbstractVersionDetails implements VersionDetails {
      *
      * @since 1.0-beta-1
      */
-    private ArtifactVersion currentVersion = null;
+    private ArtifactVersion currentVersion;
 
     /**
      * holds the current version range
      */
-    private VersionRange currentVersionRange = null;
+    private VersionRange currentVersionRange;
 
     /**
      * displays more verbose information about discovered updates

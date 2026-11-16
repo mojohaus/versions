@@ -236,7 +236,7 @@ public class ForceReleasesMojoTest {
             mojo.update(null);
             fail("MojoExecutionException is expected");
         } catch (MojoExecutionException e) {
-            assertTrue(e.getMessage().startsWith("No matching"), () -> e.getMessage());
+            assertTrue(e.getMessage().startsWith("No matching"), e::getMessage);
         }
     }
 }

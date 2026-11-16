@@ -82,7 +82,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
      *
      * @since 2.14.0
      */
-    protected int maxUpdates = 0;
+    protected int maxUpdates;
 
     /**
      * Whether to process the dependencies section of the project.
@@ -131,7 +131,7 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
      *
      * @since 2.14.0
      */
-    protected boolean ignoreMinorUpdates = false;
+    protected boolean ignoreMinorUpdates;
 
     /**
      * Whether incremental updates should be ignored. Default {@code false}.
@@ -141,14 +141,14 @@ public class MaxDependencyUpdates extends AbstractEnforcerRule {
      *
      * @since 2.14.0
      */
-    protected boolean ignoreIncrementalUpdates = false;
+    protected boolean ignoreIncrementalUpdates;
 
     /**
      * Whether sub-incremental updates should be ignored. Default {@code false}.
      *
      * @since 2.14.0
      */
-    protected boolean ignoreSubIncrementalUpdates = false;
+    protected boolean ignoreSubIncrementalUpdates;
 
     /**
      * <p>List of <u>input</u> dependency inclusion patterns.</p>

@@ -76,7 +76,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.16.2
      */
     @Parameter(property = "parentVersion")
-    protected String parentVersion = null;
+    protected String parentVersion;
 
     /**
      * to update parent version by force when it is RELEASE or LATEST
@@ -84,7 +84,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.16.2
      */
     @Parameter(property = "forceUpdate", defaultValue = "false")
-    protected boolean forceUpdate = false;
+    protected boolean forceUpdate;
 
     /**
      * Skips version resolution, only valid if {@code parentVersion} is set.
@@ -93,7 +93,7 @@ public class DisplayParentUpdatesMojo extends AbstractVersionsDisplayMojo {
      * @since 2.16.2
      */
     @Parameter(property = "skipResolution", defaultValue = "false")
-    protected boolean skipResolution = false;
+    protected boolean skipResolution;
 
     /**
      * <p>Whether to downgrade a snapshot dependency if <code>allowSnapshots</code> is <code>false</code>

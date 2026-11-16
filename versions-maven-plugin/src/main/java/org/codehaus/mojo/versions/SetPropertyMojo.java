@@ -65,13 +65,13 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
      * You can also specify multiple property names separated by "," which are all set to the same new version.
      */
     @Parameter(property = "property")
-    private String property = null;
+    private String property;
 
     /**
      * The new version to set the property.
      */
     @Parameter(property = "newVersion")
-    private String newVersion = null;
+    private String newVersion;
 
     /**
      * Whether properties linking versions should be auto-detected or not.
@@ -95,7 +95,7 @@ public class SetPropertyMojo extends AbstractVersionsUpdaterMojo {
      * @since 2.15
      */
     @Parameter(property = "profileId")
-    private String profileId = null;
+    private String profileId;
 
     /**
      * Whether to insert a new version property or just replace an existing one.
