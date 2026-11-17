@@ -108,7 +108,7 @@ class PomHelperTest {
         URL url = getClass().getResource("PomHelperTest.profiles.pom.xml");
         assert url != null;
         try (MutableXMLStreamReader pom = new MutableXMLStreamReader(Paths.get(url.toURI()))) {
-            assertEquals(true, PomHelper.setPropertyVersion(pom, null, "propertyA", "newValue"));
+            assertTrue(PomHelper.setPropertyVersion(pom, null, "propertyA", "newValue"));
             String pomString = pom.getSource();
             assertTextContains(pomString, "<propertyA>newValue</propertyA>");
             assertTextContains(
@@ -126,7 +126,7 @@ class PomHelperTest {
         URL url = getClass().getResource("PomHelperTest.profiles.pom.xml");
         assert url != null;
         try (MutableXMLStreamReader pom = new MutableXMLStreamReader(Paths.get(url.toURI()))) {
-            assertEquals(true, PomHelper.setPropertyVersion(pom, "profileA", "profileAPropertyA", "newValue"));
+            assertTrue(PomHelper.setPropertyVersion(pom, "profileA", "profileAPropertyA", "newValue"));
             String pomString = pom.getSource();
             assertTextContains(pomString, "<profileAPropertyA>newValue</profileAPropertyA>");
             assertTextContains(
@@ -202,10 +202,8 @@ class PomHelperTest {
         String input = PomHelper.readXml(file).getLeft();
         Model model = new MavenXpp3Reader().read(new StringReader(input));
         try (MutableXMLStreamReader pom = new MutableXMLStreamReader(file.toPath())) {
-            assertEquals(
-                    true,
-                    PomHelper.setDependencyVersion(
-                            pom, "propertyAValue", "artifactA", "version", "newVersion", model, log));
+            assertTrue(PomHelper.setDependencyVersion(
+                    pom, "propertyAValue", "artifactA", "version", "newVersion", model, log));
             Model newModel = new MavenXpp3Reader().read(new StringReader(pom.getSource()));
             assertTrue(
                     newModel.getDependencies().stream()
@@ -225,8 +223,7 @@ class PomHelperTest {
         String input = PomHelper.readXml(file).getLeft();
         Model model = new MavenXpp3Reader().read(new StringReader(input));
         try (MutableXMLStreamReader pom = new MutableXMLStreamReader(file.toPath())) {
-            assertEquals(
-                    true,
+            assertTrue(
                     PomHelper.setDependencyVersion(pom, "groupB", "artifactB", "versionB", "newVersion", model, log));
             Model newModel = new MavenXpp3Reader().read(new StringReader(pom.getSource()));
             assertTrue(
@@ -247,8 +244,7 @@ class PomHelperTest {
         String input = PomHelper.readXml(file).getLeft();
         Model model = new MavenXpp3Reader().read(new StringReader(input));
         try (MutableXMLStreamReader pom = new MutableXMLStreamReader(file.toPath())) {
-            assertEquals(
-                    true,
+            assertTrue(
                     PomHelper.setDependencyVersion(pom, "groupC", "artifactC", "versionC", "newVersion", model, log));
             Model newModel = new MavenXpp3Reader().read(new StringReader(pom.getSource()));
             assertTrue(
@@ -337,7 +333,7 @@ class PomHelperTest {
                 toInputStream("<super-parent><parent><child>test</child></parent></super-parent>", defaultCharset()),
                 PATH);
 
-        assertEquals(true, PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
+        assertTrue(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
         assertEquals(
                 "<super-parent><parent><child>value</child></parent></super-parent>",
                 xmlEventReader.getSource().replaceAll("\\s", ""));
@@ -348,7 +344,7 @@ class PomHelperTest {
         MutableXMLStreamReader xmlEventReader = new MutableXMLStreamReader(
                 toInputStream("<super-parent><parent><child/></parent></super-parent>", defaultCharset()), PATH);
 
-        assertEquals(true, PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
+        assertTrue(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
         assertEquals(
                 "<super-parent><parent><child>value</child></parent></super-parent>",
                 xmlEventReader.getSource().replaceAll("\\s", ""));
@@ -359,7 +355,7 @@ class PomHelperTest {
         MutableXMLStreamReader xmlEventReader = new MutableXMLStreamReader(
                 toInputStream("<super-parent><parent/></super-parent>", defaultCharset()), PATH);
 
-        assertEquals(true, PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
+        assertTrue(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
         assertEquals(
                 "<super-parent><parent><child>value</child></parent></super-parent>",
                 xmlEventReader.getSource().replaceAll("\\s", ""));
@@ -370,7 +366,7 @@ class PomHelperTest {
         MutableXMLStreamReader xmlEventReader = new MutableXMLStreamReader(
                 toInputStream("<super-parent><parent><child2/></parent></super-parent>", defaultCharset()), PATH);
 
-        assertEquals(true, PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
+        assertTrue(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
         assertEquals(
                 "<super-parent><parent><child2/><child>value</child></parent></super-parent>",
                 xmlEventReader.getSource().replaceAll("\\s", ""));
@@ -382,7 +378,7 @@ class PomHelperTest {
                 toInputStream("<super-parent><parent><child>test</child></parent></super-parent>", defaultCharset()),
                 PATH);
 
-        assertEquals(true, PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
+        assertTrue(PomHelper.setElementValue(xmlEventReader, "/super-parent/parent", "child", "value"));
         assertEquals(
                 "<super-parent><parent><child>value</child></parent></super-parent>",
                 xmlEventReader.getSource().replaceAll("\\s", ""));
