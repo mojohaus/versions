@@ -61,7 +61,7 @@ public final class MockUtils {
     private static final Map<String, String[]> DEFAULT_VERSION_MAP;
 
     static {
-        DEFAULT_VERSION_MAP = new HashMap<String, String[]>();
+        DEFAULT_VERSION_MAP = new HashMap<>();
         DEFAULT_VERSION_MAP.put("artifactA", new String[] {"1.0.0", "2.0.0"});
         DEFAULT_VERSION_MAP.put("artifactB", new String[] {"1.0.0", "1.1.0"});
         DEFAULT_VERSION_MAP.put("artifactC", new String[] {"1.0.0"});
