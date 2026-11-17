@@ -108,12 +108,12 @@ class MutableXMLStreamReaderTest {
                 new MutableXMLStreamReader(getClass().getResourceAsStream(value + ".xml"), PATH);
 
         assertEquals(START_DOCUMENT, reader.getEventType());
-        assertEquals(true, reader.hasNext());
+        assertTrue(reader.hasNext());
 
         // move inside the <modelVersion> element
-        assertEquals(true, goToStartElement(reader, "modelVersion"));
+        assertTrue(goToStartElement(reader, "modelVersion"));
         reader.next();
-        assertEquals(true, reader.isCharacters());
+        assertTrue(reader.isCharacters());
 
         assertEquals("4.0.0", reader.getSource().substring((int) reader.getCurrentStartingCharOffset(), (int)
                 reader.getCurrentEndingCharOffset()));
@@ -125,9 +125,9 @@ class MutableXMLStreamReaderTest {
                         .substring(reader.getCurrentStartingCharOffset(), reader.getCurrentEndingCharOffset()));
 
         // now move inside the <groupId> element
-        assertEquals(true, goToStartElement(reader, "groupId"));
+        assertTrue(goToStartElement(reader, "groupId"));
         reader.next();
-        assertEquals(true, reader.isCharacters());
+        assertTrue(reader.isCharacters());
 
         assertEquals(
                 "localhost",
@@ -142,22 +142,22 @@ class MutableXMLStreamReaderTest {
                 new MutableXMLStreamReader(getClass().getResourceAsStream(value + ".xml"), PATH);
 
         assertEquals(START_DOCUMENT, reader.getEventType());
-        assertEquals(true, reader.hasNext());
+        assertTrue(reader.hasNext());
 
         // move the cursor to <modelVersion>
-        assertEquals(true, goToStartElement(reader, "modelVersion"));
+        assertTrue(goToStartElement(reader, "modelVersion"));
         reader.mark("<modelVersion>");
 
         // move the cursor to </modelVersion>
-        assertEquals(true, goToEndElement(reader, "modelVersion"));
+        assertTrue(goToEndElement(reader, "modelVersion"));
         reader.mark("</modelVersion>");
 
         assertEquals("4.0.0", reader.getBetween("<modelVersion>", "</modelVersion>"));
 
         // to check if the replacement has not shifted offsets, move inside the <groupId> element
-        assertEquals(true, goToStartElement(reader, "groupId"));
+        assertTrue(goToStartElement(reader, "groupId"));
         reader.next();
-        assertEquals(true, reader.isCharacters());
+        assertTrue(reader.isCharacters());
 
         assertEquals(
                 "localhost",
@@ -172,27 +172,27 @@ class MutableXMLStreamReaderTest {
                 new MutableXMLStreamReader(getClass().getResourceAsStream(value + ".xml"), PATH);
 
         assertEquals(START_DOCUMENT, reader.getEventType());
-        assertEquals(true, reader.hasNext());
+        assertTrue(reader.hasNext());
 
         // move the cursor to <version>
-        assertEquals(true, goToStartElement(reader, "version"));
+        assertTrue(goToStartElement(reader, "version"));
         reader.mark("<version>");
 
         // move the cursor to </version>
-        assertEquals(true, goToEndElement(reader, "version"));
+        assertTrue(goToEndElement(reader, "version"));
         reader.mark("</version>");
         assertEquals("1.0", reader.getBetween("<version>", "</version>"));
 
         // move the cursor to <properties>
-        assertEquals(true, goToStartElement(reader, "properties"));
+        assertTrue(goToStartElement(reader, "properties"));
         reader.mark("<properties>");
 
         // move the cursor to <empty/>
-        assertEquals(true, goToStartElement(reader, "empty"));
+        assertTrue(goToStartElement(reader, "empty"));
         reader.mark("<empty/>");
 
         // move the cursor to </properties>
-        assertEquals(true, goToEndElement(reader, "properties"));
+        assertTrue(goToEndElement(reader, "properties"));
         reader.mark("</properties>");
 
         assertTextContains(
@@ -216,9 +216,9 @@ class MutableXMLStreamReaderTest {
                 "<empty>1.0.0</empty>");
 
         // offsets outside marks should also be correct
-        assertEquals(true, goToStartElement(reader, "groupId"));
+        assertTrue(goToStartElement(reader, "groupId"));
         reader.next();
-        assertEquals(true, reader.isCharacters());
+        assertTrue(reader.isCharacters());
 
         assertEquals(
                 "localhost",
@@ -233,24 +233,24 @@ class MutableXMLStreamReaderTest {
                 new MutableXMLStreamReader(getClass().getResourceAsStream(value + ".xml"), PATH);
 
         assertEquals(START_DOCUMENT, reader.getEventType());
-        assertEquals(true, reader.hasNext());
+        assertTrue(reader.hasNext());
 
         // create a set of marks in and around <version>
-        assertEquals(true, goToStartElement(reader, "version"));
+        assertTrue(goToStartElement(reader, "version"));
         reader.mark("<version>");
         reader.next();
-        assertEquals(true, reader.isCharacters());
+        assertTrue(reader.isCharacters());
         reader.mark("version");
-        assertEquals(true, goToEndElement(reader, "version"));
+        assertTrue(goToEndElement(reader, "version"));
         reader.mark("</version>");
 
         // create another set of marks in and around <api>
-        assertEquals(true, goToStartElement(reader, "api"));
+        assertTrue(goToStartElement(reader, "api"));
         reader.mark("<api>");
         reader.next();
-        assertEquals(true, reader.isCharacters());
+        assertTrue(reader.isCharacters());
         reader.mark("api");
-        assertEquals(true, goToEndElement(reader, "api"));
+        assertTrue(goToEndElement(reader, "api"));
         reader.mark("</api>");
 
         assertEquals("1.0", reader.getBetween("<version>", "</version>"));

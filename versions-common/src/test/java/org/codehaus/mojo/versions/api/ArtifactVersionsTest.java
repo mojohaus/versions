@@ -109,8 +109,8 @@ class ArtifactVersionsTest {
                         "jar",
                         new DefaultArtifactHandler()),
                 Arrays.asList(versions("1.0.1-SNAPSHOT", "1.0.2-SNAPSHOT")));
-        assertEquals(true, instance.isEmpty(false));
-        assertEquals(false, instance.isEmpty(true));
+        assertTrue(instance.isEmpty(false));
+        assertFalse(instance.isEmpty(true));
     }
 
     @Test

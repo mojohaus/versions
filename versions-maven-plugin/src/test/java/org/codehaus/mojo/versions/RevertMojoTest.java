@@ -33,7 +33,7 @@ import static java.lang.String.join;
 import static org.apache.commons.io.FileUtils.copyDirectory;
 import static org.apache.maven.api.plugin.testing.MojoExtension.getBasedir;
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Unit tests for {@link RevertMojo}
@@ -68,11 +68,11 @@ public class RevertMojoTest {
         myMojo.execute();
 
         assertTextContains(join("\n", Files.readAllLines(pomDir.resolve("aggregate/pom.xml"))), "OLD");
-        assertEquals(false, Files.exists(pomDir.resolve("aggregate/pom.xml.versionsBackup")));
+        assertFalse(Files.exists(pomDir.resolve("aggregate/pom.xml.versionsBackup")));
         assertTextContains(join("\n", Files.readAllLines(pomDir.resolve("module-a/pom.xml"))), "OLD");
-        assertEquals(false, Files.exists(pomDir.resolve("module-a/pom.xml.versionsBackup")));
+        assertFalse(Files.exists(pomDir.resolve("module-a/pom.xml.versionsBackup")));
         assertTextContains(join("\n", Files.readAllLines(pomDir.resolve("module-b/pom.xml"))), "OLD");
-        assertEquals(false, Files.exists(pomDir.resolve("module-b/pom.xml.versionsBackup")));
+        assertFalse(Files.exists(pomDir.resolve("module-b/pom.xml.versionsBackup")));
     }
 
     @Test
@@ -83,6 +83,6 @@ public class RevertMojoTest {
         myMojo.execute();
 
         assertTextContains(join("\n", Files.readAllLines(pomDir.resolve("pom-a.xml"))), "1.0.0-SNAPSHOT");
-        assertEquals(false, Files.exists(pomDir.resolve("aggregate/pom.xml.versionsBackup")));
+        assertFalse(Files.exists(pomDir.resolve("aggregate/pom.xml.versionsBackup")));
     }
 }

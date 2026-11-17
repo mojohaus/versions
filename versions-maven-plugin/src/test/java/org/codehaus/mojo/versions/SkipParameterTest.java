@@ -37,7 +37,7 @@ import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySys
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextNotContains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -81,11 +81,9 @@ public class SkipParameterTest {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertEquals(
-                true,
-                testLog.getLoggedMessages().stream()
-                        .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")));
+        assertTrue(testLog.getLoggedMessages().stream()
+                .anyMatch(triple -> triple.getMiddle() != null
+                        && triple.getMiddle().toString().contains("Skipping execution")));
 
         // Verify the file was not modified (version should still be 1.0-SNAPSHOT, not 1.0)
         String pomContent = String.join("", Files.readAllLines(tempDir.resolve("pom.xml")));
@@ -111,11 +109,9 @@ public class SkipParameterTest {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertEquals(
-                true,
-                testLog.getLoggedMessages().stream()
-                        .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")));
+        assertTrue(testLog.getLoggedMessages().stream()
+                .anyMatch(triple -> triple.getMiddle() != null
+                        && triple.getMiddle().toString().contains("Skipping execution")));
     }
 
     @Test
@@ -141,14 +137,12 @@ public class SkipParameterTest {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertEquals(
-                true,
-                testLog.getLoggedMessages().stream()
-                        .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")));
+        assertTrue(testLog.getLoggedMessages().stream()
+                .anyMatch(triple -> triple.getMiddle() != null
+                        && triple.getMiddle().toString().contains("Skipping execution")));
 
         // Verify the backup file was not deleted
-        assertEquals(true, Files.exists(backupFile));
+        assertTrue(Files.exists(backupFile));
     }
 
     @Test
@@ -169,11 +163,9 @@ public class SkipParameterTest {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertEquals(
-                true,
-                testLog.getLoggedMessages().stream()
-                        .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")));
+        assertTrue(testLog.getLoggedMessages().stream()
+                .anyMatch(triple -> triple.getMiddle() != null
+                        && triple.getMiddle().toString().contains("Skipping execution")));
     }
 
     @Test
@@ -193,11 +185,9 @@ public class SkipParameterTest {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertEquals(
-                true,
-                testLog.getLoggedMessages().stream()
-                        .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")));
+        assertTrue(testLog.getLoggedMessages().stream()
+                .anyMatch(triple -> triple.getMiddle() != null
+                        && triple.getMiddle().toString().contains("Skipping execution")));
     }
 
     @Test
@@ -218,10 +208,8 @@ public class SkipParameterTest {
         mojo.execute();
 
         // Verify that "Skipping execution" was logged
-        assertEquals(
-                true,
-                testLog.getLoggedMessages().stream()
-                        .anyMatch(triple -> triple.getMiddle() != null
-                                && triple.getMiddle().toString().contains("Skipping execution")));
+        assertTrue(testLog.getLoggedMessages().stream()
+                .anyMatch(triple -> triple.getMiddle() != null
+                        && triple.getMiddle().toString().contains("Skipping execution")));
     }
 }

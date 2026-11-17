@@ -763,7 +763,7 @@ public class DisplayDependencyUpdatesMojoTest {
                 }
             });
             mojo.execute();
-            assertEquals(true, Files.exists(tempFile.getPath()));
+            assertTrue(Files.exists(tempFile.getPath()));
             String output = String.join("", Files.readAllLines(tempFile.getPath()));
             assertTextContains(output, "1.0.0 -> 2.0.0");
         }
