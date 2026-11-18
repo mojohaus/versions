@@ -110,7 +110,7 @@ class DefaultVersionsHelperTest {
     }
 
     @Test
-    public void testPerRuleVersionsIgnored() throws Exception {
+    void perRuleVersionsIgnored() throws Exception {
         when(artifact.getGroupId()).thenReturn("com.mycompany.maven");
         when(artifact.getArtifactId()).thenReturn("artifact-one");
         when(artifact.getType()).thenReturn("jar");
@@ -137,7 +137,7 @@ class DefaultVersionsHelperTest {
     }
 
     @Test
-    public void testGlobalRuleVersionsIgnored() throws Exception {
+    void globalRuleVersionsIgnored() throws Exception {
         final Artifact artifact = mock(Artifact.class);
         when(artifact.getGroupId()).thenReturn("other.company");
         when(artifact.getArtifactId()).thenReturn("artifact-two");

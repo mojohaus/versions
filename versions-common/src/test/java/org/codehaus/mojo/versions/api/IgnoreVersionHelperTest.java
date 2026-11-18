@@ -69,7 +69,7 @@ class IgnoreVersionHelperTest {
      * Additional safety measure: prevent a NPE coming from Matcher if the current version happens to be null.
      */
     @Test
-    public void testNullIgnoreVersion() {
+    void nullIgnoreVersion() {
         IgnoreVersion ignoreVersion = aIgnoreVersion("Alpha", IgnoreVersion.TYPE_REGEX);
         assertTrue(IgnoreVersionHelper.isVersionIgnored((String) null, ignoreVersion));
     }

@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MavenProjectUtilsTest {
+class MavenProjectUtilsTest {
 
     @Test
-    public void testInterpolateVersion() {
+    void interpolateVersion() {
         Dependency dep = DependencyBuilder.newBuilder()
                 .withGroupId("groupA")
                 .withArtifactId("artifactA")
@@ -43,7 +43,7 @@ public class MavenProjectUtilsTest {
     }
 
     @Test
-    public void testInterpolateVersionNoChange() {
+    void interpolateVersionNoChange() {
         MavenProject proj = new MavenProject() {
             {
                 setOriginalModel(new Model());
@@ -54,7 +54,7 @@ public class MavenProjectUtilsTest {
     }
 
     @Test
-    public void testInterpolateVersionDependencyNoChange() {
+    void interpolateVersionDependencyNoChange() {
         Dependency dep = DependencyBuilder.newBuilder()
                 .withGroupId("groupA")
                 .withArtifactId("artifactA")
@@ -71,7 +71,7 @@ public class MavenProjectUtilsTest {
     }
 
     @Test
-    public void testMultiLevelInterpolatedVersion() {
+    void multiLevelInterpolatedVersion() {
         MavenProject proj = new MavenProject() {
             {
                 setOriginalModel(new Model() {
@@ -111,7 +111,7 @@ public class MavenProjectUtilsTest {
     }
 
     @Test
-    public void testRawDependencyManagementCoordinatesAreInterpolated() throws Exception {
+    void rawDependencyManagementCoordinatesAreInterpolated() throws Exception {
         MavenProject project = projectWithRawDependencyManagement(DependencyBuilder.newBuilder()
                 .withGroupId("${project.groupId}")
                 .withArtifactId("${bom.artifactId}")
@@ -131,7 +131,7 @@ public class MavenProjectUtilsTest {
     }
 
     @Test
-    public void testUninterpolatableDependencyManagementEntryIsSkipped() throws Exception {
+    void uninterpolatableDependencyManagementEntryIsSkipped() throws Exception {
         MavenProject project = projectWithRawDependencyManagement(
                 DependencyBuilder.newBuilder()
                         .withGroupId("${undefined.groupId}")
@@ -152,7 +152,7 @@ public class MavenProjectUtilsTest {
     }
 
     @Test
-    public void testInterpolateCoordinatesWithEmbeddedExpression() {
+    void interpolateCoordinatesWithEmbeddedExpression() {
         MavenProject project = projectWithRawDependencyManagement();
         Dependency dependency = MavenProjectUtils.interpolateCoordinates(
                 DependencyBuilder.newBuilder()
