@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class PropertyVersionsBuilderTest {
+class PropertyVersionsBuilderTest {
 
     @Mock
     private Log log;
@@ -32,7 +32,7 @@ public class PropertyVersionsBuilderTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testGetVersionRangeLowerBound(boolean inclusive) {
+    void getVersionRangeLowerBound(boolean inclusive) {
         builder.withLowerBound("3", true).withLowerBound("1", inclusive).withLowerBound("2", false);
         String versionRange = builder.getVersionRange();
         assertTrue(versionRange.startsWith((inclusive ? '[' : '(') + "1,"), () -> versionRange);
@@ -40,7 +40,7 @@ public class PropertyVersionsBuilderTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testGetVersionRangeUpperBound(boolean inclusive) {
+    void getVersionRangeUpperBound(boolean inclusive) {
         builder.withUpperBound("1", true).withUpperBound("3", inclusive).withUpperBound("2", false);
         String versionRange = builder.getVersionRange();
         assertTrue(versionRange.endsWith(",3" + (inclusive ? ']' : ')')), () -> versionRange);
