@@ -155,6 +155,15 @@ class ArtifactAgeServiceTest {
         return new ArtifactResult(request).setArtifact(request.getArtifact().setFile(pom.toFile()));
     }
 
+    /** Makes the POM resolve from a different repository than the one the version range named, as a mirror does. */
+    private void pomsPublishedFrom(String version, long ageInDays, RemoteRepository repository) throws Exception {
+        when(repositorySystem.resolveArtifact(any(), any(ArtifactRequest.class)))
+                .then(invocation -> {
+                    ArtifactRequest request = invocation.getArgument(1);
+                    return resolved(request, ageInDays).setRepository(repository);
+                });
+    }
+
     private List<String> filter(ArtifactAgeService service, Artifact artifact, String... versions) throws Exception {
         VersionRangeResult range = new VersionRangeResult(new VersionRangeRequest());
         List<Version> parsed = new java.util.ArrayList<>();
@@ -308,6 +317,17 @@ class ArtifactAgeServiceTest {
     }
 
     @Test
+    void asksTheRepositoryThatServedThePomWhenTheRangeRepositoryIsMirrored() throws Exception {
+        RemoteRepository mirror = new RemoteRepository.Builder("mirror", "default", "https://mirror.invalid/").build();
+        pomsPublishedFrom("2.0", 0, mirror);
+        transportSetsTime(12L);
+
+        filter(serviceWithTransport(7), artifact("g", "a", "1.0"), "1.0", "2.0");
+
+        verify(transporterProvider).newTransporter(same(session), same(mirror));
+    }
+
+    @Test
     void leavesOutAVersionThatTheTransportConfirmsToBeTooYoung() throws Exception {
         pomsPublished("2.0", "0");
         transportSetsTime(3L);
@@ -349,7 +369,7 @@ class ArtifactAgeServiceTest {
                 Collections.singletonList("1.0"),
                 filter(serviceWithTransport(7), artifact("g", "a", "1.0"), "1.0", "2.0"));
         verify(transporter).close();
-        verify(log, never()).warn(anyString());
+        verify(log, times(1)).warn(contains("connection reset"));
     }
 
     @Test
@@ -359,7 +379,7 @@ class ArtifactAgeServiceTest {
         when(transporterProvider.newTransporter(any(), any())).thenThrow(new NoTransporterException(REPOSITORY));
 
         assertEquals(Collections.singletonList("1.0"), filter(service, artifact("g", "a", "1.0"), "1.0", "2.0"));
-        verify(log, never()).warn(anyString());
+        verify(log, times(1)).warn(contains("Cannot read the publication date"));
     }
 
     @Test

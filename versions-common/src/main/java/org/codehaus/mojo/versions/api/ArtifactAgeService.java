@@ -280,19 +280,32 @@ public class ArtifactAgeService {
         if (repository == null) {
             return unknown(gav, "it was not found in a remote repository");
         }
-        Optional<Instant> localDate = localRepositoryDate(gav, groupId, artifactId, version, repository);
-        if (!localDate.isPresent() || isOldEnough(localDate.get())) {
-            return localDate;
+        LocalDate localDate = localRepositoryDate(gav, groupId, artifactId, version, repository);
+        if (!localDate.date.isPresent() || isOldEnough(localDate.date.get())) {
+            return localDate.date;
         }
-        // A time that is too young may be the time of the download instead of the publication date
-        Optional<Instant> transportDate = transportDate(gav, groupId, artifactId, version, repository);
-        return transportDate.isPresent() ? transportDate : localDate;
+        // A time that is too young may be the time of the download instead of the publication date. Ask the
+        // repository that actually served the POM: the one from the version range may have been mirrored.
+        RemoteRepository servingRepository = localDate.repository != null ? localDate.repository : repository;
+        Optional<Instant> transportDate = transportDate(gav, groupId, artifactId, version, servingRepository);
+        return transportDate.isPresent() ? transportDate : localDate.date;
+    }
+
+    private static class LocalDate {
+        final Optional<Instant> date;
+        final RemoteRepository repository;
+
+        LocalDate(Optional<Instant> date, RemoteRepository repository) {
+            this.date = date;
+            this.repository = repository;
+        }
     }
 
     /**
-     * Returns the modification time of the POM that the Resolver resolves into the local repository.
+     * Returns the modification time of the POM that the Resolver resolves into the local repository, together with
+     * the repository that served it, which may differ from the requested one when a mirror is configured.
      */
-    private Optional<Instant> localRepositoryDate(
+    private LocalDate localRepositoryDate(
             String gav, String groupId, String artifactId, String version, RemoteRepository repository) {
         try {
             ArtifactResult result = repositorySystem.resolveArtifact(
@@ -303,13 +316,18 @@ public class ArtifactAgeService {
                             "minimumReleaseAge"));
             File pom =
                     result.getArtifact() == null ? null : result.getArtifact().getFile();
+            ArtifactRepository serving = result.getRepository();
+            RemoteRepository servingRepository =
+                    serving instanceof RemoteRepository ? (RemoteRepository) serving : null;
             long lastModified = pom == null ? 0 : pom.lastModified();
             if (lastModified <= 0) {
-                return unknown(gav, "its POM has no modification time");
+                return new LocalDate(unknown(gav, "its POM has no modification time"), servingRepository);
             }
-            return Optional.of(Instant.ofEpochMilli(lastModified));
+            return new LocalDate(Optional.of(Instant.ofEpochMilli(lastModified)), servingRepository);
         } catch (ArtifactResolutionException e) {
-            return unknown(gav, "its POM could not be resolved from " + repository.getId() + ": " + e.getMessage());
+            return new LocalDate(
+                    unknown(gav, "its POM could not be resolved from " + repository.getId() + ": " + e.getMessage()),
+                    null);
         }
     }
 
@@ -347,6 +365,11 @@ public class ArtifactAgeService {
         } catch (Exception e) {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
+            }
+            if (repositoriesWithoutModificationTime.add(repository.getId())) {
+                log.warn("Cannot read the publication date of " + gav + " from " + repository.getId() + ": "
+                        + e.getMessage() + "; the local modification time is used and versions may be held back"
+                        + " for longer than minimumReleaseAge=" + minimumReleaseAge);
             }
             log.debug("Could not fetch the POM of " + gav + " from " + repository.getId(), e);
         } finally {
