@@ -1,0 +1,16 @@
+# Applies a release-drafter category label to new PRs that have none, so
+# release notes are generated from labelled pull requests.
+name: PR Labels
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  label:
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: mojohaus/.github/.github/workflows/pr-labeler.yml@master
