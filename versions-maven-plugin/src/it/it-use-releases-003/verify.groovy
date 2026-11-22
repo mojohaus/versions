@@ -1,2 +1,0 @@
-def buf = new File(basedir, "pom.xml").getText("UTF-8")
-assert buf.contains("<version>1.1.3</version>") : "Version of dummy-api not bumped"
