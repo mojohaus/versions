@@ -25,6 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.mojo.versions.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -33,7 +35,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValueToObject;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextMatches;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
@@ -103,5 +107,24 @@ public class SetScmTagMojoTest {
                     output,
                     ".*<scm>.*<developerConnection>\\s*" + "developerConnection\\s*</developerConnection>.*</scm>.*");
         }
+    }
+
+    @Test
+    public void testNoScmElementFails() throws Exception {
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-scm-tag/without-scm"), tempDir);
+        SetScmTagMojo mojo = mojos.lookup("set-scm-tag", tempDir);
+        setVariableValueToObject(mojo, "newTag", "v1.0");
+        MojoFailureException e = assertThrows(MojoFailureException.class, mojo::execute);
+        assertTextContains(e.getMessage(), "No <scm> was present");
+    }
+
+    @Test
+    public void testNothingToSetFails() throws Exception {
+        TestUtils.copyDir(Paths.get("src/test/resources/org/codehaus/mojo/set-scm-tag/with-scm-tag"), tempDir);
+        SetScmTagMojo mojo = mojos.lookup("set-scm-tag", tempDir);
+        MojoExecutionException e = assertThrows(MojoExecutionException.class, mojo::execute);
+        assertTextContains(
+                e.getMessage(),
+                "One of: \"newTag\", \"connection\", \"developerConnection\", \"url\" should be provided.");
     }
 }
