@@ -86,12 +86,11 @@ public class DisplayDependencyUpdatesMojo extends AbstractVersionsDisplayMojo {
     protected boolean processDependencyManagement = true;
 
     /**
-     * Whether to process the dependencyManagement part transitive or not.
-     * In case of <code>&lt;type&gt;pom&lt;/type&gt;</code>and
-     * <code>&lt;scope&gt;import&lt;/scope&gt;</code> this means
-     * by default to report also the imported dependencies.
-     * If processTransitive is set to <code>false</code> the report will only show
-     * updates of the imported pom it self.
+     * Whether to report the dependencies managed by an imported bill of materials as well.
+     * <p>
+     * By default, a dependency declared with {@code <type>pom</type>} and {@code <scope>import</scope>}
+     * is expanded, so the goal reports an update for every dependency the BOM manages. Set this to
+     * {@code false} to report the BOM as a single entry instead.
      *
      * @since 2.11
      */

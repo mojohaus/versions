@@ -77,6 +77,51 @@ Each version is listed once, so a dependency without a newer incremental or mino
 `jakarta.xml.bind-api` above, shows fewer versions. `allowMajorUpdates`, `allowMinorUpdates`,
 `allowIncrementalUpdates`, `allowSnapshots`, `ignoredVersions` and `ruleSet` apply to every version listed.
 
+$h3 Reporting imported BOMs
+
+By default an imported bill of materials (BOM) is expanded: the goal reports an update for every
+dependency the BOM manages. When a parent POM imports a BOM with hundreds of entries, each child
+module gets hundreds of lines like these:
+
+```log
+[INFO] The following dependencies in Dependency Management have newer versions:
+[INFO]   software.amazon.awssdk:accessanalyzer .............. 2.57.13 -> 2.59.5
+[INFO]   software.amazon.awssdk:account ..................... 2.57.13 -> 2.59.5
+[INFO]   software.amazon.awssdk:s3 .......................... 2.57.13 -> 2.59.5
+[INFO]   ...
+```
+
+Set `processDependencyManagementTransitive` to `false` to stop expanding the BOM:
+
+```sh
+mvn versions:$goal -DprocessDependencyManagementTransitive=false
+```
+
+When the BOM is imported in the same POM, the import is reported as a single entry:
+
+```log
+[INFO] The following dependencies in Dependency Management have newer versions:
+[INFO]   software.amazon.awssdk:bom ......................... 2.57.13 -> 2.59.5
+```
+
+When the BOM is imported in a parent POM, the module's declared dependencies are reported instead,
+with their versions still resolved from the BOM:
+
+```log
+[INFO] The following dependencies in Dependencies have newer versions:
+[INFO]   software.amazon.awssdk:s3 .......................... 2.57.13 -> 2.59.5
+```
+
+Put the setting in the plugin configuration to apply it to every run:
+
+```xml
+<configuration>
+  <processDependencyManagementTransitive>false</processDependencyManagementTransitive>
+</configuration>
+```
+
+To keep the per-artifact detail and see which BOM manages each entry, set `verbose` to `true` instead.
+
 <!--- Ignoring specific version suffixes -->
 #set( $goal = "display-dependency-updates" )
 #parse( "ignore-versions.md.vm" )
