@@ -132,4 +132,141 @@ class UpdatePropertiesMojoScenarioTest {
     void appliesBuildNumberUpdateOnly(UpdatePropertiesMojo mojo) throws Exception {
         assertTextContains(run(mojo), "<api>1.1.0-2</api>");
     }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "it-002/pom.xml")
+    void updatesPropertyWithinTheConfiguredRange(UpdatePropertiesMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<api>1.3</api>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "it-004/pom.xml")
+    @MojoParameter(name = "autoLinkItems", value = "true")
+    void updatesAutoLinkedPropertyWithinTheRangeOfItsDependency(UpdatePropertiesMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<api>2.0</api>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "it-009/pom.xml")
+    @MojoParameter(name = "autoLinkItems", value = "true")
+    void ignoresAutoLinkedPropertyOfAnInactiveProfile(UpdatePropertiesMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<api>2.1</api>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "it-017/pom.xml")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    @MojoParameter(name = "allowSnapshots", value = "true")
+    void updatesToASnapshotWithinTheMajorVersion(UpdatePropertiesMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<api>2.1.1-SNAPSHOT</api>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "it-018/pom.xml")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    @MojoParameter(name = "allowSnapshots", value = "true")
+    void updatesSnapshotAndLinkedPropertyWithinTheMajorVersion(UpdatePropertiesMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<api>2.1.1-SNAPSHOT</api>");
+        assertTextContains(pom, "<impl>1.4</impl>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "it-020/pom.xml")
+    @MojoParameter(name = "allowSnapshots", value = "true")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    @MojoParameter(name = "allowMinorUpdates", value = "false")
+    void updatesToAnIncrementalSnapshot(UpdatePropertiesMojo mojo) throws Exception {
+        assertTextContains(run(mojo), "<api>2.1.1-SNAPSHOT</api>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "issue-279-1/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost:dummy-api")
+    @MojoParameter(name = "allowSnapshots", value = "true")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    @MojoParameter(name = "allowDowngrade", value = "true")
+    @MojoParameter(name = "allowIncrementalUpdates", value = "true")
+    @MojoParameter(name = "allowMinorUpdates", value = "true")
+    void keepsASnapshotThatIsTheLatestAllowedVersion(UpdatePropertiesMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<versionProp>1.9.1-SNAPSHOT</versionProp>");
+        assertTextContains(pom, "<version>${versionProp}</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "issue-279-2/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost:dummy-api")
+    @MojoParameter(name = "allowSnapshots", value = "false")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    @MojoParameter(name = "allowDowngrade", value = "true")
+    @MojoParameter(name = "allowIncrementalUpdates", value = "true")
+    @MojoParameter(name = "allowMinorUpdates", value = "true")
+    void downgradesASnapshotToTheLatestReleaseWithinTheMajorVersion(UpdatePropertiesMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<versionProp>1.3</versionProp>");
+        assertTextContains(pom, "<version>${versionProp}</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "issue-279-3/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost:dummy-api")
+    @MojoParameter(name = "allowSnapshots", value = "false")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    @MojoParameter(name = "allowDowngrade", value = "true")
+    @MojoParameter(name = "allowIncrementalUpdates", value = "true")
+    @MojoParameter(name = "allowMinorUpdates", value = "false")
+    void keepsASnapshotWhenOnlyIncrementalUpdatesAreAllowedAndNoneFits(UpdatePropertiesMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<versionProp>1.9.1-SNAPSHOT</versionProp>");
+        assertTextContains(pom, "<version>${versionProp}</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "issue-279-4/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost:dummy-api")
+    @MojoParameter(name = "allowSnapshots", value = "false")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    @MojoParameter(name = "allowDowngrade", value = "true")
+    @MojoParameter(name = "allowIncrementalUpdates", value = "true")
+    @MojoParameter(name = "allowMinorUpdates", value = "false")
+    void downgradesASnapshotToTheLatestIncrementalRelease(UpdatePropertiesMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<versionProp>1.2.2</versionProp>");
+        assertTextContains(pom, "<version>${versionProp}</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "issue-279-5/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost:dummy-api")
+    @MojoParameter(name = "allowSnapshots", value = "false")
+    @MojoParameter(name = "allowMajorUpdates", value = "false")
+    @MojoParameter(name = "allowDowngrade", value = "true")
+    @MojoParameter(name = "allowIncrementalUpdates", value = "false")
+    @MojoParameter(name = "allowMinorUpdates", value = "false")
+    void downgradesASnapshotToTheLatestBuildNumberRelease(UpdatePropertiesMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<versionProp>1.1.0-2</versionProp>");
+        assertTextContains(pom, "<version>${versionProp}</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "issue-98-1/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost:dummy-parent2")
+    @MojoParameter(name = "allowSnapshots", value = "true")
+    void keepsASnapshotOfAParentWhenSnapshotsAreAllowed(UpdatePropertiesMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<versionProp>3.2-SNAPSHOT</versionProp>");
+        assertTextContains(pom, "<version>${versionProp}</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "update-properties", pom = "issue-98-2/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost:dummy-parent2")
+    @MojoParameter(name = "allowSnapshots", value = "false")
+    void keepsASnapshotOfAParentWhenNothingElseFits(UpdatePropertiesMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<versionProp>3.2-SNAPSHOT</versionProp>");
+        assertTextContains(pom, "<version>${versionProp}</version>");
+    }
 }

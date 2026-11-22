@@ -20,6 +20,7 @@ import java.nio.file.Files;
 
 import org.apache.maven.api.plugin.testing.Basedir;
 import org.apache.maven.api.plugin.testing.InjectMojo;
+import org.apache.maven.api.plugin.testing.MojoParameter;
 import org.junit.jupiter.api.Test;
 
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
@@ -130,5 +131,128 @@ class UseGoalsScenarioTest {
     @InjectMojo(goal = "use-releases", pom = "use-releases-001/pom.xml")
     void useReleasesKeepsAReleaseVersion(AbstractVersionsUpdaterMojo mojo) throws Exception {
         assertTextContains(run(mojo), "<version>1.1.1-2</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-dep-version", pom = "use-dep-version-001/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost")
+    @MojoParameter(name = "depVersion", value = "1.0.1")
+    void useDepVersionSetsTheDependencyVersion(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.0.1</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-dep-version", pom = "use-dep-version-003/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost")
+    @MojoParameter(name = "depVersion", value = "1.0.1")
+    void useDepVersionSetsTheVersionOfAProfileDependency(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.0.1</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-dep-version", pom = "use-dep-version-004/pom.xml")
+    @MojoParameter(name = "includesList", value = "localhost")
+    @MojoParameter(name = "depVersion", value = "1.0.1")
+    @MojoParameter(name = "processProperties", value = "true")
+    void useDepVersionUpdatesTheLinkedProperty(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<revision>1.0.1</revision>");
+        assertTextContains(pom, "<version>${revision}</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-latest-releases", pom = "use-latest-releases-002/pom.xml")
+    void useLatestReleasesLeavesASnapshotAlone(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.2-SNAPSHOT</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-latest-snapshots", pom = "use-latest-snapshots-001/pom.xml")
+    @MojoParameter(name = "allowMinorUpdates", value = "true")
+    void useLatestSnapshotsWithMinorUpdates(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.9.1-SNAPSHOT</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-latest-snapshots", pom = "use-latest-snapshots-002/pom.xml")
+    void useLatestSnapshotsDoesNotDowngradeARelease(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.2</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-latest-snapshots", pom = "use-latest-snapshots-005/pom.xml")
+    void useLatestSnapshotsUpdatesToTheLatestSnapshot(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>3.1.5-SNAPSHOT</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-latest-versions", pom = "use-latest-versions-002/pom.xml")
+    void useLatestVersionsUpdatesADependency(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>3.0</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-latest-versions", pom = "use-latest-versions-003/pom.xml")
+    void useLatestVersionsUpdatesAnotherDependency(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>3.0</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-next-releases", pom = "use-next-releases-003/pom.xml")
+    void useNextReleasesLeavesASnapshotAlone(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.2-SNAPSHOT</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-next-snapshots", pom = "use-next-snapshots-001/pom.xml")
+    void useNextSnapshotsUpdatesToTheNextSnapshot(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.2-SNAPSHOT</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-next-snapshots", pom = "use-next-snapshots-002/pom.xml")
+    void useNextSnapshotsKeepsASnapshotWhenThereIsNoNextOne(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.2-SNAPSHOT</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-next-versions", pom = "use-next-versions-002-snapshot/pom.xml")
+    void useNextVersionsMovesToTheNextSnapshot(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.2-SNAPSHOT</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-next-versions", pom = "use-next-versions-003/pom.xml")
+    void useNextVersionsMovesToTheNextRelease(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.2</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-releases", pom = "use-releases-002/pom.xml")
+    void useReleasesReplacesASnapshotByItsRelease(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.2</version>");
+    }
+
+    @Test
+    @InjectMojo(goal = "use-releases", pom = "use-releases-003/pom.xml")
+    @MojoParameter(name = "allowRangeMatching", value = "true")
+    @MojoParameter(name = "failIfNotReplaced", value = "true")
+    void useReleasesMatchesTheRange(AbstractVersionsUpdaterMojo mojo) throws Exception {
+        String pom = run(mojo);
+        assertTextContains(pom, "<version>1.1.3</version>");
     }
 }
