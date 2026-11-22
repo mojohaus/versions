@@ -28,7 +28,7 @@ of those dependencies with newer versions available.
 Here are some examples of what this looks like:
 
 ```sh
-svn checkout http://svn.codehaus.org/mojo/trunk/mojo/build-helper-maven-plugin build-helper-maven-plugin
+git clone https://github.com/mojohaus/build-helper-maven-plugin.git build-helper-maven-plugin
 cd build-helper-maven-plugin
 mvn versions:$goal
 ```

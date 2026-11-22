@@ -27,7 +27,7 @@ Your Maven project should look like:
     <dependency>
       <groupId>org.codehaus.mojo.versions</groupId>
       <artifactId>versions-api</artifactId>
-      <version>${pluginVersion}</version>
+      <version><!-- latest release --></version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -44,7 +44,7 @@ Your Maven project should look like:
         <!-- build index of JSR 330 components -->
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>sisu-maven-plugin</artifactId>
-        <version>${sisuMavenPluginVersion}</version>
+        <version><!-- latest release --></version>
         <executions>
           <execution>
             <id>generate-index</id>
@@ -66,9 +66,8 @@ The artifacts `org.codehaus.mojo.versions:versions-api` and `javax.inject:javax.
 
 Extension artifact should therefore only depend on them with `provided` scope.
 
-
 Using Extensions with the Versions Maven Plugin
-------------------------------------------------
+-----------------------------------------------
 
 You need to add your extension as plugin dependency:
 
@@ -89,7 +88,7 @@ You need to add your extension as plugin dependency:
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
-          <version>${pluginVersion}</version>
+          <version><!-- latest release --></version>
           <dependencies>
             <dependency>
               <!-- add your extension as plugin dependency -->

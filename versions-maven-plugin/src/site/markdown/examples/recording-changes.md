@@ -37,8 +37,8 @@ Which writes a file to `target/versions-changes.xml` that looks something like:
                     newVersion="3.0"
                     oldVersion="1.1.1-2"/>
   <propertyUpdate property="revision"
-                  newValue="3.0"
-                  oldValue="3.1"/>
+                  newValue="3.1"
+                  oldValue="3.0"/>
 </updates>
 ```
 

@@ -29,6 +29,10 @@ The Versions Plugin has the following goals.
 project to the dependency management section of a remote project.
 * [versions:display-dependency-updates](./display-dependency-updates-mojo.html) scans a project's dependencies and
 produces a report of those dependencies which have newer versions available.
+* [versions:display-extension-updates](./display-extension-updates-mojo.html) scans a project's build and core
+extensions and produces a report of those extensions which have newer versions available.
+* [versions:display-parent-updates](./display-parent-updates-mojo.html) displays any updates of the project's
+parent project.
 * [versions:display-plugin-updates](./display-plugin-updates-mojo.html) scans a project's plugins and produces a
 report of those plugins which have newer versions available, taking care of Maven version prerequisites.
 * [versions:display-property-updates](./display-property-updates-mojo.html) scans a project and produces a report of
@@ -54,8 +58,13 @@ and replaces them with -SNAPSHOT.
 to the specific version being used.
 * [versions:set](./set-mojo.html) can be used to set the project version from the command line.
 * [versions:set-property](./set-property-mojo.html) can be used to set one or multiple properties to a given version from the command line.
+* [versions:set-scm-tag](./set-scm-tag-mojo.html) updates the SCM tag of the current project.
 * [versions:use-releases](./use-releases-mojo.html) searches the pom for all -SNAPSHOT versions which have been
 released and replaces them with the corresponding release version.
+* [versions:force-releases](./force-releases-mojo.html) replaces any -SNAPSHOT versions with a release version, an
+older one if necessary, when there has been a release.
+* [versions:use-reactor](./use-reactor-mojo.html) replaces any versions with the corresponding version from the
+reactor.
 * [versions:use-next-releases](./use-next-releases-mojo.html) searches the pom for all non-SNAPSHOT versions for
 which a newer release is available, and replaces them with the next release version.
 * [versions:use-latest-releases](./use-latest-releases-mojo.html) searches the pom for all dependencies using *release* versions (i.e. not SNAPSHOT and not versions ending with a year-month-day suffix) and replaces them with the latest *release* version.
@@ -108,7 +117,7 @@ free to post a question on our [GitHub issue tracker](./issue-management.html) o
 the [user mailing list](./mailing-lists.html). The posts to GitHub or the mailing list are archived and could
 already contain the answer to your question as part of an older thread.
 
-For older issues, it is also worth browsing/searching the [mail archive](./mail-lists.html).
+For older issues, it is also worth browsing/searching the [mail archive](./mailing-lists.html).
 
 If you feel like the plugin is missing a feature or has a defect, you can fill a feature request or bug report in our
 [GitHub issue tracker](./issue-management.html). When creating a new issue, please provide a comprehensive description
@@ -135,4 +144,6 @@ you can take a look into the following examples:
 * [Unlocking snapshot dependencies](./examples/unlock-snapshots.html)
 * [Replacing -SNAPSHOT versions with their corresponding releases](./examples/use-releases.html)
 * [Changing the project version](./examples/set.html)
+* [Changing aggregator project version](./examples/setaggregator.html)
+* [Holding back recent releases](./examples/minimum-release-age.html)
 * [Recording version changes](./examples/recording-changes.html)
