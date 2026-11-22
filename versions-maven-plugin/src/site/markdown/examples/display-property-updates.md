@@ -27,7 +27,7 @@ it will detail which properties have newer versions available.
 Here are some examples of what this looks like:
 
 ```sh
-svn checkout http://svn.codehaus.org/mojo/trunk/mojo/build-helper-maven-plugin build-helper-maven-plugin
+git clone https://github.com/mojohaus/build-helper-maven-plugin.git build-helper-maven-plugin
 cd build-helper-maven-plugin
 mvn versions:display-property-updates
 ```
@@ -55,8 +55,8 @@ Which produces the following output:
 Another example, using a project which uses properties to control the version of multiple artifacts:
 
 ```sh
-svn checkout http://svn.codehaus.org/mojo/trunk/mojo/versions-maven-plugin versions-maven-plugin
-cd versions-maven-plugin
+git clone https://github.com/mojohaus/versions.git
+cd versions/versions-maven-plugin
 mvn versions:display-property-updates
 ```
 

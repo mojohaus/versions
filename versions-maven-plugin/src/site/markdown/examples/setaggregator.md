@@ -66,7 +66,7 @@ A module `separate-module`:
   <groupId>com.soebes.separate</groupId>
   <artifactId>separate-module</artifactId>
   <packaging>pom</packaging>
-  <version>2.0.7-SNAPSHOT</version>
+  <version>2.0.7</version>
 
 </project>
 ```

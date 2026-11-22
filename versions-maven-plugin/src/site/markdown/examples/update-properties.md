@@ -89,7 +89,7 @@ which depends on evaluating a single property that is defined in the POM, for ex
 ```
 
 If multiple dependencies use the property to define the version, then all dependencies will be used to determine
-what versions are available (and consequently what version to update the property to).  The version chosen in such 
+what versions are available (and consequently what version to update the property to).  The version chosen in such
 cases must be available for all associated dependencies.
 
 The automatic detection can be assisted by adding a version-maven-plugin configuration section to the POM,
@@ -105,7 +105,6 @@ for example if we add the following to the POM:
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>${pluginVersion}</version>
         <configuration>
           ...
           <properties>
@@ -134,8 +133,8 @@ for example if we add the following to the POM:
 </project>
 ```
 
-Then executing the `update-properties` goal will update the `manchu.version` property to the latest common 
-version of both manchu-core and manchu-wibble available to you (i.e. based on your local repository and all 
+Then executing the `update-properties` goal will update the `manchu.version` property to the latest common
+version of both manchu-core and manchu-wibble available to you (i.e. based on your local repository and all
 currently active remote repositories).
 
 If you want to restrict updates to within a specific range, for example, suppose we only want the 1.5 stream of
@@ -151,7 +150,6 @@ manchu:
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>${pluginVersion}</version>
         <configuration>
           ...
           <properties>
@@ -187,7 +185,6 @@ Additionally, if you want to disable automatic property detection, set `autoLink
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>${pluginVersion}</version>
         <configuration>
           ...
           <properties>
@@ -211,7 +208,6 @@ Additionally, if you want to disable automatic property detection, set `autoLink
 </project>
 ```
 
-
 By default, the reactor will also be searched to see if it can satisfy the property's associated dependencies.
 If you want to disable the preference given to the reactor (i.e. stop the reactor version always winning)
 
@@ -225,7 +221,6 @@ If you want to disable the preference given to the reactor (i.e. stop the reacto
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>${pluginVersion}</version>
         <configuration>
           ...
           <properties>
@@ -261,7 +256,6 @@ If you want to disable searching the reactor entirely:
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>${pluginVersion}</version>
         <configuration>
           ...
           <properties>
@@ -298,7 +292,6 @@ snapshots are *never* resolved for a specific property:
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>${pluginVersion}</version>
         <configuration>
           ...
           <allowSnapshots>true</allowSnapshots> <!-- in general allow them -->          

@@ -23,8 +23,7 @@ limitations under the License.
 Here's an example:
 
 ```shell
-svn checkout http://svn.codehaus.org/mojo/tags/xmlbeans-maven-plugin-2.3.1 xmlbeans-maven-plugin
-cd xmlbeans-maven-plugin
+cd my-project
 mvn versions:update-parent
 ```
 

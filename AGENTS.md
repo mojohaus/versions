@@ -20,18 +20,21 @@ what the code and the POMs do not make obvious.
   committing; it formats Java with palantir-java-format and also reformats Markdown, including
   tables in this file and the README.
 - Main code must use the Java 8 API only: animal-sniffer checks it against the `java18`
-  signature, and CI builds on JDK 8 as well as JDK 17, 21 and 25.
-- The plugin compiles against Maven 3.9.16 and resolver 1.9.27 and keeps
-  `<prerequisites><maven>3.9.0</maven>`. CI runs it on Maven 3.10.0 and 4.0.0-rc-7.
+  signature, and CI builds on JDK 8 as well as newer JDKs.
+- The plugin compiles against the Maven 3.9.x and Resolver 1.9.x line (`mavenVersion` in the root
+  POM; Dependabot ignores the 3.10 and 2.x releases) so that it keeps running on Maven 3.9.0, the
+  `<prerequisites><maven>` of the plugin. `.github/workflows/maven.yml` calls the shared build
+  workflow, which also runs the plugin on Maven 3.10 and on Maven 4.
 - Protected methods of the mojo base classes, such as `AbstractVersionsUpdaterMojo`, are API for
   subclasses in other plugins. Deprecate them; remove them only in a major version.
-- The site is built from `src/site/markdown`; `.md.vm` files go through Velocity. Public classes
-  in `versions-test` need complete Javadoc, including `@param`, or the site build fails.
+- The site is built from the `src/site/markdown` directory of each module; `.md.vm` files go
+  through Velocity. Public classes in `versions-test` need complete Javadoc, including `@param`,
+  or the site build fails.
 
 ## Unit tests
 
-- JUnit 5 only. JUnit 4, the vintage engine and Hamcrest are not on the classpath; use JUnit
-  assertions and, for text output, `TextAssertions` from `versions-test`.
+- Unit tests use JUnit 5. Use JUnit assertions and, for text output, `TextAssertions` from
+  `versions-test`.
 - Mojo tests are annotated with `@ProjectMojoTest` and take a `ProjectMojos` parameter.
   `ProjectMojos.lookup(goal, pomDir)` builds the project from the test POM, so parent inheritance
   and plugin configuration apply as in a real build. `ItRepository` offers the versions in
@@ -76,6 +79,29 @@ what the code and the POMs do not make obvious.
   those pull requests.
 - Deliberate pins in `.github/dependabot.yml`: Mockito stays below 5 because the build runs on
   JDK 8, and plexus-xml below 4 because 4.x depends on the Maven 4 XML API.
+
+## Documentation updates
+
+A change that users or contributors can notice ships with the documentation it affects, in the
+same pull request. A refactor with no visible effect needs none.
+
+- A goal or parameter is documented in its Javadoc, which becomes the goal page
+  (`plugin-info.html` lists the goals). Give a new `@Parameter` a description, its default and
+  `@since`.
+- `versions-maven-plugin/src/site/markdown` holds the overview (`index.md`, which lists every
+  goal), `usage.md.vm`, `faq.md`, `version-rules.md.vm` and the pages under `examples/`. Add a
+  page under `examples/` for a new behaviour that needs more than a parameter description.
+- `versions-api/src/site/markdown` documents the extension API, and
+  `versions-enforcer/src/site/markdown/index.md` the `maxDependencyUpdates` rule and its
+  parameters.
+- Keep the `site.xml` of the module in sync when a page is added or removed. Never rename a
+  published page or a heading: both are URLs that readers link to.
+- Pages that use Velocity (`#set`, `#parse`, `$h2`) stay `.md.vm`; write every other page as
+  plain `.md`. Examples show the plugin without a version, or with
+  `<version><!-- latest release --></version>` where a version is needed, and never a snapshot
+  version unless snapshots are the subject of the page.
+- `README.md` covers what the plugin does, its Maven and JDK floor, and how to contribute; update
+  it when those change. Update this file when a change adds a convention, build gate or fixture.
 
 ## Pull requests
 

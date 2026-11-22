@@ -3,7 +3,7 @@ author: Slawomir Jaranowski
 date: 2022-11-20
 
 Writing Your Own ChangeRecorder
-================================
+===============================
 
 In order to create an own ChangeRecorder you must implement [ChangeRecorder](apidocs/org/codehaus/mojo/versions/api/recording/ChangeRecorder.html) interface.
 
@@ -63,11 +63,10 @@ Plugin configuration:
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
-          <version>${project.version}</version>
           <configuration>
             <!-- your component name -->
             <changeRecorderFormat>my-recorder</changeRecorderFormat>
-            <changeRecorderOutputFile>\${project.build.directory}/my-versions-changes.txt</changeRecorderOutputFile>
+            <changeRecorderOutputFile>${project.build.directory}/my-versions-changes.txt</changeRecorderOutputFile>
           </configuration>
           <dependencies>
             <dependency>
