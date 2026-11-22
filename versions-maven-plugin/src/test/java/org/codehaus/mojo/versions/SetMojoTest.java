@@ -1,6 +1,7 @@
 package org.codehaus.mojo.versions;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +32,7 @@ import static org.apache.maven.api.plugin.testing.MojoExtension.setVariableValue
 import static org.codehaus.mojo.versions.utils.MockUtils.mockAetherRepositorySystem;
 import static org.codehaus.mojo.versions.utils.MockUtils.mockArtifactHandlerManager;
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContains;
+import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextContainsPattern;
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextMatches;
 import static org.codehaus.mojo.versions.utils.TextAssertions.assertTextNotContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -135,6 +137,11 @@ public class SetMojoTest {
     public void testVersionlessDependency() throws Exception {
         SetMojo myMojo = mojos.lookup("set", Paths.get("target/test-classes/org/codehaus/mojo/set/versionless-01"));
         myMojo.execute();
+        String pom = new String(Files.readAllBytes(myMojo.getProject().getFile().toPath()), StandardCharsets.UTF_8);
+        // the versionless dependency stays versionless, the managed version and the project version are untouched
+        assertTextContainsPattern(pom, "(?s)<artifactId>dummy-api</artifactId>\\s*<version>1\\.1</version>");
+        assertTextContainsPattern(pom, "(?s)<artifactId>dummy-api</artifactId>\\s*</dependency>");
+        assertTextContains(pom, "<version>1.0</version>");
     }
 
     @Test
