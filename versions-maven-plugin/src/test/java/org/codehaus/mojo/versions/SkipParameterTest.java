@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.execution.MavenSession;
@@ -112,6 +113,13 @@ public class SkipParameterTest {
         assertTrue(testLog.getLoggedMessages().stream()
                 .anyMatch(triple -> triple.getMiddle() != null
                         && triple.getMiddle().toString().contains("Skipping execution")));
+
+        // when skipped, no dependency analysis is shown
+        assertTextNotContains(
+                testLog.getLoggedMessages().stream()
+                        .map(triple -> String.valueOf(triple.getMiddle()))
+                        .collect(Collectors.joining("\n")),
+                "The following dependencies in Dependencies have newer versions");
     }
 
     @Test
