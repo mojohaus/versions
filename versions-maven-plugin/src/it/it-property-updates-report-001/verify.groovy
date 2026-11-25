@@ -1,5 +1,7 @@
-def buf = new File(basedir, "target/site/property-updates-report.html").readLines("UTF-8").collect { it + " " }.join('')
-def result = buf.toString().replaceAll( "<[^>]+>", " " ).replaceAll( "&[^;]+;", " " ).replaceAll( "\\s+", " " )
+def buf = new File(basedir, "target/site/property-updates-report.html").readLines("UTF-8").collect {
+    it + " "
+}.join('')
+def result = buf.toString().replaceAll("<[^>]+>", " ").replaceAll("&[^;]+;", " ").replaceAll("\\s+", " ")
 assert result.contains("# of properties using the latest version available 1") : "Did not generate using current version totals correctly" + "\n" + "Result = \"" + result +"\""
 assert result.contains("# of properties where the next version available is smaller than an incremental version update 0") : "Did not generate with subincremental totals correctly" + "\n" + "Result = \"" + result +"\""
 assert result.contains("# of properties where the next version available is an incremental version update 1") : "Did not generate with incremental totals correctly" + "\n" + "Result = \"" + result +"\""

@@ -1,4 +1,6 @@
-def output = (1..3).collect{new File( basedir, "output." + it + ".txt").text.replaceAll( "(\n|\r)", " " ) }
+def output = (1..3).collect{
+    new File(basedir, "output." + it + ".txt").text.replaceAll("(\n|\r)", " ")
+}
 
 assert output[0] =~ /localhost:dummy-api \.* 1.1 -> 3.0/
 assert !(output[0] =~ /localhost:dummy-impl \.* 1.2 -> 2.2/)

@@ -15,7 +15,9 @@
 
 import groovy.xml.XmlSlurper
 
-def model = { path -> new XmlSlurper().parse(new File(basedir, path + '/pom.xml')) }
+def model = { path ->
+    new XmlSlurper().parse(new File(basedir, path + '/pom.xml'))
+}
 assert model('parent').version.text() == '2.0'
 assert model('parent/component').parent.version.text() == '2.0'
 assert model('tests').parent.version.text() == '2.0'

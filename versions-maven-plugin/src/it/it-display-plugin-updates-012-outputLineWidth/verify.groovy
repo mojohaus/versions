@@ -1,1 +1,1 @@
-assert new File( basedir, "dependencyUpdate.txt" ).text =~ /\.{14}/
+assert new File(basedir, "dependencyUpdate.txt").text =~ /\.{14}/

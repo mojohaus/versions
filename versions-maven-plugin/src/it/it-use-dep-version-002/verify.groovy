@@ -18,8 +18,8 @@
  */
 import groovy.xml.XmlSlurper
 
-def parent = new XmlSlurper().parse( new File( basedir, 'pom.xml' ) )
+def parent = new XmlSlurper().parse(new File(basedir, 'pom.xml'))
 assert parent.dependencies.dependency.version == '1.0.1'
 
-def child = new XmlSlurper().parse( new File( basedir, 'it-use-dep-version-002-child/pom.xml' ) )
+def child = new XmlSlurper().parse(new File(basedir, 'it-use-dep-version-002-child/pom.xml'))
 assert child.dependencies.dependency.version == '1.0.1'

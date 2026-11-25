@@ -1,7 +1,7 @@
-def output = new File( basedir, 'target/reports/plugin-updates-aggregate-report.html' ).text
-        .replaceAll( '<[^>]+>', ' ' )
-        .replaceAll( '&[^;]+;', ' ' )
-        .replaceAll( '\\s+', ' ' )
+def output = new File(basedir, 'target/reports/plugin-updates-aggregate-report.html').text
+        .replaceAll('<[^>]+>', ' ')
+        .replaceAll('&[^;]+;', ' ')
+        .replaceAll('\\s+', ' ')
 
 // Plugin management
 assert !(output =~ 'This project does not declare any plugins in a build/pluginManagement section.')
