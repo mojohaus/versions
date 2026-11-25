@@ -1,5 +1,5 @@
 def buf = new File(basedir, "target/site/dependency-updates-report.html").getText("UTF-8")
-def result = buf.toString().replaceAll( "<[^>]+>", " " ).replaceAll( "&[^;]+;", " " ).replaceAll( "\\s+", " " )
+def result = buf.toString().replaceAll("<[^>]+>", " ").replaceAll("&[^;]+;", " ").replaceAll("\\s+", " ")
 assert result.contains("localhost dummy-api 1.1 compile jar 1.1.0-2 1.1.3 1.3 3.0") : "Did not generate summary correctly" + "\n" + "Result = \"" + result +"\""
 assert result.contains("1.1.0-2 Latest Subincremental") : "Did not identify next version" + "\n" + "Result = \"" + result +"\""
 assert result.contains("1.1.1") : "Did not identify next incremental" + "\n" + "Result = \"" + result +"\""

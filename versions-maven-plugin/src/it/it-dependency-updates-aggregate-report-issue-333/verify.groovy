@@ -1,10 +1,10 @@
-def output = new File( basedir, 'target/reports/dependency-updates-aggregate-report.html' ).text
-        .replaceAll( '<[^>]+>', ' ' )
-        .replaceAll( '&[^;]+;', ' ' )
-        .replaceAll( '\\s+', ' ' )
+def output = new File(basedir, 'target/reports/dependency-updates-aggregate-report.html').text
+        .replaceAll('<[^>]+>', ' ')
+        .replaceAll('&[^;]+;', ' ')
+        .replaceAll('\\s+', ' ')
 
 // Dependency management
-assert !( output =~ 'This project does not declare any dependencies in a dependencyManagement section.' )
+assert !(output =~ 'This project does not declare any dependencies in a dependencyManagement section.')
 assert output =~ 'localhost dummy-api 1.1 jar'
 assert output =~ 'localhost dummy-impl 1.1 jar'
 assert output =~ 'test.bigversion dummy-lib 2.0.0.0 jar'

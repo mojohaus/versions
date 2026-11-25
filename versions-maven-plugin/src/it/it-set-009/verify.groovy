@@ -2,41 +2,36 @@
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
 
-class Checker
-{
-    def basedir;
+class Checker {
+    def basedir
 
     public Checker(File basedir) {
-        this.basedir = basedir;
+        this.basedir = basedir
     }
 
-    def readXPath( String pom, String xPathExpression )
-    {
-        def stream = new FileInputStream( new File( basedir, pom ) );
-        try
-        {
+    def readXPath(String pom, String xPathExpression) {
+        def stream = new FileInputStream(new File(basedir, pom))
+        try {
             return XPathFactory.newInstance()
                     .newXPath()
-                    .evaluate( xPathExpression, DocumentBuilderFactory.newInstance()
+                    .evaluate(xPathExpression, DocumentBuilderFactory.newInstance()
                     .newDocumentBuilder()
-                    .parse( stream ).documentElement );
+                    .parse(stream).documentElement)
         }
-        finally
-        {
-            stream.close();
+        finally {
+            stream.close()
         }
     }
 
-    Checker check( String message, String pom, String xpath, String expected )
-    {
-        def actual = readXPath( pom, xpath )
-        assert Objects.equals( expected, actual ) : "${pom} [xpath:${xpath}] expected '${expected}' found '${actual}' : ${message}"
-        return this;
+    Checker check(String message, String pom, String xpath, String expected) {
+        def actual = readXPath(pom, xpath)
+        assert Objects.equals(expected, actual) : "${pom} [xpath:${xpath}] expected '${expected}' found '${actual}' : ${message}"
+        return this
     }
 }
 
 new Checker(basedir)
-        .check( "alternative-pom.xml change", "alternative-pom.xml", "/project/version", "2.0")
-        .check( "child/pom.xml change", "child/pom.xml", "/project/parent/version", "2.0")
+        .check("alternative-pom.xml change", "alternative-pom.xml", "/project/version", "2.0")
+        .check("child/pom.xml change", "child/pom.xml", "/project/parent/version", "2.0")
 
 return true
