@@ -4,8 +4,6 @@ import javax.xml.xpath.XPathFactory
 
 class Checker
 {
-  def result = true;
-
   def basedir;
 
   public Checker(File basedir) {
@@ -31,28 +29,13 @@ class Checker
 
   Checker check( String message, String pom, String xpath, String expected )
   {
-    if ( result )
-    {
-      try
-      {
-        def actual = readXPath( pom, xpath )
-        if ( !Objects.equals( expected, actual ) )
-        {
-          System.out.println( pom + " [xpath:" + xpath + "] expected '" + expected + "' found '" + actual + "' : " + message );
-          result = false;
-        }
-      }
-      catch ( Throwable t )
-      {
-        t.printStackTrace();
-        result = false;
-      }
-    }
+    def actual = readXPath( pom, xpath )
+    assert Objects.equals( expected, actual ) : "${pom} [xpath:${xpath}] expected '${expected}' found '${actual}' : ${message}"
     return this;
   }
 }
 
-return new Checker(basedir)
+new Checker(basedir)
         .check( "root pom unchanged", "pom.xml", "/project/version", "1.2.0-SNAPSHOT" )
         .check( "module-a1 changed", "module-a1/pom.xml", "/project/version", "2.0.9-SNAPSHOT" )
         .check( "module-a1/module-b1 parent changed", "module-a1/module-b1/pom.xml", "/project/parent/version", "2.0.9-SNAPSHOT" )
@@ -63,4 +46,5 @@ return new Checker(basedir)
         .check( "module-a1/module-b3 version unchanged", "module-a1/module-b3/pom.xml", "/project/version", "2.0.8-SNAPSHOT" )
         .check( "module-a2 changed", "module-a2/pom.xml", "/project/version", "2.0.9-SNAPSHOT" )
         .check( "module-a2 dependency changed", "module-a2/pom.xml", "/project/dependencies/dependency/version", "2.0.9-SNAPSHOT" )
-        .result;
+
+return true
