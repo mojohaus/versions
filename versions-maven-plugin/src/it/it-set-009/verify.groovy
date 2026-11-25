@@ -4,7 +4,6 @@ import javax.xml.xpath.XPathFactory
 
 class Checker
 {
-    def result = true;
     def basedir;
 
     public Checker(File basedir) {
@@ -30,28 +29,14 @@ class Checker
 
     Checker check( String message, String pom, String xpath, String expected )
     {
-        if ( result )
-        {
-            try
-            {
-                def actual = readXPath( pom, xpath )
-                if ( !Objects.equals( expected, actual ) )
-                {
-                    System.out.println( pom + " [xpath:" + xpath + "] expected '" + expected + "' found '" + actual + "' : " + message );
-                    result = false;
-                }
-            }
-            catch ( Throwable t )
-            {
-                t.printStackTrace();
-                result = false;
-            }
-        }
+        def actual = readXPath( pom, xpath )
+        assert Objects.equals( expected, actual ) : "${pom} [xpath:${xpath}] expected '${expected}' found '${actual}' : ${message}"
         return this;
     }
 }
 
-return new Checker(basedir)
+new Checker(basedir)
         .check( "alternative-pom.xml change", "alternative-pom.xml", "/project/version", "2.0")
         .check( "child/pom.xml change", "child/pom.xml", "/project/parent/version", "2.0")
-        .result;
+
+return true
