@@ -264,11 +264,22 @@ public abstract class AbstractVersionsDependencyUpdaterMojo extends AbstractVers
      * @since 1.0-alpha-3
      */
     protected Optional<Artifact> findArtifact(Dependency dependency) {
-        return Optional.ofNullable(getProject().getDependencyArtifacts())
-                // no mutation, so parallelStream is safe
-                .flatMap(artifacts -> artifacts.parallelStream()
-                        .filter(artifact -> compare(artifact, dependency))
-                        .findAny());
+        return getProject().getArtifacts().stream()
+                .filter(this::isDirectDependency)
+                .filter(artifact -> compare(artifact, dependency))
+                .findAny();
+    }
+
+    /**
+     * Direct dependencies have a trail of the project GAV followed by the dependency GAV; transitive dependencies
+     * have a longer trail. This keeps the scope of {@code MavenProject.getDependencyArtifacts()} without calling it.
+     *
+     * @param artifact the resolved artifact to check
+     * @return whether the artifact is a direct dependency of the project
+     */
+    private boolean isDirectDependency(Artifact artifact) {
+        List<String> trail = artifact.getDependencyTrail();
+        return trail != null && trail.size() == 2;
     }
 
     /**
